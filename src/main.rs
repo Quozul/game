@@ -1,7 +1,10 @@
 mod utils;
 mod bullet;
+mod turret;
 
 use bevy::{prelude::*, window::PresentMode};
+use crate::bullet::Bullet;
+use crate::turret::Turret;
 
 fn main() {
     App::new()
@@ -17,6 +20,7 @@ fn main() {
         .add_system(move_on_input)
         .add_system(shoot_bullet)
         .add_system(bullet::move_bullet)
+        .add_system(turret::turret_shoot)
         .run();
 }
 
@@ -29,10 +33,14 @@ struct CanShoot;
 #[derive(Component)]
 struct MainCamera;
 
+#[derive(Component)]
+struct Health;
+
 fn setup(mut commands: Commands) {
     commands.spawn_bundle(Camera2dBundle::default())
         .insert(MainCamera);
 
+    // Spawn player
     commands.spawn_bundle(SpriteBundle {
         sprite: Sprite {
             color: Color::rgb(0.25, 0.25, 0.75),
@@ -44,6 +52,18 @@ fn setup(mut commands: Commands) {
     })
         .insert(Movable)
         .insert(CanShoot);
+
+    // Spawn turret
+    commands.spawn_bundle(SpriteBundle {
+        sprite: Sprite {
+            color: Color::rgb(1.0, 0.25, 0.75),
+            custom_size: Some(Vec2::new(50.0, 50.0)),
+            ..default()
+        },
+        transform: Transform::from_xyz(100.0, 0.0, 0.0),
+        ..default()
+    })
+        .insert(Turret { shoot_delay: 0.0 });
 }
 
 fn move_on_input(
@@ -80,7 +100,7 @@ fn shoot_bullet(
     mut query: Query<&Transform, With<CanShoot>>,
     q_camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
-    if buttons.pressed(MouseButton::Left) {
+    if buttons.just_pressed(MouseButton::Left) {
         let world_pos = utils::get_world_mouse(windows, q_camera);
 
         for transform in query.iter_mut() {
@@ -88,16 +108,7 @@ fn shoot_bullet(
             let x = angle.cos();
             let y = angle.sin();
 
-            commands.spawn_bundle(SpriteBundle {
-                sprite: Sprite {
-                    color: Color::rgb(1.0, 1.0, 1.0),
-                    custom_size: Some(Vec2::new(5.0, 5.0)),
-                    ..default()
-                },
-                transform: Transform::from_translation(transform.translation),
-                ..default()
-            })
-                .insert(bullet::Bullet { x, y, life: 2.0 });
+            Bullet::new(Bullet { x, y, life: 2.0 }, &mut commands, Transform::from_translation(transform.translation));
         }
     }
 }

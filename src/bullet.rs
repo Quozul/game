@@ -25,3 +25,18 @@ pub(crate) fn move_bullet(
         }
     }
 }
+
+impl Bullet {
+    pub(crate) fn new(bullet: Bullet, commands: &mut Commands, transform: Transform) {
+        commands.spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: Color::rgb(1.0, 1.0, 1.0),
+                custom_size: Some(Vec2::new(5.0, 5.0)),
+                ..default()
+            },
+            transform,
+            ..default()
+        })
+            .insert(bullet);
+    }
+}
