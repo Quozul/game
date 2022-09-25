@@ -1,8 +1,10 @@
 mod utils;
 mod bullet;
 mod turret;
+mod player;
 
 use bevy::{prelude::*, window::PresentMode};
+use bevy_rapier2d::prelude::*;
 use crate::bullet::Bullet;
 use crate::turret::Turret;
 
@@ -16,42 +18,53 @@ fn main() {
             ..default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugin(RapierDebugRenderPlugin::default())
         .add_startup_system(setup)
-        .add_system(move_on_input)
-        .add_system(shoot_bullet)
+        .add_system(player::move_on_input)
+        .add_system(player::shoot_bullet)
         .add_system(bullet::move_bullet)
         .add_system(turret::turret_shoot)
         .run();
 }
 
 #[derive(Component)]
-struct Movable;
-
-#[derive(Component)]
-struct CanShoot;
-
-#[derive(Component)]
 struct MainCamera;
-
-#[derive(Component)]
-struct Health;
 
 fn setup(mut commands: Commands) {
     commands.spawn_bundle(Camera2dBundle::default())
         .insert(MainCamera);
 
+    // Floor
+    commands
+        .spawn()
+        .insert(Collider::cuboid(500.0, 50.0))
+        .insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, -100.0, 0.0)));
+
     // Spawn player
-    commands.spawn_bundle(SpriteBundle {
-        sprite: Sprite {
-            color: Color::rgb(0.25, 0.25, 0.75),
-            custom_size: Some(Vec2::new(50.0, 50.0)),
+    commands
+        .spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: Color::rgb(0.25, 0.25, 0.75),
+                custom_size: Some(Vec2::new(50.0, 50.0)),
+                ..default()
+            },
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
-        },
-        transform: Transform::from_xyz(0.0, 0.0, 0.0),
-        ..default()
-    })
-        .insert(Movable)
-        .insert(CanShoot);
+        })
+        .insert(RigidBody::Dynamic)
+        .insert(Collider::cuboid(25.0, 25.0))
+        .insert(Restitution::coefficient(0.7))
+        .insert(ExternalImpulse { 
+            impulse: Vec2::new(0.0, 0.0), 
+            torque_impulse: 0.0 
+        })
+        .insert(Velocity {
+            linvel: Vec2::new(0.0, 0.0),
+            angvel: 0.0,
+        })
+        .insert(player::Movable)
+        .insert(player::CanShoot);
 
     // Spawn turret
     commands.spawn_bundle(SpriteBundle {
@@ -63,52 +76,5 @@ fn setup(mut commands: Commands) {
         transform: Transform::from_xyz(100.0, 0.0, 0.0),
         ..default()
     })
-        .insert(Turret { shoot_delay: 0.0 });
-}
-
-fn move_on_input(
-    time: Res<Time>,
-    key: Res<Input<KeyCode>>,
-    mut query: Query<&mut Transform, With<Movable>>,
-) {
-    let dt = time.delta_seconds();
-    let speed = if key.pressed(KeyCode::LShift) {
-        dt * 200.0
-    } else {
-        dt * 100.0
-    };
-
-    for mut transform in query.iter_mut() {
-        if key.pressed(KeyCode::Q) {
-            transform.translation.x -= speed;
-        } else if key.pressed(KeyCode::D) {
-            transform.translation.x += speed;
-        }
-
-        if key.pressed(KeyCode::S) {
-            transform.translation.y -= speed;
-        } else if key.pressed(KeyCode::Z) {
-            transform.translation.y += speed;
-        }
-    }
-}
-
-fn shoot_bullet(
-    buttons: Res<Input<MouseButton>>,
-    windows: Res<Windows>,
-    mut commands: Commands,
-    mut query: Query<&Transform, With<CanShoot>>,
-    q_camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
-) {
-    if buttons.just_pressed(MouseButton::Left) {
-        let world_pos = utils::get_world_mouse(windows, q_camera);
-
-        for transform in query.iter_mut() {
-            let angle = (world_pos.y - transform.translation.y).atan2(world_pos.x - transform.translation.x);
-            let x = angle.cos();
-            let y = angle.sin();
-
-            Bullet::new(Bullet { x, y, life: 2.0 }, &mut commands, Transform::from_translation(transform.translation));
-        }
-    }
+        .insert(Turret { shoot_delay: 100.0 });
 }

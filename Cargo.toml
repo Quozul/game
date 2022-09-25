@@ -18,3 +18,4 @@ opt-level = 3
 
 [dependencies]
 bevy = { version = "0.8.1", features = ["dynamic"] } # make sure this is the latest version
+bevy_rapier2d = "*"

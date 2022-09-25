@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub(crate) struct Bullet {
@@ -10,14 +11,11 @@ pub(crate) struct Bullet {
 pub(crate) fn move_bullet(
     time: Res<Time>,
     mut commands: Commands,
-    mut query: Query<(&mut Transform, &mut Bullet, Entity)>,
+    mut query: Query<(&mut Bullet, Entity)>,
 ) {
     let dt = time.delta_seconds();
 
-    for (mut transform, mut bullet, entity) in query.iter_mut() {
-        transform.translation.x += bullet.x * dt * 100.0;
-        transform.translation.y += bullet.y * dt * 100.0;
-
+    for (mut bullet, entity) in query.iter_mut() {
         bullet.life -= dt;
 
         if bullet.life <= 0.0 {
@@ -37,6 +35,13 @@ impl Bullet {
             transform,
             ..default()
         })
+            .insert(RigidBody::Dynamic)
+            .insert(Collider::cuboid(2.5, 2.5))
+            .insert(Restitution::coefficient(0.7))
+            .insert(ExternalImpulse {
+                impulse: Vec2::new(bullet.x, bullet.y),
+                torque_impulse: 14.0,
+            })
             .insert(bullet);
     }
 }
