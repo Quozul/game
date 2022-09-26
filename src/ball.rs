@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use crate::brick::Brick;
 
 #[derive(Component)]
 pub(crate) struct Ball;
 
 pub(crate) fn display_events(
 	mut collision_events: EventReader<CollisionEvent>,
+	mut query: Query<With<Ball>, With<Brick>>,
 ) {
 	for collision_event in collision_events.iter() {
 		println!("Received collision event: {:?}", collision_event);
@@ -32,6 +34,7 @@ impl Ball {
 				impulse: Vec2::new(0.0, -1.0),
 				torque_impulse: 0.0,
 			})
+			.insert(Ccd::enabled())
 			.insert(Ball);
 	}
 }

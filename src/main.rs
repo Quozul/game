@@ -1,6 +1,7 @@
 mod utils;
 mod paddle;
 mod ball;
+mod brick;
 
 use bevy::{prelude::*, window::PresentMode};
 use bevy_rapier2d::prelude::*;
@@ -52,7 +53,22 @@ fn setup(mut commands: Commands) {
 		.insert(Restitution::coefficient(1.0))
 		.insert_bundle(TransformBundle::from(Transform::from_xyz(0.0, 300.0, 0.0)));
 
+	// Walls
+	commands
+		.spawn()
+		.insert(Collider::cuboid(50.0, 300.0))
+		.insert(Restitution::coefficient(1.0))
+		.insert_bundle(TransformBundle::from(Transform::from_xyz(-400.0, 0.0, 0.0)));
+
+	// Ceiling
+	commands
+		.spawn()
+		.insert(Collider::cuboid(50.0, 300.0))
+		.insert(Restitution::coefficient(1.0))
+		.insert_bundle(TransformBundle::from(Transform::from_xyz(400.0, 0.0, 0.0)));
+
 	// Spawn player
 	Paddle::new(&mut commands);
 	ball::Ball::new(&mut commands);
+	brick::Brick::new(&mut commands);
 }

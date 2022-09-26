@@ -31,7 +31,6 @@ impl Paddle {
 			})
 			.insert(RigidBody::Dynamic)
 			.insert(Collider::cuboid(25.0, 5.0))
-			.insert(ActiveEvents::COLLISION_EVENTS)
 			.insert(LockedAxes::ROTATION_LOCKED | LockedAxes::TRANSLATION_LOCKED_Y)
 			.insert(Restitution::coefficient(1.0))
 			.insert(Paddle);
