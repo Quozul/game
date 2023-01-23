@@ -50,6 +50,12 @@ pub struct Player {
 #[derive(Component)]
 pub struct AttackTimer(pub Timer);
 
+#[derive(Component)]
+pub struct DyingTimer(pub Timer);
+
+#[derive(Component)]
+pub struct Attack;
+
 #[derive(Bundle)]
 pub struct PlayerBundle {
 	pub player: Player,

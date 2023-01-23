@@ -11,7 +11,7 @@ use crate::collisions::*;
 use crate::game::*;
 use crate::menu::*;
 use crate::player::animations::*;
-use crate::player::attack::attack_enemies;
+use crate::player::attack::{attack_enemies, dying_animation};
 use crate::player::controls::{controls, movements};
 use crate::slimes::*;
 use crate::state_handlers::*;
@@ -46,6 +46,7 @@ fn main() {
 		.add_system_set(
 			SystemSet::on_update(AppState::InGame)
 				.with_system(attack_enemies)
+				.with_system(dying_animation)
 				.with_system(update_animation)
 				.with_system(controls)
 				.with_system(update_slime_animation)
