@@ -1,4 +1,4 @@
-use crate::player::components::{Direction, Player, PlayerAnimation, PlayerTimer};
+use crate::player::components::{Direction, Player, PlayerAnimation, AttackTimer};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::Velocity;
 
@@ -47,7 +47,7 @@ pub fn animation_update(keys: &Res<Input<KeyCode>>, player: &mut Player, force: 
 
 pub fn controls(
 	keys: Res<Input<KeyCode>>,
-	mut player_query: Query<(&mut Player, &mut PlayerTimer)>,
+	mut player_query: Query<(&mut Player, &mut AttackTimer)>,
 ) {
 	for (mut player, mut timer) in &mut player_query {
 		if player.state != PlayerAnimation::ATTACKING {

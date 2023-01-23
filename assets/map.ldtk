@@ -436,16 +436,16 @@
 						},
 						{
 							"__identifier": "Slime",
-							"__grid": [9,6],
+							"__grid": [2,8],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#BE4A2F",
-							"iid": "d8c382e0-7820-11ed-9922-63db40282ba8",
+							"iid": "230c2d50-7820-11ed-b64f-150189b6e3fb",
 							"width": 16,
 							"height": 16,
 							"defUid": 7,
-							"px": [144,96],
+							"px": [32,128],
 							"fieldInstances": []
 						}
 					]

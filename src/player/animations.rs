@@ -1,5 +1,5 @@
 use crate::animations::*;
-use crate::player::components::{Direction, Player, PlayerAnimation, PlayerTimer};
+use crate::player::components::{Direction, Player, PlayerAnimation, AttackTimer};
 use crate::player::controls::animation_update;
 use crate::slimes::Slime;
 use benimator::FrameRate;
@@ -8,7 +8,7 @@ use bevy::prelude::*;
 pub fn attack_animation(
 	keys: Res<Input<KeyCode>>,
 	time: Res<Time>,
-	mut player_query: Query<(&mut Player, &mut PlayerTimer)>,
+	mut player_query: Query<(&mut Player, &mut AttackTimer)>,
 ) {
 	for (mut player, mut player_timer) in &mut player_query {
 		if player.state == PlayerAnimation::ATTACKING {

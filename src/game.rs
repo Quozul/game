@@ -1,7 +1,6 @@
 use crate::animations::*;
 use crate::player::components::{Player, PlayerBundle};
 use crate::state_handlers::*;
-use benimator::FrameRate;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;

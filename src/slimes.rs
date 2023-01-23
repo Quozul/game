@@ -1,5 +1,5 @@
 use crate::animations::*;
-use crate::player::components::{Direction, Player, PlayerAnimation};
+use crate::player::components::{AttackTimer, Direction, Player, PlayerAnimation};
 use benimator::FrameRate;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -7,6 +7,9 @@ use bevy_rapier2d::prelude::*;
 
 #[derive(Component)]
 pub struct Slime;
+
+#[derive(Component)]
+pub struct Health(pub u8);
 
 #[derive(Bundle)]
 pub struct SlimeBundle {
@@ -18,6 +21,8 @@ pub struct SlimeBundle {
 	pub damping: Damping,
 	pub animation_bundle: AnimationBundle,
 	pub player: Player,
+	pub external_force: ExternalImpulse,
+	pub health: Health,
 }
 
 impl LdtkEntity for SlimeBundle {
@@ -50,11 +55,16 @@ impl LdtkEntity for SlimeBundle {
 			slime: Slime,
 			rotation_constraints: LockedAxes::ROTATION_LOCKED,
 			damping: Damping {
-				linear_damping: 1.,
+				linear_damping: 10.,
 				..default()
 			},
 			animation_bundle: AnimationBundle::default(),
 			player: Player::default(),
+			external_force: ExternalImpulse {
+				impulse: Vec2::ZERO,
+				torque_impulse: 0.0,
+			},
+			health: Health(3),
 		}
 	}
 }
