@@ -35,7 +35,7 @@ pub fn attack_enemies(
 					slime.direction = Direction::from_vec(hit_normal);
 
 					if health.0 == 0 {
-						slime.state = PlayerAnimation::DYING;
+						slime.state = PlayerAnimation::Dying;
 						state.0.reset();
 						commands.entity(entity).insert(DyingTimer(timer_from_frame_count(5)));
 					}

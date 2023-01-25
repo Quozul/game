@@ -46,15 +46,15 @@ pub fn animate(
 		&Player,
 	)>,
 ) {
-	for (mut state, mut texture, animation_set, state) in query.iter_mut() {
+	for (mut state, mut texture, animation_set, player) in query.iter_mut() {
+		let data = animation_set.get_animation(player.state, player.direction);
+
 		// Update the state
-		state.update(&animation.0, time.delta());
+		state.update(&data.animation, time.delta());
 
 		// Update the texture atlas
 		texture.index = state.frame_index();
 
-		if let Some(data) = data {
-			texture.flip_x = data.flip_x
-		}
+		texture.flip_x = data.flip_x;
 	}
 }

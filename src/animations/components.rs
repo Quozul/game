@@ -4,9 +4,10 @@ use bevy::time::TimerMode;
 use crate::animations::legacy::AnimationTimer;
 use crate::player::components::{Direction, Player, PlayerAnimation};
 
-#[derive(Component)]
+#[derive(Component, Clone)]
 struct AnimationData {
-	animation: benimator::Animation,
+	pub animation: benimator::Animation,
+	pub flip_x: bool,
 }
 
 impl Default for AnimationData {
@@ -16,6 +17,7 @@ impl Default for AnimationData {
 				0..=0,
 				FrameRate::from_fps(10.0),
 			),
+			flip_x: false,
 		}
 	}
 }
@@ -41,41 +43,45 @@ impl AnimationDirections {
 			Direction::Up => {
 				let data = AnimationData {
 					animation,
+					flip_x: false,
 				};
 				self.up = Some(data);
 			}
 			Direction::Down => {
 				self.down = AnimationData {
 					animation,
+					flip_x: false,
 				};
 			}
 			Direction::Left => {
 				let data = AnimationData {
 					animation,
+					flip_x: true,
 				};
 				self.left = Some(data);
 			}
 			Direction::Right => {
 				let data = AnimationData {
 					animation,
+					flip_x: false,
 				};
 				self.right = Some(data);
 			}
 		}
 	}
 
-	fn get_animation(self, direction: Direction) -> &AnimationData {
+	fn get_animation(self, direction: Direction) -> AnimationData {
 		let data = match direction {
-			Direction::Up => &self.up,
-			Direction::Down => &Some(self.down),
-			Direction::Left => &self.left,
-			Direction::Right => &self.right,
+			Direction::Up => self.up,
+			Direction::Down => Some(self.down),
+			Direction::Left => self.left,
+			Direction::Right => self.right,
 		};
 
 		if let Some(data) = data {
 			data
 		} else {
-			&self.down
+			self.down
 		}
 	}
 }
@@ -111,14 +117,38 @@ impl Default for AnimationSet {
 }
 
 impl AnimationSet {
-	fn get_animation(self, animation: PlayerAnimation, direction: Direction) -> AnimationData {
+	pub fn get_animation(self, animation: PlayerAnimation, direction: Direction) -> AnimationData {
 		let data = match animation {
-			PlayerAnimation::ATTACKING => {
-				self.attacking.get_animation(direction)
+			PlayerAnimation::Attacking => {
+				if let Some(directions) = self.attacking {
+					Some(directions.get_animation(direction))
+				} else {
+					None
+				}
 			}
-			PlayerAnimation::MOVING => {}
-			PlayerAnimation::IDLING => {}
-			PlayerAnimation::DYING => {}
+			PlayerAnimation::Moving => {
+				if let Some(directions) = self.moving {
+					Some(directions.get_animation(direction))
+				} else {
+					None
+				}
+			}
+			PlayerAnimation::Idling => {
+				Some(self.idling.get_animation(direction))
+			}
+			PlayerAnimation::Dying => {
+				if let Some(directions) = self.dying {
+					Some(directions.get_animation(direction))
+				} else {
+					None
+				}
+			}
+		};
+
+		if let Some(data) = data {
+			data
+		} else {
+			self.idling.get_animation(Direction::Down)
 		}
 	}
 }

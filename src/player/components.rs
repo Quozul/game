@@ -35,10 +35,10 @@ impl Direction {
 
 #[derive(PartialEq)]
 pub enum PlayerAnimation {
-	ATTACKING,
-	MOVING,
-	IDLING,
-	DYING,
+	Attacking,
+	Moving,
+	Idling,
+	Dying,
 }
 
 #[derive(Component)]
@@ -51,7 +51,7 @@ impl Default for Player {
 	fn default() -> Player {
 		Player {
 			direction: Direction::Down,
-			state: PlayerAnimation::IDLING,
+			state: PlayerAnimation::Idling,
 		}
 	}
 }

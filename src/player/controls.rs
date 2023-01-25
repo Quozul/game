@@ -16,7 +16,7 @@ pub fn animation_update(keys: &Res<Input<KeyCode>>, player: &mut Player, force: 
 		} else if keys.pressed(KeyCode::Q) {
 			Ok(Some(Direction::Left))
 		} else {
-			Err(Some(PlayerAnimation::IDLING))
+			Err(Some(PlayerAnimation::Idling))
 		}
 	} else if keys.just_pressed(KeyCode::Z) {
 		Ok(Some(Direction::Up))
@@ -34,7 +34,7 @@ pub fn animation_update(keys: &Res<Input<KeyCode>>, player: &mut Player, force: 
 		Ok(ok) => {
 			if let Some(direction) = ok {
 				player.direction = direction;
-				player.state = PlayerAnimation::MOVING;
+				player.state = PlayerAnimation::Moving;
 			}
 		}
 		Err(err) => {
@@ -51,12 +51,12 @@ pub fn controls(
 	mut player_query: Query<(&mut Player, &mut AttackTimer, Entity)>,
 ) {
 	for (mut player, mut timer, entity) in &mut player_query {
-		if player.state != PlayerAnimation::ATTACKING {
+		if player.state != PlayerAnimation::Attacking {
 			animation_update(&keys, player.as_mut(), false);
 
 			if keys.just_pressed(KeyCode::Space) {
 				commands.entity(entity).insert(Attack);
-				player.state = PlayerAnimation::ATTACKING;
+				player.state = PlayerAnimation::Attacking;
 				timer.0 = Timer::from_seconds(1. / 10. * 4., TimerMode::Once)
 			};
 		}
@@ -65,7 +65,7 @@ pub fn controls(
 
 pub fn movements(mut player_query: Query<(&Player, &mut Velocity)>) {
 	for (player, mut velocity) in &mut player_query {
-		velocity.linvel = if player.state == PlayerAnimation::MOVING {
+		velocity.linvel = if player.state == PlayerAnimation::Moving {
 			match player.direction {
 				Direction::Up => Vec2::new(0.0, 64.0),
 				Direction::Down => Vec2::new(0.0, -64.0),
