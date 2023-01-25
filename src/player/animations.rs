@@ -1,5 +1,5 @@
 use crate::animations::*;
-use crate::player::components::{Direction, Player, PlayerAnimation, AttackTimer};
+use crate::player::components::{FacingDirection, Player, PlayerAnimation, AttackTimer};
 use crate::player::controls::animation_update;
 use crate::slimes::Slime;
 use benimator::FrameRate;
@@ -39,32 +39,32 @@ pub fn update_animation(
 				state.0.reset();
 
 				match player.direction {
-					Direction::UP => 48..=51,
-					Direction::DOWN => 36..=39,
-					Direction::LEFT => {
+					FacingDirection::Up => 48..=51,
+					FacingDirection::Down => 36..=39,
+					FacingDirection::Left => {
 						flip_x = true;
 						42..=45
 					}
-					Direction::RIGHT => 42..=45,
+					FacingDirection::Right => 42..=45,
 				}
 			}
 			PlayerAnimation::MOVING => match player.direction {
-				Direction::UP => 30..=33,
-				Direction::DOWN => 18..=23,
-				Direction::LEFT => {
+				FacingDirection::Up => 30..=33,
+				FacingDirection::Down => 18..=23,
+				FacingDirection::Left => {
 					flip_x = true;
 					24..=29
 				}
-				Direction::RIGHT => 24..=29,
+				FacingDirection::Right => 24..=29,
 			},
 			PlayerAnimation::IDLING => match player.direction {
-				Direction::UP => 12..=17,
-				Direction::DOWN => 0..=5,
-				Direction::LEFT => {
+				FacingDirection::Up => 12..=17,
+				FacingDirection::Down => 0..=5,
+				FacingDirection::Left => {
 					flip_x = true;
 					6..=11
 				}
-				Direction::RIGHT => 6..=11,
+				FacingDirection::Right => 6..=11,
 			},
 			PlayerAnimation::DYING => 48..=50,
 		};

@@ -1,5 +1,5 @@
 use crate::animations::*;
-use crate::player::components::{AttackTimer, Direction, Player, PlayerAnimation};
+use crate::player::components::{AttackTimer, FacingDirection, Player, PlayerAnimation};
 use benimator::FrameRate;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -89,32 +89,32 @@ pub fn update_slime_animation(
 				state.0.reset();
 
 				match slime.direction {
-					Direction::UP => 21..=23,
-					Direction::DOWN => 21..=23,
-					Direction::LEFT => {
+					FacingDirection::Up => 21..=23,
+					FacingDirection::Down => 21..=23,
+					FacingDirection::Left => {
 						flip_x = true;
 						21..=34
 					}
-					Direction::RIGHT => 21..=23,
+					FacingDirection::Right => 21..=23,
 				}
 			}
 			PlayerAnimation::MOVING => match slime.direction {
-				Direction::UP => 7..=12,
-				Direction::DOWN => 7..=12,
-				Direction::LEFT => {
+				FacingDirection::Up => 7..=12,
+				FacingDirection::Down => 7..=12,
+				FacingDirection::Left => {
 					flip_x = true;
 					7..=23
 				}
-				Direction::RIGHT => 7..=12,
+				FacingDirection::Right => 7..=12,
 			},
 			PlayerAnimation::IDLING => match slime.direction {
-				Direction::UP => 0..=3,
-				Direction::DOWN => 0..=3,
-				Direction::LEFT => {
+				FacingDirection::Up => 0..=3,
+				FacingDirection::Down => 0..=3,
+				FacingDirection::Left => {
 					flip_x = true;
 					0..=3
 				}
-				Direction::RIGHT => 0..=3,
+				FacingDirection::Right => 0..=3,
 			},
 			PlayerAnimation::DYING => {
 				once = true;

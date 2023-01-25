@@ -1,34 +1,34 @@
 use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
 use bevy::prelude::*;
 
-pub enum Direction {
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
+pub enum FacingDirection {
+	Up,
+	Down,
+	Left,
+	Right,
 }
 
-impl Direction {
+impl FacingDirection {
 	pub fn to_vec(&self) -> Vec2 {
 		match self {
-			Direction::UP => Vec2::new(0.0, 1.0),
-			Direction::DOWN => Vec2::new(0.0, -1.0),
-			Direction::LEFT => Vec2::new(-1.0, 0.0),
-			Direction::RIGHT => Vec2::new(1.0, 0.0),
+			FacingDirection::Up => Vec2::new(0.0, 1.0),
+			FacingDirection::Down => Vec2::new(0.0, -1.0),
+			FacingDirection::Left => Vec2::new(-1.0, 0.0),
+			FacingDirection::Right => Vec2::new(1.0, 0.0),
 		}
 	}
 
-	pub fn from_vec(vec: Vec2) -> Direction {
+	pub fn from_vec(vec: Vec2) -> FacingDirection {
 		let angle = vec.y.atan2(vec.x);
 
-		if angle >= -FRAC_PI_4 && angle < FRAC_PI_4 {
-			Direction::RIGHT
-		} else if angle >= FRAC_PI_4 && angle < FRAC_PI_2 {
-			Direction::DOWN
-		} else if angle >= FRAC_PI_2 || angle < -FRAC_PI_2 {
-			Direction::LEFT
+		if (-FRAC_PI_4..FRAC_PI_4).contains(&angle) {
+			FacingDirection::Right
+		} else if (FRAC_PI_4..FRAC_PI_2).contains(&angle) {
+			FacingDirection::Down
+		} else if !(-FRAC_PI_2..FRAC_PI_2).contains(&angle) {
+			FacingDirection::Left
 		} else {
-			Direction::UP
+			FacingDirection::Up
 		}
 	}
 }
@@ -43,8 +43,17 @@ pub enum PlayerAnimation {
 
 #[derive(Component)]
 pub struct Player {
-	pub direction: Direction,
+	pub direction: FacingDirection,
 	pub state: PlayerAnimation,
+}
+
+#[derive(Component)]
+pub struct FacingComponent(pub(crate) FacingDirection);
+
+impl Default for FacingComponent {
+	fn default() -> Self {
+		FacingComponent(FacingDirection::Down)
+	}
 }
 
 #[derive(Component)]
@@ -74,7 +83,7 @@ impl Default for PlayerBundle {
 impl Default for Player {
 	fn default() -> Player {
 		Player {
-			direction: Direction::DOWN,
+			direction: FacingDirection::Down,
 			state: PlayerAnimation::IDLING,
 		}
 	}

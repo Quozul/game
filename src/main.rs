@@ -12,7 +12,7 @@ use crate::game::*;
 use crate::menu::*;
 use crate::player::animations::*;
 use crate::player::attack::{attack_enemies, dying_animation};
-use crate::player::controls::{controls, movements};
+use crate::player::controls::{controls};
 use crate::slimes::*;
 use crate::state_handlers::*;
 use bevy::app::App;
@@ -20,6 +20,8 @@ use bevy::prelude::*;
 use bevy::DefaultPlugins;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
+use crate::player::controller::update_system;
+use crate::player::events::{attack_event, attacking, handle_move_event, process_locks, reset_animation, toggle_idling, toggle_moving, update_attacking_animation, update_idling_animation, update_moving_animation};
 
 fn main() {
 	App::new()
@@ -45,14 +47,35 @@ fn main() {
 		.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(setup_game))
 		.add_system_set(
 			SystemSet::on_update(AppState::InGame)
-				.with_system(attack_enemies)
-				.with_system(dying_animation)
-				.with_system(update_animation)
-				.with_system(controls)
-				.with_system(update_slime_animation)
-				.with_system(attack_animation)
-				.with_system(movements)
-				.with_system(camera_follow)
+				.label("render")
+				.after("other")
+				.with_system(camera_follow),
+		)
+		.add_system_set(
+			SystemSet::on_update(AppState::InGame)
+				.label("animations")
+				.after("input")
+				.with_system(reset_animation)
+				.with_system(update_moving_animation)
+				.with_system(update_idling_animation)
+				.with_system(update_attacking_animation)
+				.with_system(update_slime_animation),
+		)
+		.add_system_set(
+			SystemSet::on_update(AppState::InGame)
+				.label("input")
+				.with_system(handle_move_event)
+				.with_system(toggle_moving)
+				.with_system(toggle_idling)
+				.with_system(attack_event)
+				.with_system(process_locks),
+		)
+		.add_system_set(
+			SystemSet::on_update(AppState::InGame)
+				.label("physics")
+				.after("input")
+				.with_system(attacking)
+				.with_system(update_system)
 				.with_system(spawn_wall_collision),
 		)
 		.add_system_set(SystemSet::on_exit(AppState::InGame).with_system(despawn_entities))

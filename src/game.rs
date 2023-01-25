@@ -1,9 +1,10 @@
 use crate::animations::*;
-use crate::player::components::{Player, PlayerBundle};
+use crate::player::components::FacingComponent;
 use crate::state_handlers::*;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
+use crate::player::events::Idling;
 
 #[derive(Component, Deref, DerefMut, Clone, Default)]
 pub struct AnimationTimer(pub Timer);
@@ -12,8 +13,8 @@ pub struct AnimationTimer(pub Timer);
 pub struct FollowSubject(Entity);
 
 pub fn camera_follow(
-	mut camera_query: Query<(&FollowSubject, &mut Transform), Without<Player>>,
-	player_query: Query<&Transform, With<Player>>,
+	mut camera_query: Query<(&FollowSubject, &mut Transform), With<Camera>>,
+	player_query: Query<&Transform, Without<Camera>>,
 ) {
 	for (subject, mut transform) in &mut camera_query {
 		let player = player_query.get(subject.0);
@@ -49,26 +50,24 @@ pub fn setup_game(
 	let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
 	let player = commands
+		// Sprite stuff
 		.spawn((
 			SpriteSheetBundle {
 				texture_atlas: texture_atlas_handle,
 				..default()
 			},
-			AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
 		))
-		.insert(PlayerBundle::default())
-		.insert(Transform {
-			translation: Vec3::new(0.0, 0.0, 5.0),
-			..default()
-		})
+		// Player data
+		.insert(FacingComponent::default())
+		.insert(Idling)
 		.insert(AnimationBundle::default())
-		.insert(RigidBody::Dynamic)
+		// Player controller
+		.insert(RigidBody::KinematicPositionBased)
 		.insert(Collider::cuboid(8.0, 10.0))
-		.insert(DespawnOnClose)
-		.insert(LockedAxes::ROTATION_LOCKED)
-		.insert(Velocity {
-			linvel: Vec2::new(0.0, 0.0),
-			angvel: 0.0,
+		.insert(KinematicCharacterController::default())
+		.insert(Transform {
+			translation: Vec3::new(0.0, 0.0, 5.0), // Change Z axis to make it visible
+			..default()
 		})
 		.id();
 

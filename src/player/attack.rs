@@ -1,5 +1,5 @@
 use crate::animations::AnimationState;
-use crate::player::components::{Attack, Direction, DyingTimer, Player, PlayerAnimation};
+use crate::player::components::{Attack, FacingDirection, DyingTimer, Player, PlayerAnimation};
 use crate::slimes::{Health, Slime};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -32,7 +32,7 @@ pub fn attack_enemies(
 				if health.0 > 0 {
 					health.0 -= 1;
 					impulse.impulse = hit_normal * -100.0;
-					slime.direction = Direction::from_vec(hit_normal);
+					slime.direction = FacingDirection::from_vec(hit_normal);
 
 					if health.0 == 0 {
 						slime.state = PlayerAnimation::DYING;
