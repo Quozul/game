@@ -1,9 +1,10 @@
-use crate::animations::*;
-use crate::player::components::{Player, PlayerBundle};
+use std::mem::take;
+use crate::player::components::{Player, Direction};
 use crate::state_handlers::*;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
+use crate::animations::components::AnimationBundle;
 
 #[derive(Component, Deref, DerefMut, Clone, Default)]
 pub struct AnimationTimer(pub Timer);
@@ -48,20 +49,23 @@ pub fn setup_game(
 	);
 	let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
+	let animation_bundle = &mut AnimationBundle::new();
+	animation_bundle.set_idling(None, 0..=3);
+	animation_bundle.set_dying(None, 25..=30);
+	animation_bundle.set_attacking(Some(Direction::Down), 21..=23);
+
 	let player = commands
-		.spawn((
+		.spawn(
 			SpriteSheetBundle {
 				texture_atlas: texture_atlas_handle,
 				..default()
 			},
-			AnimationTimer(Timer::from_seconds(0.1, TimerMode::Repeating)),
-		))
-		.insert(PlayerBundle::default())
+		)
+		.insert(take(animation_bundle))
 		.insert(Transform {
 			translation: Vec3::new(0.0, 0.0, 5.0),
 			..default()
 		})
-		.insert(AnimationBundle::default())
 		.insert(RigidBody::Dynamic)
 		.insert(Collider::cuboid(8.0, 10.0))
 		.insert(DespawnOnClose)

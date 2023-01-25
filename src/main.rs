@@ -1,16 +1,14 @@
-mod animations;
 mod collisions;
 mod game;
 mod menu;
 mod player;
 mod slimes;
 mod state_handlers;
+mod animations;
 
-use crate::animations::animate;
 use crate::collisions::*;
 use crate::game::*;
 use crate::menu::*;
-use crate::player::animations::*;
 use crate::player::attack::{attack_enemies, dying_animation};
 use crate::player::controls::{controls, movements};
 use crate::slimes::*;
@@ -20,6 +18,7 @@ use bevy::prelude::*;
 use bevy::DefaultPlugins;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
+use crate::animations::legacy::animate;
 
 fn main() {
 	App::new()
@@ -47,10 +46,7 @@ fn main() {
 			SystemSet::on_update(AppState::InGame)
 				.with_system(attack_enemies)
 				.with_system(dying_animation)
-				.with_system(update_animation)
 				.with_system(controls)
-				.with_system(update_slime_animation)
-				.with_system(attack_animation)
 				.with_system(movements)
 				.with_system(camera_follow)
 				.with_system(spawn_wall_collision),

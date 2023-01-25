@@ -1,5 +1,7 @@
 use benimator::FrameRate;
 use bevy::prelude::*;
+use crate::animations::components::AnimationSet;
+use crate::player::components::Player;
 
 // Create the animation component
 // Note: you may make the animation an asset instead of a component
@@ -13,11 +15,11 @@ pub struct AnimationData {
 
 // Create the player component
 #[derive(Default, Component, Deref, DerefMut)]
-pub struct AnimationState(pub benimator::State);
+pub struct AnimationTimer(pub benimator::State);
 
 #[derive(Bundle)]
 pub struct AnimationBundle {
-	pub state: AnimationState,
+	pub state: AnimationTimer,
 	pub data: AnimationData,
 	pub animation: Animation,
 }
@@ -26,7 +28,7 @@ impl Default for AnimationBundle {
 	fn default() -> AnimationBundle {
 		AnimationBundle {
 			data: AnimationData { flip_x: false },
-			state: AnimationState(benimator::State::default()),
+			state: AnimationTimer(benimator::State::default()),
 			animation: Animation(benimator::Animation::from_indices(
 				0..=0,
 				FrameRate::from_fps(10.0),
@@ -38,13 +40,13 @@ impl Default for AnimationBundle {
 pub fn animate(
 	time: Res<Time>,
 	mut query: Query<(
-		&mut AnimationState,
+		&mut AnimationTimer,
 		&mut TextureAtlasSprite,
-		&Animation,
-		Option<&AnimationData>,
+		&AnimationSet,
+		&Player,
 	)>,
 ) {
-	for (mut state, mut texture, animation, data) in query.iter_mut() {
+	for (mut state, mut texture, animation_set, state) in query.iter_mut() {
 		// Update the state
 		state.update(&animation.0, time.delta());
 

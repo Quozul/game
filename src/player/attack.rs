@@ -1,8 +1,8 @@
-use crate::animations::AnimationState;
 use crate::player::components::{Attack, Direction, DyingTimer, Player, PlayerAnimation};
 use crate::slimes::{Health, Slime};
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
+use crate::game::AnimationTimer;
 
 fn timer_from_frame_count(frame_count: u8) -> Timer {
 	Timer::from_seconds(1.0 / 10.0 * frame_count as f32, TimerMode::Once)
@@ -12,7 +12,7 @@ pub fn attack_enemies(
 	mut commands: Commands,
 	rapier_context: Res<RapierContext>,
 	player_query: Query<(&Player, &Transform, Entity), (With<Attack>, Without<Slime>)>,
-	mut slime_query: Query<(&mut Player, &mut AnimationState, &mut ExternalImpulse, &mut Health), With<Slime>>,
+	mut slime_query: Query<(&mut Player, &mut AnimationTimer, &mut ExternalImpulse, &mut Health), With<Slime>>,
 ) {
 	for (player, transform, entity) in &player_query {
 		commands.entity(entity).remove::<Attack>();

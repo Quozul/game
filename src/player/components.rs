@@ -2,19 +2,19 @@ use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
 use bevy::prelude::*;
 
 pub enum Direction {
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
+	Up,
+	Down,
+	Left,
+	Right,
 }
 
 impl Direction {
 	pub fn to_vec(&self) -> Vec2 {
 		match self {
-			Direction::UP => Vec2::new(0.0, 1.0),
-			Direction::DOWN => Vec2::new(0.0, -1.0),
-			Direction::LEFT => Vec2::new(-1.0, 0.0),
-			Direction::RIGHT => Vec2::new(1.0, 0.0),
+			Direction::Up => Vec2::new(0.0, 1.0),
+			Direction::Down => Vec2::new(0.0, -1.0),
+			Direction::Left => Vec2::new(-1.0, 0.0),
+			Direction::Right => Vec2::new(1.0, 0.0),
 		}
 	}
 
@@ -22,13 +22,13 @@ impl Direction {
 		let angle = vec.y.atan2(vec.x);
 
 		if angle >= -FRAC_PI_4 && angle < FRAC_PI_4 {
-			Direction::RIGHT
+			Direction::Right
 		} else if angle >= FRAC_PI_4 && angle < FRAC_PI_2 {
-			Direction::DOWN
+			Direction::Down
 		} else if angle >= FRAC_PI_2 || angle < -FRAC_PI_2 {
-			Direction::LEFT
+			Direction::Left
 		} else {
-			Direction::UP
+			Direction::Up
 		}
 	}
 }
@@ -45,6 +45,15 @@ pub enum PlayerAnimation {
 pub struct Player {
 	pub direction: Direction,
 	pub state: PlayerAnimation,
+}
+
+impl Default for Player {
+	fn default() -> Player {
+		Player {
+			direction: Direction::Down,
+			state: PlayerAnimation::IDLING,
+		}
+	}
 }
 
 #[derive(Component)]
@@ -67,15 +76,6 @@ impl Default for PlayerBundle {
 		PlayerBundle {
 			player: Player::default(),
 			timer: AttackTimer(Timer::default()),
-		}
-	}
-}
-
-impl Default for Player {
-	fn default() -> Player {
-		Player {
-			direction: Direction::DOWN,
-			state: PlayerAnimation::IDLING,
 		}
 	}
 }

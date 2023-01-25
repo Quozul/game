@@ -8,24 +8,24 @@ pub fn animation_update(keys: &Res<Input<KeyCode>>, player: &mut Player, force: 
 
 	let animation_update = if just_released || force {
 		if keys.pressed(KeyCode::Z) {
-			Ok(Some(Direction::UP))
+			Ok(Some(Direction::Up))
 		} else if keys.pressed(KeyCode::S) {
-			Ok(Some(Direction::DOWN))
+			Ok(Some(Direction::Down))
 		} else if keys.pressed(KeyCode::D) {
-			Ok(Some(Direction::RIGHT))
+			Ok(Some(Direction::Right))
 		} else if keys.pressed(KeyCode::Q) {
-			Ok(Some(Direction::LEFT))
+			Ok(Some(Direction::Left))
 		} else {
 			Err(Some(PlayerAnimation::IDLING))
 		}
 	} else if keys.just_pressed(KeyCode::Z) {
-		Ok(Some(Direction::UP))
+		Ok(Some(Direction::Up))
 	} else if keys.just_pressed(KeyCode::S) {
-		Ok(Some(Direction::DOWN))
+		Ok(Some(Direction::Down))
 	} else if keys.just_pressed(KeyCode::D) {
-		Ok(Some(Direction::RIGHT))
+		Ok(Some(Direction::Right))
 	} else if keys.just_pressed(KeyCode::Q) {
-		Ok(Some(Direction::LEFT))
+		Ok(Some(Direction::Left))
 	} else {
 		Err(None)
 	};
@@ -67,10 +67,10 @@ pub fn movements(mut player_query: Query<(&Player, &mut Velocity)>) {
 	for (player, mut velocity) in &mut player_query {
 		velocity.linvel = if player.state == PlayerAnimation::MOVING {
 			match player.direction {
-				Direction::UP => Vec2::new(0.0, 64.0),
-				Direction::DOWN => Vec2::new(0.0, -64.0),
-				Direction::LEFT => Vec2::new(-64.0, 0.0),
-				Direction::RIGHT => Vec2::new(64.0, 0.0),
+				Direction::Up => Vec2::new(0.0, 64.0),
+				Direction::Down => Vec2::new(0.0, -64.0),
+				Direction::Left => Vec2::new(-64.0, 0.0),
+				Direction::Right => Vec2::new(64.0, 0.0),
 			}
 		} else {
 			Vec2::ZERO

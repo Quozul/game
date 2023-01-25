@@ -1,6 +1,5 @@
-use crate::animations::*;
-use crate::player::components::{AttackTimer, Direction, Player, PlayerAnimation};
-use benimator::FrameRate;
+use crate::player::components::{Player, Direction};
+use crate::animations::components::AnimationBundle;
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use bevy_rapier2d::prelude::*;
@@ -20,7 +19,6 @@ pub struct SlimeBundle {
 	pub rotation_constraints: LockedAxes,
 	pub damping: Damping,
 	pub animation_bundle: AnimationBundle,
-	pub player: Player,
 	pub external_force: ExternalImpulse,
 	pub health: Health,
 }
@@ -45,6 +43,11 @@ impl LdtkEntity for SlimeBundle {
 		);
 		let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
+		let mut animation_bundle = AnimationBundle::new();
+		animation_bundle.set_idling(None, 0..=3);
+		animation_bundle.set_dying(None, 25..=30);
+		animation_bundle.set_attacking(Some(Direction::Down), 21..=23);
+
 		SlimeBundle {
 			sprite_sheet_bundle: SpriteSheetBundle {
 				texture_atlas: texture_atlas_handle,
@@ -58,76 +61,12 @@ impl LdtkEntity for SlimeBundle {
 				linear_damping: 10.,
 				..default()
 			},
-			animation_bundle: AnimationBundle::default(),
-			player: Player::default(),
+			animation_bundle,
 			external_force: ExternalImpulse {
 				impulse: Vec2::ZERO,
 				torque_impulse: 0.0,
 			},
 			health: Health(3),
-		}
-	}
-}
-
-pub fn update_slime_animation(
-	mut query: Query<
-		(
-			&Player,
-			&mut Animation,
-			&mut AnimationData,
-			&mut AnimationState,
-		),
-		(Changed<Player>, With<Slime>),
-	>,
-) {
-	for (slime, mut animation, mut data, mut state) in &mut query {
-		let mut flip_x = false;
-		let mut once = false;
-
-		let range = match slime.state {
-			PlayerAnimation::ATTACKING => {
-				state.0.reset();
-
-				match slime.direction {
-					Direction::UP => 21..=23,
-					Direction::DOWN => 21..=23,
-					Direction::LEFT => {
-						flip_x = true;
-						21..=34
-					}
-					Direction::RIGHT => 21..=23,
-				}
-			}
-			PlayerAnimation::MOVING => match slime.direction {
-				Direction::UP => 7..=12,
-				Direction::DOWN => 7..=12,
-				Direction::LEFT => {
-					flip_x = true;
-					7..=23
-				}
-				Direction::RIGHT => 7..=12,
-			},
-			PlayerAnimation::IDLING => match slime.direction {
-				Direction::UP => 0..=3,
-				Direction::DOWN => 0..=3,
-				Direction::LEFT => {
-					flip_x = true;
-					0..=3
-				}
-				Direction::RIGHT => 0..=3,
-			},
-			PlayerAnimation::DYING => {
-				once = true;
-				25..=30
-			}
-		};
-
-		data.flip_x = flip_x;
-
-		animation.0 = if once {
-			benimator::Animation::from_indices(range, FrameRate::from_fps(10.0)).once()
-		} else {
-			benimator::Animation::from_indices(range, FrameRate::from_fps(10.0))
 		}
 	}
 }
