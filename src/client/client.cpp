@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <cstdlib>
 #include <entt/entt.hpp>
+#include <iostream>
 
 #define SCREEN_WIDTH  800.0
 #define SCREEN_HEIGHT 450.0
