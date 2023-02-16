@@ -1,25 +1,22 @@
 #include <entt/entity/registry.hpp>
-#include <raylib.h>
-#include <netinet/in.h>
-#include "../common/socket.hpp"
+#include "ssl_server.hpp"
 
-#define PORT 44444
+void read_system(entt::registry &registry) {
+	auto view = registry.view<ClientConnection>();
 
-void accept_connection(entt::registry &registry, const int sockfd) {
-	struct sockaddr_in address;
-	socklen_t len = sizeof(address);
-
-	int client = accept(sockfd, (struct sockaddr *) &address, &len);  // Accept connection as usual
+	for (auto [entity, conn]: view.each()) {
+		conn.Read();
+	}
 }
 
 int main() {
 	entt::registry registry;
-	SetTargetFPS(60);
 
-	int sockfd = create_socket(PORT);
+	SslServer server;
 
-	while (!WindowShouldClose()) {
-		accept_connection(registry, sockfd);
+	while (true) {
+		server.Accept(registry);
+		read_system(registry);
 	}
 
 	return EXIT_SUCCESS;

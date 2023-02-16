@@ -1,25 +1,25 @@
 cmake_minimum_required(VERSION 3.15)
 project(game CXX)
 
-find_package(raylib 4.0 REQUIRED)
-find_package(EnTT 3.0 REQUIRED)
-find_package(OpenSSL 3.0 REQUIRED)
+find_package(raylib REQUIRED)
+find_package(EnTT REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(LIBRARIES raylib EnTT::EnTT OpenSSL::SSL)
 
 # Common library
-file(GLOB_RECURSE COMMON_DEPENDS "src/common/*.cpp")
+file(GLOB_RECURSE COMMON_DEPENDS "src/common/*.[hc]pp")
 add_library(common STATIC ${COMMON_DEPENDS})
 target_link_libraries(common ${LIBRARIES})
 
 # Server
-file(GLOB_RECURSE SERVER_DEPENDS "src/server/*.cpp")
+file(GLOB_RECURSE SERVER_DEPENDS "src/server/*.[hc]pp")
 add_executable(server ${SERVER_DEPENDS})
-target_link_libraries(server ${LIBRARIES} common)
+target_link_libraries(server LINK_PUBLIC common)
 
 # Client
-file(GLOB_RECURSE CLIENT_DEPENDS "src/client/*.cpp")
+file(GLOB_RECURSE CLIENT_DEPENDS "src/client/*.[hc]pp")
 add_executable(client ${CLIENT_DEPENDS})
-target_link_libraries(client ${LIBRARIES} common)
+target_link_libraries(client LINK_PUBLIC common)

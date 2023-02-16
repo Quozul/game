@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <cstdlib>
 #include <entt/entt.hpp>
-#include <iostream>
+#include "ssl_client.hpp"
 
 #define SCREEN_WIDTH  800.0
 #define SCREEN_HEIGHT 450.0
@@ -44,8 +44,21 @@ void setup(entt::registry &registry) {
 
 int main() {
 	entt::registry registry;
+
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Window title");
 	SetTargetFPS(60);
+
+	srand (time(NULL));
+	int iSecret = rand() % 10 + 1;
+
+	char buf[16];
+	sprintf(buf, "My number is %d\n", iSecret);
+
+	const std::string hostname = "127.0.0.1";
+	SslClient client(hostname);
+	client.Write("Hello\n");
+	client.Write(buf);
+	client.Write("World!\n");
 
 	setup(registry);
 
