@@ -65,13 +65,13 @@ private:
 
 public:
 	SslServer() {
-		ssl_ctx = create_context(true);
+		ssl_ctx = net::create_context(true);
 
 		/* Configure server context with appropriate key files */
-		configure_server_context(ssl_ctx);
+		net::configure_server_context(ssl_ctx);
 
 		/* Create server socket; will bind with server port and listen */
-		server_skt = create_socket(true);
+		server_skt = net::create_socket(true);
 
 		std::cout << "Server listening..." << std::endl;
 	}

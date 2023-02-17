@@ -25,17 +25,17 @@ private:
 public:
 	SslClient(const std::string& rem_server_ip) { // TODO: Add server hostname and port as parameters
 		auto hostname = rem_server_ip.c_str();
-		ssl_ctx = create_context(false);
+		ssl_ctx = net::create_context(false);
 
 		/* Configure server context with appropriate key files */
-		configure_client_context(ssl_ctx);
+		net::configure_client_context(ssl_ctx);
 
 		/* Create "bare" socket */
-		client_skt = create_socket(false);
+		client_skt = net::create_socket(false);
 		/* Set up connect hostname */
 		addr.sin_family = AF_INET;
 		inet_pton(AF_INET, hostname, &addr.sin_addr.s_addr);
-		addr.sin_port = htons(server_port);
+		addr.sin_port = htons(net::server_port);
 		/* Do TCP connect with server */
 		if (connect(client_skt, (struct sockaddr*) &addr, sizeof(addr)) != 0) {
 			perror("Unable to TCP connect to server");

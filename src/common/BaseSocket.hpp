@@ -23,7 +23,6 @@ namespace net {
 		int close_conn;
 		char buffer[80];
 		struct sockaddr_in addr;
-		struct timeval timeout;
 		fd_set master_set, working_set;
 
 	public:
