@@ -8,9 +8,11 @@
 static const int server_port = 4433;
 
 int create_socket(bool isServer) {
-	int socketfd;
+	int socketfd, max_sd;
 	int optval = 1;
 	struct sockaddr_in addr;
+	struct timeval timeout;
+	fd_set master_set, working_set;
 
 	socketfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (socketfd < 0) {
@@ -23,6 +25,13 @@ int create_socket(bool isServer) {
 			printf("Could not switch to non-blocking.\n");
 			return -1;
 		}
+
+		FD_ZERO(&master_set);
+		max_sd = socketfd;
+		FD_SET(socketfd, &master_set);
+
+		timeout.tv_sec  = 3 * 60;
+		timeout.tv_usec = 0;
 
 		addr.sin_family = AF_INET;
 		addr.sin_port = htons(server_port);

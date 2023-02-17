@@ -1,16 +1,9 @@
 ## Dependencies
 
-### ENet
+### OpenSSL
 
 ```shell
-git clone https://github.com/lsalzman/enet.git enet 
-cd enet
-git checkout v1.3.17
-sudo dnf install autoconf automake libtool
-autoreconf -vfi
-./configure 
-make 
-sudo make install
+sudo dnf install openssl-devel
 ```
 
 ### Raylib
