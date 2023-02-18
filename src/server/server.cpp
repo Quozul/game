@@ -35,7 +35,7 @@ int main() {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Server");
 	SetTargetFPS(60);
 
-	std::thread handler(std::bind(&server_loop, std::ref(registry)));
+	std::thread handler([&registry] { return server_loop(registry); });
 	handler.detach();
 
 	while (!WindowShouldClose()) {

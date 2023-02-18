@@ -3,7 +3,7 @@
 
 #include <map>
 #include "BaseSocket.hpp"
-#include "ssl_server.hpp"
+#include "network.cpp"
 #include "../server/Channel.hpp"
 
 namespace net {
