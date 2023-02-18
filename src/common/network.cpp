@@ -1,9 +1,4 @@
-#include <openssl/types.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <fcntl.h>
+#include "network.hpp"
 
 namespace net {
 

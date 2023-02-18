@@ -52,7 +52,7 @@ int main() {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Window title");
 	SetTargetFPS(60);
 
-	srand (time(NULL));
+	srand (time(nullptr));
 	int iSecret = rand() % 10 + 1;
 
 	char buf[16];

@@ -1,31 +1,25 @@
 #include <raylib.h>
 #include <entt/entity/registry.hpp>
-#include <thread>
 #include "../common/ServerSocket.hpp"
+#include <fmt/core.h>
 
 #define SCREEN_WIDTH  800.0
 #define SCREEN_HEIGHT 450.0
 
 void text_drawing(entt::registry &registry) {
-	const char *text = "SERVER RUNNING";
+	auto view = registry.view<net::Channel>();
+
+	std::string str = fmt::format("SERVER RUNNING! {} clients connected.", view.size());
+
+	const char *text = str.c_str();
 	const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
 	DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 10, 20, BLACK);
 
 	int y = 30;
 
-	auto view = registry.view<net::Channel>();
-
 	for (auto [entity, channel]: view.each()) {
 		DrawText(channel.getBuffer(), SCREEN_WIDTH / 2 - text_size.x / 2, y, 10, BLACK);
 		y += 10;
-	}
-}
-
-[[noreturn]] void server_loop(entt::registry &registry) {
-	net::ServerSocket socket{registry};
-
-	while (true) {
-		socket.loop();
 	}
 }
 
@@ -35,8 +29,8 @@ int main() {
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Server");
 	SetTargetFPS(60);
 
-	std::thread handler([&registry] { return server_loop(registry); });
-	handler.detach();
+	net::ServerSocket socket{registry};
+	socket.start_loop();
 
 	while (!WindowShouldClose()) {
 		BeginDrawing();
