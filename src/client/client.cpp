@@ -1,7 +1,7 @@
 #include <raylib.h>
 #include <cstdlib>
 #include <entt/entt.hpp>
-#include "ssl_client.hpp"
+#include "../common/ClientSocket.hpp"
 
 #define SCREEN_WIDTH  800.0
 #define SCREEN_HEIGHT 450.0
@@ -17,7 +17,7 @@ void text_drawing(entt::registry &registry) {
 	DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 10, 20, BLACK);
 }
 
-void drawing_squares(entt::registry &registry, SslClient &client) {
+void drawing_squares(entt::registry &registry, net::ClientSocket &client) {
 	auto view = registry.view<Position>();
 
 	for (auto [entity, position]: view.each()) {
@@ -59,7 +59,7 @@ int main() {
 	sprintf(buf, "My number is %d\n", iSecret);
 
 	const std::string hostname = "127.0.0.1";
-	SslClient client(hostname);
+	net::ClientSocket client(hostname);
 	client.Write("Hello\n");
 	client.Write(buf);
 	client.Write("World!\n");

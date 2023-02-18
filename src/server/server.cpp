@@ -18,7 +18,8 @@ void text_drawing(entt::registry &registry) {
 	int y = 30;
 
 	for (auto [entity, channel]: view.each()) {
-		DrawText(channel.getBuffer(), SCREEN_WIDTH / 2 - text_size.x / 2, y, 10, BLACK);
+		std::string str = fmt::format("Client {} - {}", channel.fd, channel.getBuffer());
+		DrawText(str.c_str(), SCREEN_WIDTH / 2 - text_size.x / 2, y, 10, BLACK);
 		y += 10;
 	}
 }
