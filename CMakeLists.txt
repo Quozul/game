@@ -4,10 +4,11 @@ project(game CXX)
 find_package(raylib REQUIRED)
 find_package(EnTT REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(Threads REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(LIBRARIES raylib EnTT::EnTT OpenSSL::SSL)
+set(LIBRARIES raylib EnTT::EnTT OpenSSL::SSL Threads::Threads)
 
 # Common library
 file(GLOB_RECURSE COMMON_DEPENDS "src/common/*.[hc]pp")

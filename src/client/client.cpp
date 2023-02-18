@@ -17,20 +17,24 @@ void text_drawing(entt::registry &registry) {
 	DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 10, 20, BLACK);
 }
 
-void drawing_squares(entt::registry &registry) {
+void drawing_squares(entt::registry &registry, SslClient &client) {
 	auto view = registry.view<Position>();
 
 	for (auto [entity, position]: view.each()) {
 		if (IsKeyDown(KEY_D)) {
 			position.x += 1;
+			client.Write("Pressing D");
 		} else if (IsKeyDown(KEY_A)) {
 			position.x -= 1;
+			client.Write("Pressing A");
 		}
 
 		if (IsKeyDown(KEY_W)) {
 			position.y -= 1;
+			client.Write("Pressing W");
 		} else if (IsKeyDown(KEY_S)) {
 			position.y += 1;
+			client.Write("Pressing S");
 		}
 
 		DrawRectangle(position.x, position.y, 16, 16, RED);
@@ -68,7 +72,7 @@ int main() {
 		ClearBackground(RAYWHITE);
 
 		text_drawing(registry);
-		drawing_squares(registry);
+		drawing_squares(registry, client);
 
 		EndDrawing();
 	}

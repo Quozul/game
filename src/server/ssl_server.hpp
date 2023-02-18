@@ -67,10 +67,10 @@ public:
 	SslServer() {
 		ssl_ctx = net::create_context(true);
 
-		/* Configure server context with appropriate key files */
+		/* Configure net context with appropriate key files */
 		net::configure_server_context(ssl_ctx);
 
-		/* Create server socket; will bind with server port and listen */
+		/* Create net socket; will bind with net port and listen */
 		server_skt = net::create_socket(true);
 
 		std::cout << "Server listening..." << std::endl;
@@ -84,7 +84,7 @@ public:
 
 		printf("Client TCP connection accepted\n");
 
-		/* Create server SSL structure using newly accepted client socket */
+		/* Create net SSL structure using newly accepted client socket */
 		SSL *ssl = SSL_new(ssl_ctx);
 		SSL_set_fd(ssl, client_skt);
 
@@ -93,10 +93,6 @@ public:
 			ERR_print_errors_fp(stderr);
 		} else {
 			printf("Client SSL connection accepted\n\n");
-			ClientConnection client{client_skt, ssl};
-
-			auto ent = registry.create();
-			registry.emplace<ClientConnection>(ent, client);
 		}
 	}
 };

@@ -1,19 +1,60 @@
 #ifndef GAME_SERVERSOCKET_HPP
 #define GAME_SERVERSOCKET_HPP
 
+#include <map>
 #include "BaseSocket.hpp"
+#include "ssl_server.hpp"
+#include "../server/Channel.hpp"
 
 namespace net {
 
 	// Source: https://www.ibm.com/docs/en/i/7.1?topic=designs-example-nonblocking-io-select
 	class ServerSocket : private BaseSocket {
+	private:
+		SSL_CTX *ssl_ctx = nullptr;
+		entt::registry *registry;
+		unsigned int addr_len = sizeof(addr);
+
+		void accept_connection() {
+			printf("  Listening socket is readable\n");
+			do {
+				new_sd = accept(listen_sd, (struct sockaddr *) &addr, &addr_len);
+				if (new_sd < 0) {
+					if (errno != EWOULDBLOCK) {
+						perror("  accept() failed");
+					}
+					break;
+				}
+
+				printf("  New incoming connection - %d %d\n", new_sd, i);
+				FD_SET(new_sd, &master_set);
+				if (new_sd > max_sd) {
+					max_sd = new_sd;
+				}
+
+				// Create the SSL context
+				SSL *ssl = SSL_new(ssl_ctx);
+				SSL_set_fd(ssl, new_sd);
+
+				/* Wait for SSL connection from the client */
+				if (SSL_accept(ssl) <= 0) {
+					ERR_print_errors_fp(stderr);
+				} else {
+					printf("Client SSL connection accepted\n\n");
+				}
+
+				auto entity = registry->create();
+				registry->emplace<net::Channel>(entity, new_sd, ssl);
+			} while (new_sd != -1);
+		}
+
 	public:
-		ServerSocket() : BaseSocket() {
-			memset(&addr, 0, sizeof(addr));
+		explicit ServerSocket(entt::registry &reg) : BaseSocket() {
+			this->registry = &reg;
 			addr.sin_family = AF_INET;
-			memcpy(&addr.sin_addr, &in6addr_any, sizeof(in6addr_any));
+			addr.sin_addr.s_addr = INADDR_ANY;
 			addr.sin_port = htons(SERVER_PORT);
-			rc = bind(listen_sd, (struct sockaddr *) &addr, sizeof(addr));
+			rc = bind(listen_sd, (struct sockaddr *) &addr, addr_len);
 
 			if (rc < 0) {
 				perror("bind() failed");
@@ -27,6 +68,11 @@ namespace net {
 				close(listen_sd);
 				exit(-1);
 			}
+
+			ssl_ctx = net::create_context(true);
+
+			/* Configure net context with appropriate key files */
+			net::configure_server_context(ssl_ctx);
 		}
 
 		void loop() {
@@ -53,48 +99,19 @@ namespace net {
 				desc_ready -= 1;
 
 				if (i == listen_sd) {
-					printf("  Listening socket is readable\n");
-					do {
-						new_sd = accept(listen_sd, nullptr, nullptr);
-						if (new_sd < 0) {
-							if (errno != EWOULDBLOCK) {
-								perror("  accept() failed");
+					accept_connection();
+				} else {
+					printf("  Descriptor %d is readable\n", i);
+
+					auto view = registry->view<net::Channel>();
+
+					for (auto [entity, channel]: view.each()) {
+						if (channel.fd == i) {
+							if (channel.read()) {
+								close_connection(i);
 							}
 							break;
 						}
-
-						printf("  New incoming connection - %d\n", new_sd);
-						FD_SET(new_sd, &master_set);
-						if (new_sd > max_sd) {
-							max_sd = new_sd;
-						}
-					} while (new_sd != -1);
-				} else {
-					printf("  Descriptor %d is readable\n", i);
-					close_conn = false;
-					rc = recv(i, buffer, sizeof(buffer), 0);
-					if (rc < 0) {
-						if (errno != EWOULDBLOCK) {
-							perror("  recv() failed");
-							close_connection(i);
-						}
-						return;
-					}
-
-					if (rc == 0) {
-						printf("  Connection closed\n");
-						close_connection(i);
-						return;
-					}
-
-					len = rc;
-					printf("  %d bytes received : %s\n", len, buffer);
-
-					rc = send(i, buffer, len, 0);
-					if (rc < 0) {
-						perror("  send() failed");
-						close_connection(i);
-						return;
 					}
 				} /* End of existing connection is readable */
 			} /* End of loop through selectable descriptors */

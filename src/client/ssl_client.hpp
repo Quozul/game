@@ -23,11 +23,11 @@ private:
 	struct sockaddr_in addr;
 
 public:
-	SslClient(const std::string& rem_server_ip) { // TODO: Add server hostname and port as parameters
+	SslClient(const std::string& rem_server_ip) { // TODO: Add net hostname and port as parameters
 		auto hostname = rem_server_ip.c_str();
 		ssl_ctx = net::create_context(false);
 
-		/* Configure server context with appropriate key files */
+		/* Configure net context with appropriate key files */
 		net::configure_client_context(ssl_ctx);
 
 		/* Create "bare" socket */
@@ -36,11 +36,11 @@ public:
 		addr.sin_family = AF_INET;
 		inet_pton(AF_INET, hostname, &addr.sin_addr.s_addr);
 		addr.sin_port = htons(net::server_port);
-		/* Do TCP connect with server */
+		/* Do TCP connect with net */
 		if (connect(client_skt, (struct sockaddr*) &addr, sizeof(addr)) != 0) {
-			perror("Unable to TCP connect to server");
+			perror("Unable to TCP connect to net");
 		} else {
-			printf("TCP connection to server successful\n");
+			printf("TCP connection to net successful\n");
 		}
 
 		/* Create client SSL structure using dedicated client socket */
@@ -48,7 +48,7 @@ public:
 		SSL_set_fd(ssl, client_skt);
 		/* Set hostname for SNI */
 		SSL_set_tlsext_host_name(ssl, hostname);
-		/* Configure server hostname check */
+		/* Configure net hostname check */
 		SSL_set1_host(ssl, hostname);
 
 		int result;
