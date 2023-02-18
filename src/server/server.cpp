@@ -1,6 +1,6 @@
 #include <raylib.h>
 #include <entt/entity/registry.hpp>
-#include "../common/ServerSocket.hpp"
+#include "../common/net/ServerSocket.hpp"
 #include <fmt/core.h>
 
 #define SCREEN_WIDTH  800.0
@@ -9,17 +9,17 @@
 void text_drawing(entt::registry &registry) {
 	auto view = registry.view<net::Channel>();
 
-	std::string str = fmt::format("SERVER RUNNING! {} clients connected.", view.size());
+	std::string title = fmt::format("SERVER RUNNING! {} clients connected.", view.size());
+	const char *text = title.c_str();
 
-	const char *text = str.c_str();
 	const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
 	DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 10, 20, BLACK);
 
 	int y = 30;
 
 	for (auto [entity, channel]: view.each()) {
-		std::string str = fmt::format("Client {} - {}", channel.fd, channel.getBuffer());
-		DrawText(str.c_str(), SCREEN_WIDTH / 2 - text_size.x / 2, y, 10, BLACK);
+		std::string row = fmt::format("Client {} - {}", channel.fd, channel.getBuffer());
+		DrawText(row.c_str(), SCREEN_WIDTH / 2 - text_size.x / 2, y, 10, BLACK);
 		y += 10;
 	}
 }

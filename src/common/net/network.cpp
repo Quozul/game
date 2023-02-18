@@ -2,8 +2,6 @@
 
 namespace net {
 
-	static const int server_port = 4433;
-
 	int create_socket(bool isServer) {
 		int socketfd, max_sd;
 		int optval = 1;

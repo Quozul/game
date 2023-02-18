@@ -12,7 +12,7 @@ namespace net {
 	class Channel {
 	private:
 		char buffer[80];
-		int i, len, rc = 1;
+		int bytes = 0;
 
 	public:
 		int fd;
@@ -27,14 +27,25 @@ namespace net {
 			return buffer;
 		}
 
+		void write(std::string data) {
+			printf("Writing %s\n", data.c_str());
+
+			auto buffer = data.c_str();
+			auto buffer_length = data.length();
+
+			if (SSL_write(ssl, buffer, buffer_length) <= 0) {
+				printf("Server closed connection\n");
+				ERR_print_errors_fp(stderr);
+			}
+		}
+
 		bool read() {
 			// Clear the buffer
 			memset(buffer, 0, sizeof(buffer));
 
-			rc = SSL_read(ssl, buffer, sizeof(buffer));
-//			rc = recv(fd, buffer, sizeof(buffer), 0);
+			bytes = SSL_read(ssl, buffer, sizeof(buffer));
 
-			if (rc < 0) {
+			if (bytes < 0) {
 				if (errno != EWOULDBLOCK) {
 					perror("  recv() failed");
 					return true;
@@ -42,19 +53,12 @@ namespace net {
 				return false;
 			}
 
-			if (rc == 0) {
+			if (bytes == 0) {
 				printf("  Connection closed\n");
 				return true;
 			}
 
-			len = rc;
-			printf("  %d bytes received : %s\n", len, buffer);
-
-//			rc = send(i, buffer, len, 0);
-//			if (rc < 0) {
-//				perror("  send() failed");
-//				return true;
-//			}
+			printf("  %d bytes received : %s\n", bytes, buffer);
 
 			return false;
 		}

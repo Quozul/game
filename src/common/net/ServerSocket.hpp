@@ -6,16 +6,14 @@
 #include <entt/entity/registry.hpp>
 #include "BaseSocket.hpp"
 #include "network.hpp"
-#include "../server/Channel.hpp"
+#include "Channel.hpp"
 
 namespace net {
 
 	// Source: https://www.ibm.com/docs/en/i/7.1?topic=designs-example-nonblocking-io-select
 	class ServerSocket : private BaseSocket {
 	private:
-		SSL_CTX *ssl_ctx = nullptr;
 		entt::registry *registry;
-		unsigned int addr_len = sizeof(addr);
 
 		void accept_connection();
 
@@ -28,10 +26,13 @@ namespace net {
 
 	public:
 		explicit ServerSocket(entt::registry &reg) : BaseSocket() {
+			set_non_blocking();
+			init_ssl(true);
+
 			this->registry = &reg;
 			addr.sin_family = AF_INET;
 			addr.sin_addr.s_addr = INADDR_ANY;
-			addr.sin_port = htons(SERVER_PORT);
+			addr.sin_port = htons(net::server_port);
 			rc = bind(listen_sd, (struct sockaddr *) &addr, addr_len);
 
 			if (rc < 0) {
@@ -46,11 +47,6 @@ namespace net {
 				close(listen_sd);
 				exit(-1);
 			}
-
-			ssl_ctx = net::create_context(true);
-
-			/* Configure net context with appropriate key files */
-			net::configure_server_context(ssl_ctx);
 		}
 
 		void start_loop();

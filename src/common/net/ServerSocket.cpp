@@ -32,6 +32,8 @@ namespace net {
 
 			auto entity = registry->create();
 			registry->emplace<net::Channel>(entity, new_sd, ssl);
+			auto channel = registry->get<net::Channel>(entity);
+			channel.write("Welcome!");
 		} while (new_sd != -1);
 	}
 

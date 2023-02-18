@@ -10,19 +10,35 @@
 #include <cerrno>
 #include <csignal>
 #include <cstring>
-
-#define SERVER_PORT 4433
+#include <openssl/types.h>
+#include "network.hpp"
 
 namespace net {
 
 	class BaseSocket {
 	protected:
-		int i, len, rc, on = 1;
+		int i, rc, on = 1;
 		int listen_sd, max_sd, new_sd;
 		int desc_ready = false;
-		char buffer[80];
 		struct sockaddr_in addr;
 		fd_set master_set, working_set;
+		SSL_CTX *ssl_ctx = nullptr;
+		unsigned int addr_len = sizeof(addr);
+
+	protected:
+		void set_non_blocking() {
+			rc = ioctl(listen_sd, FIONBIO, (char *) &on);
+			if (rc < 0) {
+				perror("ioctl() failed");
+				close(listen_sd);
+				exit(-1);
+			}
+		}
+
+		void init_ssl(bool isServer = false) {
+			ssl_ctx = net::create_context(isServer);
+			net::configure_server_context(ssl_ctx);
+		}
 
 	public:
 		BaseSocket() {
@@ -39,13 +55,6 @@ namespace net {
 				exit(-1);
 			}
 
-			rc = ioctl(listen_sd, FIONBIO, (char *) &on);
-			if (rc < 0) {
-				perror("ioctl() failed");
-				close(listen_sd);
-				exit(-1);
-			}
-
 			FD_ZERO(&master_set);
 			max_sd = listen_sd;
 			FD_SET(listen_sd, &master_set);
@@ -57,6 +66,8 @@ namespace net {
 					close(i);
 				}
 			}
+
+			SSL_CTX_free(ssl_ctx);
 		}
 	};
 
