@@ -1,12 +1,12 @@
 ## Dependencies
 
-### OpenSSL and libevent
+### OpenSSL
 
 ```shell
-sudo dnf install openssl-devel libevent-devel
+sudo dnf install openssl-devel
 ```
 
-### Raylib
+### raylib
 
 ```shell
 git clone https://github.com/raysan5/raylib.git raylib

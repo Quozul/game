@@ -1,77 +1,33 @@
+#define RAYGUI_IMPLEMENTATION
+
 #include <raylib.h>
 #include <cstdlib>
-#include <entt/entt.hpp>
-#include "../common/net/ClientSocket.hpp"
-
-#define SCREEN_WIDTH  800.0
-#define SCREEN_HEIGHT 450.0
-
-struct Position {
-	int x;
-	int y;
-};
-
-void text_drawing(entt::registry &registry) {
-	const char *text = "OMG! IT WORKS!";
-	const Vector2 text_size = MeasureTextEx(GetFontDefault(), text, 20, 1);
-	DrawText(text, SCREEN_WIDTH / 2 - text_size.x / 2, 10, 20, BLACK);
-}
-
-void drawing_squares(entt::registry &registry, net::ClientSocket &client) {
-	auto view = registry.view<Position>();
-
-	for (auto [entity, position]: view.each()) {
-		if (IsKeyDown(KEY_D)) {
-			position.x += 1;
-			client.channel->write("Pressing D");
-		} else if (IsKeyDown(KEY_A)) {
-			position.x -= 1;
-			client.channel->write("Pressing A");
-		}
-
-		if (IsKeyDown(KEY_W)) {
-			position.y -= 1;
-			client.channel->write("Pressing W");
-		} else if (IsKeyDown(KEY_S)) {
-			position.y += 1;
-			client.channel->write("Pressing S");
-		}
-
-		DrawRectangle(position.x, position.y, 16, 16, RED);
-	}
-}
-
-void setup(entt::registry &registry) {
-	const auto entity = registry.create();
-	registry.emplace<Position>(entity, 0, 0);
-}
+#include "config.hpp"
+#include "scenes/scene_state_machine.hpp"
 
 int main() {
-	entt::registry registry;
-
-	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Window title");
+	InitWindow(config::SCREEN_WIDTH, config::SCREEN_HEIGHT, "Window title");
 	SetTargetFPS(60);
 
-	srand (time(nullptr));
-	int iSecret = rand() % 10 + 1;
+	entt::registry registry;
 
-	char buf[16];
-	sprintf(buf, "My number is %d\n", iSecret);
+	using SceneManager = state::StateMachine<scene::MenuState, scene::GameState>;
+	SceneManager manager(&registry);
 
-	const std::string hostname = "127.0.0.1";
-	net::ClientSocket client(hostname);
-	client.start_loop();
-	client.channel->write("Hello World!\n");
+	auto entity = registry.create();
+	registry.emplace<SceneManager>(entity, manager);
 
-	setup(registry);
+	setup_inputs(registry);
 
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 
 		ClearBackground(RAYWHITE);
 
+		drawing_squares(registry);
 		text_drawing(registry);
-		drawing_squares(registry, client);
+		tick_inputs(registry);
+		tick_forms(registry);
 
 		EndDrawing();
 	}

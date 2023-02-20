@@ -25,29 +25,7 @@ namespace net {
 		void close_connection(int fd);
 
 	public:
-		explicit ServerSocket(entt::registry &reg) : BaseSocket() {
-			set_non_blocking();
-			init_ssl(true);
-
-			this->registry = &reg;
-			addr.sin_family = AF_INET;
-			addr.sin_addr.s_addr = INADDR_ANY;
-			addr.sin_port = htons(net::server_port);
-			rc = bind(listen_sd, (struct sockaddr *) &addr, addr_len);
-
-			if (rc < 0) {
-				perror("bind() failed");
-				close(listen_sd);
-				exit(-1);
-			}
-
-			rc = listen(listen_sd, 32);
-			if (rc < 0) {
-				perror("listen() failed");
-				close(listen_sd);
-				exit(-1);
-			}
-		}
+		explicit ServerSocket(entt::registry &reg);
 
 		void start_loop();
 
