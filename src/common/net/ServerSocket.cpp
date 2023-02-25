@@ -30,10 +30,14 @@ namespace net {
 				printf("Client SSL connection accepted\n\n");
 			}
 
+
 			auto entity = registry->create();
 			registry->emplace<net::Channel>(entity, new_sd, ssl);
-			auto channel = registry->get<net::Channel>(entity);
-			channel.write("Welcome!");
+
+			queue->push({
+								events::server_events::CONNECTED,
+								entity
+						});
 		} while (new_sd != -1);
 	}
 
@@ -46,7 +50,7 @@ namespace net {
 	void ServerSocket::loop() {
 		memcpy(&working_set, &master_set, sizeof(master_set));
 
-		printf("Waiting on select()...\n");
+//		printf("Waiting on select()...\n");
 		rc = select(max_sd + 1, &working_set, nullptr, nullptr, nullptr);
 
 		if (rc < 0) {
@@ -69,14 +73,15 @@ namespace net {
 			if (i == listen_sd) {
 				accept_connection();
 			} else {
-				printf("  Descriptor %d is readable\n", i);
+//				printf("  Descriptor %d is readable\n", i);
 
 				auto view = registry->view<net::Channel>();
 
 				// TODO: Optimize using a map
 				for (auto [entity, channel]: view.each()) {
 					if (channel.fd == i) {
-						if (channel.read()) {
+						queue->push({events::server_events::DATA_RECEIVED, entity});
+						if (channel.read()) { // read() returns true if the connection got closed
 							close_connection(i);
 							registry->destroy(entity);
 						}
@@ -105,9 +110,12 @@ namespace net {
 		handler.detach();
 	}
 
-	ServerSocket::ServerSocket(entt::registry &reg) : BaseSocket() {
+	ServerSocket::ServerSocket(entt::registry &reg, Queue<events::generic_event<events::server_events>> &queue)
+			: BaseSocket() {
 		set_non_blocking();
 		init_ssl(true);
+
+		this->queue = &queue;
 
 		this->registry = &reg;
 		addr.sin_family = AF_INET;

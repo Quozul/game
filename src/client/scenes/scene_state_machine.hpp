@@ -19,8 +19,7 @@ namespace scene {
 	struct MenuState: public state::ByDefault<state::Nothing> {
 		using ByDefault::handle;
 
-		state::TransitionTo<GameState> handle(const event::PlayEvent &, entt::registry &registry) const {
-
+		state::TransitionTo<GameState> handle(const event::PlayEvent &, entt::registry &registry, entt::entity &resource_holder) const {
 			auto view1 = registry.view<Button>();
 			std::cout << view1.size() << std::endl;
 			for (auto [entity, button]: view1.each()) {
@@ -42,11 +41,10 @@ namespace scene {
 
 			setup(registry);
 
-			auto entity = registry.create();
 			auto* socket = new net::ClientSocket("127.0.0.1");
-			registry.emplace<Client>(entity, socket);
 
 			if (socket->connected) {
+				registry.emplace<Client>(resource_holder, socket);
 				socket->start_loop();
 				socket->write("Hello World!\n");
 			}
@@ -58,7 +56,7 @@ namespace scene {
 	struct GameState: public state::ByDefault<state::Nothing> {
 		using ByDefault::handle;
 
-		state::TransitionTo<MenuState> handle(const event::MenuEvent &, entt::registry &registry) const {
+		state::TransitionTo<MenuState> handle(const event::MenuEvent &, entt::registry &registry, entt::entity &resource_holder) const {
 			std::cout << "transition to menu" << std::endl;
 			registry.clear<Position>();
 

@@ -7,6 +7,9 @@
 #include "BaseSocket.hpp"
 #include "network.hpp"
 #include "Channel.hpp"
+#include "../events/generic_event.hpp"
+#include "../events/server_events.hpp"
+#include "../Queue.hpp"
 
 namespace net {
 
@@ -14,6 +17,7 @@ namespace net {
 	class ServerSocket : private BaseSocket {
 	private:
 		entt::registry *registry;
+		Queue<events::generic_event<events::server_events>> *queue;
 
 		void accept_connection();
 
@@ -25,7 +29,7 @@ namespace net {
 		void close_connection(int fd);
 
 	public:
-		explicit ServerSocket(entt::registry &reg);
+		explicit ServerSocket(entt::registry &reg, Queue<events::generic_event<events::server_events>> & queue);
 
 		void start_loop();
 

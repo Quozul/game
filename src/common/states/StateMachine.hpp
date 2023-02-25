@@ -14,10 +14,12 @@ namespace state {
 	class StateMachine {
 	private:
 		entt::registry *registry;
+		entt::entity *resource_holder;
 
 	public:
-		StateMachine(entt::registry *reg) {
+		StateMachine(entt::registry *reg, entt::entity *ent) {
 			this->registry = reg;
+			this->resource_holder = ent;
 		}
 
 		template<typename State>
@@ -28,7 +30,7 @@ namespace state {
 		template<typename Event>
 		void handle(const Event &event) {
 			auto passEventToState = [this, &event](auto statePtr) {
-				statePtr->handle(event, *registry).execute(*this);
+				statePtr->handle(event, *registry, *resource_holder).execute(*this);
 			};
 			std::visit(passEventToState, current_state);
 		}
@@ -56,7 +58,7 @@ namespace state {
 	struct ByDefault
 	{
 		template <typename Event>
-		Action handle(const Event&, entt::registry &registry) const
+		Action handle(const Event&, entt::registry &registry, entt::entity &resource_holder) const
 		{
 			return Action{};
 		}

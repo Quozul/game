@@ -27,6 +27,10 @@ namespace net {
 			return buffer;
 		}
 
+		int getBytes() {
+			return bytes;
+		}
+
 		void write(std::string data) {
 			printf("Writing %s\n", data.c_str());
 
@@ -57,8 +61,6 @@ namespace net {
 				printf("  Connection closed\n");
 				return true;
 			}
-
-			printf("  %d bytes received : %s\n", bytes, buffer);
 
 			return false;
 		}
