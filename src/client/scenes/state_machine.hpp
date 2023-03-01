@@ -38,11 +38,12 @@ namespace scene {
 			setup(registry);
 
 			net::ClientSocket socket(event.hostname);
+			std::cout << event.hostname << std::endl;
 
 			if (socket.connected) {
-				resource_holder.add(socket);
 				socket.start_loop();
 				socket.write("Hello World!\n");
+				resource_holder.add(socket);
 			}
 			std::cout << "transition to game" << std::endl;
 			return {};

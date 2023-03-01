@@ -8,25 +8,25 @@ namespace resources {
 
 	class ResourceHolder {
 	public:
-		template<typename ResourceType>
-		void add(ResourceType& resource) {
-			resources_[std::type_index(typeid(ResourceType))] = &resource;
+		template <typename T>
+		void add(T& resource) {
+			resources[std::type_index(typeid(T))] = &resource;
 		}
 
-		template<typename ResourceType>
-		ResourceType& get() {
-			return *static_cast<ResourceType*>(resources_[std::type_index(typeid(ResourceType))]);
+		template <typename T>
+		T& get() {
+			return *static_cast<T*>(resources[std::type_index(typeid(T))]);
 		}
 
-		template<typename ResourceType>
-		bool has() const {
-			auto it = resources_.find(std::type_index(typeid(ResourceType)));
-			return it != resources_.end() && it->second != nullptr;
+		template <typename T>
+		bool has() {
+			return resources.count(std::type_index(typeid(T))) != 0;
 		}
 
 	private:
-		std::unordered_map<std::type_index, void*> resources_;
+		std::unordered_map<std::type_index, void*> resources;
 	};
+
 
 } // resources
 
