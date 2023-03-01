@@ -34,10 +34,7 @@ namespace net {
 			auto entity = registry->create();
 			registry->emplace<net::Channel>(entity, new_sd, ssl);
 
-			queue->push({
-								events::server_events::CONNECTED,
-								entity
-						});
+			events->fire(events::server::Connected{entity, new_sd});
 		} while (new_sd != -1);
 	}
 
@@ -80,7 +77,12 @@ namespace net {
 				// TODO: Optimize using a map
 				for (auto [entity, channel]: view.each()) {
 					if (channel.fd == i) {
-						queue->push({events::server_events::DATA_RECEIVED, entity});
+						events->fire(events::server::DataReceived{
+							entity,
+							channel.getBuffer(),
+							channel.getBytes()
+						});
+
 						if (channel.read()) { // read() returns true if the connection got closed
 							close_connection(i);
 							registry->destroy(entity);
@@ -110,12 +112,11 @@ namespace net {
 		handler.detach();
 	}
 
-	ServerSocket::ServerSocket(entt::registry &reg, Queue<events::generic_event<events::server_events>> &queue)
-			: BaseSocket() {
+	ServerSocket::ServerSocket(entt::registry &reg, events::EventLoop &events) : BaseSocket() {
 		set_non_blocking();
 		init_ssl(true);
 
-		this->queue = &queue;
+		this->events = &events;
 
 		this->registry = &reg;
 		addr.sin_family = AF_INET;
