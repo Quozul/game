@@ -27,22 +27,25 @@ void text_drawing(entt::registry &registry) {
 
 int main() {
 	entt::registry registry;
+	events::EventLoop events;
+	net::ServerSocket socket{registry, events};
 
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Server");
 	SetTargetFPS(60);
 
-	events::EventLoop events;
-
-	events.on<events::server::DataReceived>([](const events::server::DataReceived &event) {
+	events.on<events::server::DataReceived>([](auto &event) {
 		std::cout << fmt::format("Data received: {}", event.buffer) << std::endl;
 	});
 
-	events.on<events::server::Connected>([](const events::server::Connected &event) {
+	events.on<events::server::Connected>([](auto &event) {
 		std::cout << fmt::format("New client connected: {}", event.fd) << std::endl;
 	});
 
+	events.on<events::server::Disconnected>([](auto &event) {
+		std::cout << fmt::format("Client disconnected: {}", event.fd) << std::endl;
+	});
+
 	// start network loop
-	net::ServerSocket socket{registry, events};
 	socket.start_loop();
 
 	while (!WindowShouldClose()) {

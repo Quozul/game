@@ -12,6 +12,10 @@ namespace events::server {
 			char* buffer;
 			int length;
 		};
+
+		struct Disconnected {
+			int fd;
+		};
 	}
 
 #endif //GAME_SERVER_EVENTS_HPP

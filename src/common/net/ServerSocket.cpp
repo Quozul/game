@@ -3,17 +3,15 @@
 namespace net {
 
 	void ServerSocket::accept_connection() {
-		printf("  Listening socket is readable\n");
+		// Listening socket is readable
 		do {
 			new_sd = accept(listen_sd, (struct sockaddr *) &addr, &addr_len);
 			if (new_sd < 0) {
-				if (errno != EWOULDBLOCK) {
-					perror("  accept() failed");
-				}
+				// accept() failed
 				break;
 			}
 
-			printf("  New incoming connection - %d %d\n", new_sd, i);
+			// New incoming connection
 			FD_SET(new_sd, &master_set);
 			if (new_sd > max_sd) {
 				max_sd = new_sd;
@@ -26,10 +24,9 @@ namespace net {
 			/* Wait for SSL connection from the client */
 			if (SSL_accept(ssl) <= 0) {
 				ERR_print_errors_fp(stderr);
-			} else {
-				printf("Client SSL connection accepted\n\n");
+			// } else {
+			// Client SSL connection accepted
 			}
-
 
 			auto entity = registry->create();
 			registry->emplace<net::Channel>(entity, new_sd, ssl);
@@ -47,17 +44,17 @@ namespace net {
 	void ServerSocket::loop() {
 		memcpy(&working_set, &master_set, sizeof(master_set));
 
-//		printf("Waiting on select()...\n");
+		// Waiting on select()
 		rc = select(max_sd + 1, &working_set, nullptr, nullptr, nullptr);
 
 		if (rc < 0) {
-			perror("  select() failed");
+			// select() failed
 			return;
 		}
 
 		// FIXME: Select should never timeout since the last parameter is null
 		if (rc == 0) {
-			printf("  select() timed out.  End program.\n");
+			// select() timed out
 			return;
 		}
 
@@ -70,28 +67,28 @@ namespace net {
 			if (i == listen_sd) {
 				accept_connection();
 			} else {
-//				printf("  Descriptor %d is readable\n", i);
-
 				auto view = registry->view<net::Channel>();
 
 				// TODO: Optimize using a map
 				for (auto [entity, channel]: view.each()) {
 					if (channel.fd == i) {
-						events->fire(events::server::DataReceived{
-							entity,
-							channel.getBuffer(),
-							channel.getBytes()
-						});
-
 						if (channel.read()) { // read() returns true if the connection got closed
 							close_connection(i);
 							registry->destroy(entity);
+							break;
 						}
+
+						events->fire(events::server::DataReceived{
+								entity,
+								channel.getBuffer(),
+								channel.getBytes()
+						});
+
 						break;
 					}
 				}
-			} /* End of existing connection is readable */
-		} /* End of loop through selectable descriptors */
+			}
+		}
 	}
 
 	// TODO: Move to Channel class
@@ -103,7 +100,10 @@ namespace net {
 				max_sd -= 1;
 			}
 		}
-		printf("  Connection %d closed\n", fd);
+		events->fire(events::server::Disconnected{
+			fd
+		});
+		// Connection closed
 	}
 
 

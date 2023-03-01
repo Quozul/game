@@ -5,6 +5,8 @@
 #include <variant>
 #include <iostream>
 #include <entt/entity/registry.hpp>
+#include "../events/EventLoop.hpp"
+#include "../ResourceHolder.hpp"
 
 namespace state {
 
@@ -14,10 +16,10 @@ namespace state {
 	class StateMachine {
 	private:
 		entt::registry *registry;
-		entt::entity *resource_holder;
+		resources::ResourceHolder *resource_holder;
 
 	public:
-		StateMachine(entt::registry *reg, entt::entity *ent) {
+		StateMachine(entt::registry *reg, resources::ResourceHolder *ent) {
 			this->registry = reg;
 			this->resource_holder = ent;
 		}
@@ -54,12 +56,10 @@ namespace state {
 		}
 	};
 
-	template <typename Action>
-	struct ByDefault
-	{
-		template <typename Event>
-		Action handle(const Event&, entt::registry &registry, entt::entity &resource_holder) const
-		{
+	template<typename Action>
+	struct ByDefault {
+		template<typename Event>
+		Action handle(const Event &, entt::registry &registry, resources::ResourceHolder &resource_holder) const {
 			return Action{};
 		}
 	};

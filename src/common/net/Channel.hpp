@@ -58,7 +58,7 @@ namespace net {
 			}
 
 			if (bytes == 0) {
-				printf("  Connection closed\n");
+				// Connection closed
 				return true;
 			}
 
