@@ -54,28 +54,28 @@ void tick_forms(entt::registry &registry, resources::ResourceHolder &resource_ho
 }
 
 void controls(entt::registry &registry, resources::ResourceHolder &resource_holder) {
-	if (!resource_holder.has<net::ClientSocket>()) {
+	net::ClientSocket *client;
+	if ((client = resource_holder.get_ptr<net::ClientSocket>()) == nullptr) {
 		return;
 	}
 
-	auto client = resource_holder.get<net::ClientSocket>();
 	auto view = registry.view<Position>();
 
 	for (auto [entity, position]: view.each()) {
 		if (IsKeyPressed(KEY_D)) {
 			position.x += 1;
-			client.write("Pressing D");
+			client->write("Pressing D");
 		} else if (IsKeyPressed(KEY_A)) {
 			position.x -= 1;
-			client.write("Pressing A");
+			client->write("Pressing A");
 		}
 
 		if (IsKeyPressed(KEY_W)) {
 			position.y -= 1;
-			client.write("Pressing W");
+			client->write("Pressing W");
 		} else if (IsKeyPressed(KEY_S)) {
 			position.y += 1;
-			client.write("Pressing S");
+			client->write("Pressing S");
 		}
 	}
 }

@@ -75,14 +75,13 @@ namespace net {
 						if (channel.read()) { // read() returns true if the connection got closed
 							close_connection(i);
 							registry->destroy(entity);
-							break;
+						} else {
+							events->fire(events::server::DataReceived{
+									entity,
+									channel.getBuffer(),
+									channel.getBytes()
+							});
 						}
-
-						events->fire(events::server::DataReceived{
-								entity,
-								channel.getBuffer(),
-								channel.getBytes()
-						});
 
 						break;
 					}

@@ -14,8 +14,18 @@ namespace resources {
 		}
 
 		template <typename T>
+		void add_ptr(T* resource) {
+			resources[std::type_index(typeid(T))] = resource;
+		}
+
+		template <typename T>
 		T& get() {
 			return *static_cast<T*>(resources[std::type_index(typeid(T))]);
+		}
+
+		template <typename T>
+		T* get_ptr() {
+			return static_cast<T*>(resources[std::type_index(typeid(T))]);
 		}
 
 		template <typename T>
