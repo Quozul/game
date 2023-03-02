@@ -52,3 +52,9 @@ gcc -o raygui.so src/raygui.c -shared -fpic -DRAYGUI_IMPLEMENTATION -lraylib -lG
 sudo cp src/raygui.c /usr/include/raygui.h
 sudo cp raygui.so /usr/lib/raygui.so
 ```
+
+## Generate a certificate
+
+```shell
+openssl req  -nodes -new -x509 -keyout key.pem -out cert.pem
+```

@@ -5,8 +5,10 @@
 #include <box2d/box2d.h>
 #include "config.hpp"
 #include "scenes/state_machine.hpp"
+#include "../common/net/packets/move.hpp"
 
 int main() {
+    std::cout << std::type_index(typeid(packets::move)).hash_code() << std::endl;
 	InitWindow(config::SCREEN_WIDTH, config::SCREEN_HEIGHT, "Window title");
 	SetTargetFPS(60);
 

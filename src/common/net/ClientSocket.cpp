@@ -37,7 +37,7 @@ namespace net {
 		return channel->read();
 	}
 
-	void ClientSocket::write(std::string data) {
+	void ClientSocket::write(char* data) {
 		channel->write(data);
 	}
 

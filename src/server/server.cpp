@@ -3,6 +3,8 @@
 #include "../common/net/ServerSocket.hpp"
 #include <fmt/core.h>
 #include <iostream>
+#include "../common/net/packets/move.hpp"
+#include "../common/net/serialization.hpp"
 
 #define SCREEN_WIDTH  800.0
 #define SCREEN_HEIGHT 450.0
@@ -34,7 +36,13 @@ int main() {
 	SetTargetFPS(60);
 
 	events.on<events::server::DataReceived>([](auto &event) {
-		std::cout << fmt::format("Data received: {}", event.buffer) << std::endl;
+		auto type = net::get_packet_type(event.buffer);
+		switch (type) {
+			case packets::Type::MOVE: {
+				auto move = net::deserialize<packets::move>(event.buffer);
+				std::cout << fmt::format("Move packet received: {} {}", move.x, move.y) << std::endl;
+			}
+		}
 	});
 
 	events.on<events::server::Connected>([](auto &event) {

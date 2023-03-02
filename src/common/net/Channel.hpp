@@ -31,13 +31,10 @@ namespace net {
 			return bytes;
 		}
 
-		void write(std::string data) {
-			printf("Writing %s\n", data.c_str());
+		void write(char*data) {
+			auto buffer_length = sizeof(data);
 
-			auto buffer = data.c_str();
-			auto buffer_length = data.length();
-
-			if (SSL_write(ssl, buffer, buffer_length) <= 0) {
+			if (SSL_write(ssl, data, buffer_length) <= 0) {
 				printf("Server closed connection\n");
 				ERR_print_errors_fp(stderr);
 			}

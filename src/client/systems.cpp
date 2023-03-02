@@ -2,6 +2,8 @@
 #include "components.hpp"
 #include "config.hpp"
 #include "scenes/state_machine.hpp"
+#include "../common/net/packets/move.hpp"
+#include "../common/net/serialization.hpp"
 
 void setup(entt::registry &registry) {
 	const auto entity = registry.create();
@@ -59,24 +61,24 @@ void controls(entt::registry &registry, resources::ResourceHolder &resource_hold
 		return;
 	}
 
-	auto view = registry.view<Position>();
+	if (IsKeyPressed(KEY_D)) {
+		packets::move packet{1, 0};
+		char *serialized = net::serialize(packets::Type::MOVE, packet);
+		client->write(serialized);
+	} else if (IsKeyPressed(KEY_A)) {
+		packets::move packet{-1, 0};
+		char *serialized = net::serialize(packets::Type::MOVE, packet);
+		client->write(serialized);
+	}
 
-	for (auto [entity, position]: view.each()) {
-		if (IsKeyPressed(KEY_D)) {
-			position.x += 1;
-			client->write("Pressing D");
-		} else if (IsKeyPressed(KEY_A)) {
-			position.x -= 1;
-			client->write("Pressing A");
-		}
-
-		if (IsKeyPressed(KEY_W)) {
-			position.y -= 1;
-			client->write("Pressing W");
-		} else if (IsKeyPressed(KEY_S)) {
-			position.y += 1;
-			client->write("Pressing S");
-		}
+	if (IsKeyPressed(KEY_W)) {
+		packets::move packet{0, -1};
+		char *serialized = net::serialize(packets::Type::MOVE, packet);
+		client->write(serialized);
+	} else if (IsKeyPressed(KEY_S)) {
+		packets::move packet{0, 1};
+		char *serialized = net::serialize(packets::Type::MOVE, packet);
+		client->write(serialized);
 	}
 }
 

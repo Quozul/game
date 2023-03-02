@@ -42,7 +42,6 @@ namespace scene {
 
 			if (socket->connected) {
 				socket->start_loop();
-				socket->write("Hello World!\n");
 				resource_holder.add_ptr<net::ClientSocket>(socket);
 			}
 			std::cout << "transition to game" << std::endl;

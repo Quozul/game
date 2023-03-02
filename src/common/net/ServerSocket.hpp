@@ -7,7 +7,6 @@
 #include "BaseSocket.hpp"
 #include "network.hpp"
 #include "Channel.hpp"
-#include "../events/generic_event.hpp"
 #include "../events/server_events.hpp"
 #include "../Queue.hpp"
 #include "../events/EventLoop.hpp"

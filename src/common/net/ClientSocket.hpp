@@ -25,7 +25,7 @@ namespace net {
 
 		explicit ClientSocket(const std::string &rem_server_ip);
 
-		void write(std::string data);
+		void write(char* data);
 
 		bool read();
 
