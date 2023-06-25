@@ -11,14 +11,12 @@
 #include "../common/net/serialization.hpp"
 
 int main() {
-    std::cout << std::type_index(typeid(packets::move)).hash_code() << std::endl;
+	entt::registry registry;
+	resources::ResourceHolder resource_holder;
+	events::EventLoop events(&resource_holder);
+
 	InitWindow(config::SCREEN_WIDTH, config::SCREEN_HEIGHT, "Window title");
 	SetTargetFPS(60);
-
-	resources::ResourceHolder resource_holder;
-
-	entt::registry registry;
-	events::EventLoop events(&resource_holder);
 
 	events.on<events::client::DataReceived>([](auto &event, auto &resources) {
 		auto type = packets::get_packet_type(event.buffer);

@@ -31,10 +31,14 @@ namespace state {
 
 		template<typename Event>
 		void handle(const Event &event) {
-			auto passEventToState = [this, &event](auto statePtr) {
+			auto passEventToState = [&event, this](auto statePtr) {
 				statePtr->handle(event, *registry, *resource_holder).execute(*this);
 			};
 			std::visit(passEventToState, current_state);
+		}
+
+		~StateMachine() {
+			std::cout << "StateMachine destroyed" << std::endl;
 		}
 
 	private:

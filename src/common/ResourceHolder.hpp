@@ -33,6 +33,10 @@ namespace resources {
 			return resources.count(std::type_index(typeid(T))) != 0;
 		}
 
+		~ResourceHolder() {
+			std::cout << "ResourceHolder destroyed" << std::endl;
+		}
+
 	private:
 		std::unordered_map<std::type_index, void*> resources;
 	};

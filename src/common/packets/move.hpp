@@ -14,8 +14,8 @@ namespace packets {
 
 	struct position {
 		int id;
-		int x;
-		int y;
+		float x;
+		float y;
 		float vx;
 		float vy;
 	};

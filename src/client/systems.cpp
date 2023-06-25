@@ -46,11 +46,11 @@ using SceneManager = state::StateMachine<scene::MenuState, scene::GameState>;
 void tick_forms(entt::registry &registry, resources::ResourceHolder &resource_holder) {
 	auto view = registry.view<Input, Button, Form>();
 
-	auto manager = resource_holder.get<SceneManager>();
+	auto manager = resource_holder.get_ptr<SceneManager>();
 
 	for (auto [entity, input, button]: view.each()) {
 		if (GuiButton(button.rectangle, button.text.c_str())) {
-			manager.handle(scene::PlayEvent{input.text});
+			manager->handle(scene::PlayEvent{input.text});
 		}
 	}
 }

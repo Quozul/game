@@ -10,6 +10,10 @@
 #define SCREEN_WIDTH  800.0
 #define SCREEN_HEIGHT 450.0
 
+struct RigidBody {
+	b2Body *body;
+};
+
 void text_drawing(entt::registry &registry) {
 	auto view = registry.view<net::Channel>();
 
@@ -28,9 +32,23 @@ void text_drawing(entt::registry &registry) {
 	}
 }
 
-struct RigidBody {
-	b2Body *body;
-};
+void tick_positions(entt::registry &registry) {
+	auto view = registry.view<RigidBody, net::Channel>();
+	for (auto [entity, rigid_body, channel]: view.each()) {
+		auto position = rigid_body.body->GetPosition();
+		auto velocity = rigid_body.body->GetLinearVelocity();
+		auto packet = packets::position{
+			channel.fd,
+			position.x,
+			position.y,
+			velocity.x,
+			velocity.y,
+		};
+		auto serialized = net::serialize(packets::Type::POSITION, packet);
+		channel.write(serialized);
+		std::cout << fmt::format("Sent position packet: {} {}", position.x, position.y) << std::endl;
+	}
+}
 
 int main() {
 	entt::registry registry;
@@ -54,6 +72,10 @@ int main() {
 		switch (type) {
 			case packets::Type::MOVE: {
 				auto move = net::deserialize<packets::move>(event.buffer);
+				entt::registry* registry = resources.template get_ptr<entt::registry>();
+				RigidBody rigid_body = registry->get<RigidBody>(event.entity);
+				b2Vec2 force(move.x, move.y);
+				rigid_body.body->ApplyForceToCenter(force, true);
 				std::cout << fmt::format("Move packet received: {} {}", move.x, move.y) << std::endl;
 				break;
 			}
@@ -91,6 +113,7 @@ int main() {
 		ClearBackground(RAYWHITE);
 
 		text_drawing(registry);
+		tick_positions(registry);
 
 		EndDrawing();
 	}
