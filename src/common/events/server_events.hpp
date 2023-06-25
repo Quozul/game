@@ -4,7 +4,6 @@
 namespace events::server {
 		struct Connected {
 			entt::entity entity;
-			int fd;
 		};
 
 		struct DataReceived {

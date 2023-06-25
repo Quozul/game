@@ -1,8 +1,10 @@
 #include "ClientSocket.hpp"
+#include "../events/client_events.hpp"
 
 namespace net {
 
 	ClientSocket::~ClientSocket() {
+		this->events->fire(events::client::Disconnected{});
 		std::cout << "Client shutting down..." << std::endl;
 		/* Close up */
 		if (ssl != nullptr) {
@@ -30,6 +32,11 @@ namespace net {
 
 		if (FD_ISSET(listen_sd, &master_set)) {
 			channel->read();
+
+			this->events->fire(events::client::DataReceived{
+				channel->getBuffer(),
+				channel->getBytes(),
+			});
 		}
 	}
 
@@ -41,9 +48,10 @@ namespace net {
 		channel->write(data);
 	}
 
-	ClientSocket::ClientSocket(const std::string &rem_server_ip) : BaseSocket() {
+	ClientSocket::ClientSocket(const std::string &rem_server_ip, events::EventLoop &events) : BaseSocket() {
 		init_ssl();
 		auto hostname = rem_server_ip.c_str();
+		this->events = &events;
 
 		/* Set up connect hostname */
 		addr.sin_family = AF_INET;
@@ -77,6 +85,7 @@ namespace net {
 		}
 
 		channel = new Channel{listen_sd, ssl};
+		this->events->fire(events::client::Connected{});
 
 		connected = true;
 	}

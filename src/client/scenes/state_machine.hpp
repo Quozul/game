@@ -37,7 +37,8 @@ namespace scene {
 
 			setup(registry);
 
-			auto* socket = new net::ClientSocket(event.hostname);
+			auto events = resource_holder.get<events::EventLoop>();
+			auto* socket = new net::ClientSocket(event.hostname, events);
 			std::cout << "Connecting to: '" << event.hostname << "'" << std::endl;
 
 			if (socket->connected) {

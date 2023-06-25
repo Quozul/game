@@ -2,7 +2,7 @@
 #include "components.hpp"
 #include "config.hpp"
 #include "scenes/state_machine.hpp"
-#include "../common/net/packets/move.hpp"
+#include "../common/packets/move.hpp"
 #include "../common/net/serialization.hpp"
 
 void setup(entt::registry &registry) {

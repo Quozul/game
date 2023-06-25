@@ -17,7 +17,6 @@ namespace net {
 	class ServerSocket : private BaseSocket {
 	private:
 		entt::registry *registry;
-		events::EventLoop *events;
 
 		void accept_connection();
 

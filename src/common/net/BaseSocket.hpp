@@ -12,6 +12,7 @@
 #include <cstring>
 #include <openssl/types.h>
 #include "network.hpp"
+#include "../events/EventLoop.hpp"
 
 namespace net {
 
@@ -24,8 +25,8 @@ namespace net {
 		fd_set master_set, working_set;
 		SSL_CTX *ssl_ctx = nullptr;
 		unsigned int addr_len = sizeof(addr);
+		events::EventLoop *events;
 
-	protected:
 		void set_non_blocking() {
 			rc = ioctl(listen_sd, FIONBIO, (char *) &on);
 			if (rc < 0) {

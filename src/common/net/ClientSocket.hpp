@@ -15,7 +15,7 @@
 
 namespace net {
 
-	class ClientSocket: private BaseSocket {
+	class ClientSocket : private BaseSocket {
 	private:
 		SSL *ssl = nullptr;
 		net::Channel *channel;
@@ -23,9 +23,9 @@ namespace net {
 	public:
 		bool connected = false;
 
-		explicit ClientSocket(const std::string &rem_server_ip);
+		explicit ClientSocket(const std::string &rem_server_ip, events::EventLoop &events);
 
-		void write(char* data);
+		void write(char *data);
 
 		bool read();
 

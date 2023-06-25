@@ -3,7 +3,8 @@
 #include "../common/net/ServerSocket.hpp"
 #include <fmt/core.h>
 #include <iostream>
-#include "../common/net/packets/move.hpp"
+#include <box2d/box2d.h>
+#include "../common/packets/move.hpp"
 #include "../common/net/serialization.hpp"
 
 #define SCREEN_WIDTH  800.0
@@ -27,29 +28,57 @@ void text_drawing(entt::registry &registry) {
 	}
 }
 
+struct RigidBody {
+	b2Body *body;
+};
+
 int main() {
 	entt::registry registry;
-	events::EventLoop events;
+	resources::ResourceHolder resource_holder;
+	events::EventLoop events(&resource_holder);
 	net::ServerSocket socket{registry, events};
+
+	b2Vec2 gravity(0.0f, 0.0f);
+	b2World world(gravity);
+
+	resource_holder.add(events);
+	resource_holder.add(world);
+	resource_holder.add_ptr(&registry);
+	resource_holder.add(socket);
 
 	InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Server");
 	SetTargetFPS(60);
 
-	events.on<events::server::DataReceived>([](auto &event) {
-		auto type = net::get_packet_type(event.buffer);
+	events.on<events::server::DataReceived>([](auto &event, auto &resources) {
+		auto type = packets::get_packet_type(event.buffer);
 		switch (type) {
 			case packets::Type::MOVE: {
 				auto move = net::deserialize<packets::move>(event.buffer);
 				std::cout << fmt::format("Move packet received: {} {}", move.x, move.y) << std::endl;
+				break;
+			}
+			default: {
+				break;
 			}
 		}
 	});
 
-	events.on<events::server::Connected>([](auto &event) {
-		std::cout << fmt::format("New client connected: {}", event.fd) << std::endl;
+	events.on<events::server::Connected>([](auto &event, auto &resources) {
+		auto world = resources.template get<b2World>();
+		auto registry = resources.template get_ptr<entt::registry>();
+		net::Channel channel = registry->template get<net::Channel>(event.entity);
+		std::cout << fmt::format("New client connected: {}", channel.fd) << std::endl;
+		b2BodyDef bodyDef;
+		bodyDef.type = b2_dynamicBody;
+		bodyDef.position.Set(0.0f, 4.0f);
+		b2Body *body = world.CreateBody(&bodyDef);
+		registry->template emplace<RigidBody>(event.entity, body);
+		auto packet = packets::spawn{channel.fd};
+		auto serialized = net::serialize(packets::Type::SPAWN, packet);
+		channel.write(serialized);
 	});
 
-	events.on<events::server::Disconnected>([](auto &event) {
+	events.on<events::server::Disconnected>([](auto &event, auto &resources) {
 		std::cout << fmt::format("Client disconnected: {}", event.fd) << std::endl;
 	});
 

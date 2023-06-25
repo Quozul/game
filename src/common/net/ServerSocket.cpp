@@ -31,7 +31,7 @@ namespace net {
 			auto entity = registry->create();
 			registry->emplace<net::Channel>(entity, new_sd, ssl);
 
-			events->fire(events::server::Connected{entity, new_sd});
+			events->fire(events::server::Connected{entity});
 		} while (new_sd != -1);
 	}
 

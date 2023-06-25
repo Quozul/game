@@ -4,8 +4,12 @@
 namespace packets {
 
 	enum Type {
+		SPAWN,
 		MOVE,
+		POSITION,
 	};
+
+	Type get_packet_type(char *data);
 
 }
 
