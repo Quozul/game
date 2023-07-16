@@ -1,4 +1,5 @@
 #![feature(async_closure)]
+#![windows_subsystem = "windows"]
 
 use crate::camera_follow::camera_follow;
 use bevy::prelude::*;
