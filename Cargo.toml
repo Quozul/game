@@ -11,11 +11,26 @@ opt-level = 1
 [profile.dev.package."*"]
 opt-level = 3
 
+[lib]
+name = "shared"
+path = "src/shared/mod.rs"
+
+[[bin]]
+name = "server"
+path = "src/server/main.rs"
+
+[[bin]]
+name = "client"
+path = "src/client/main.rs"
+
 [dependencies]
 bevy = { version = "0.11", features = ["dynamic_linking"] }
 bevy_quinnet = "0.5.0"
+bevy_rapier2d = "0.22.0"
+ciborium = "0.2.1"
 futures-lite = "1.13.0"
 quinn = "0.10.1"
 rcgen = "0.11.1"
 rustls = "0.21.5"
+serde = { version = "1.0.171", features = ["derive"] }
 tokio = "1.29.1"
