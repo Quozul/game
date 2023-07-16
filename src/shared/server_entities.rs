@@ -1,19 +1,32 @@
-use bevy::prelude::Resource;
+use bevy::prelude::{Component, Resource};
 
-#[derive(Resource)]
-pub struct ServerEntityId {
+#[derive(Component)]
+pub struct ServerStaticEntityComp {
     id: u64,
 }
 
-impl Default for ServerEntityId {
-    fn default() -> Self {
-        ServerEntityId { id: 0 }
+#[derive(Resource)]
+pub struct StaticServerEntity {
+    id: u64,
+}
+
+impl StaticServerEntity {
+    pub fn next(&mut self) -> ServerStaticEntityComp {
+        let new_entity = ServerStaticEntityComp { id: self.id };
+
+        self.id += 1;
+
+        new_entity
     }
 }
 
-impl ServerEntityId {
-    pub(crate) fn next_id(&mut self) -> u64 {
-        self.id += 1;
-        self.id
+impl Default for StaticServerEntity {
+    fn default() -> Self {
+        StaticServerEntity { id: 0 }
     }
+}
+
+#[derive(Component)]
+pub struct NetworkServerEntity {
+    pub(crate) client_id: u64,
 }
