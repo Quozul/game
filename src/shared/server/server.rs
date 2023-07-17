@@ -8,11 +8,12 @@ use bevy::prelude::*;
 use bevy_quinnet::server::certificate::CertificateRetrievalMode;
 use bevy_quinnet::server::{QuinnetServerPlugin, Server, ServerConfiguration};
 use bevy_rapier2d::prelude::{
-    Collider, KinematicCharacterController, NoUserData, RapierConfiguration, RapierPhysicsPlugin,
-    RigidBody, TimestepMode, Vect,
+    Collider, NoUserData, RapierConfiguration, RapierPhysicsPlugin, RigidBody, TimestepMode, Vect,
 };
 
 use crate::messages::{ClientMessage, ServerMessage};
+use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
+use crate::server::message_handlers::{handle_client_connected, handle_client_move};
 use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
 
 pub fn start_server_app() {
@@ -34,7 +35,10 @@ pub fn start_server_app() {
         })
         .insert_resource(FixedTime::new_from_secs(FIXED_TIMESTEP))
         .insert_resource(StaticServerEntity::default())
+        .add_event::<ClientConnectedEvent>()
+        .add_event::<ClientMoveEvent>()
         .add_systems(PostStartup, (start_server, spawn_floor))
+        .add_systems(Update, (handle_client_connected, handle_client_move))
         .add_systems(
             FixedUpdate,
             (handle_client_messages, send_positions, gravity),
@@ -87,77 +91,22 @@ pub fn send_positions(
 
 pub fn handle_client_messages(
     mut server: ResMut<Server>,
-    mut commands: Commands,
-    mut query: Query<(
-        &NetworkServerEntity,
-        &mut KinematicCharacterController,
-        &Transform,
-    )>,
+    mut client_connected_writer: EventWriter<ClientConnectedEvent>,
+    mut client_move_writer: EventWriter<ClientMoveEvent>,
 ) {
     if let Some(endpoint) = server.get_endpoint_mut() {
-        for connected_client_id in endpoint.clients() {
-            while let Some(message) =
-                endpoint.try_receive_message_from::<ClientMessage>(connected_client_id)
+        for client_id in endpoint.clients() {
+            while let Some(message) = endpoint.try_receive_message_from::<ClientMessage>(client_id)
             {
                 match message {
                     ClientMessage::Connected => {
-                        let x = 50.0;
-                        let y = 50.0;
-
-                        commands
-                            .spawn(RigidBody::KinematicPositionBased)
-                            .insert(Collider::cuboid(37.0 / 2.0, 37.0 / 2.0))
-                            .insert(KinematicCharacterController::default())
-                            .insert(TransformBundle::from(Transform::from_xyz(x, y, 0.0)))
-                            .insert(NetworkServerEntity {
-                                client_id: connected_client_id,
-                            });
-
-                        endpoint
-                            .send_message(
-                                connected_client_id,
-                                ServerMessage::YourId {
-                                    id: connected_client_id,
-                                },
-                            )
-                            .unwrap();
-
-                        // Send all players to the new player
-                        for (server_entity, _, transform) in &mut query {
-                            endpoint
-                                .send_message(
-                                    connected_client_id,
-                                    ServerMessage::Spawn {
-                                        id: server_entity.client_id,
-                                        x: transform.translation.x,
-                                        y: transform.translation.y,
-                                    },
-                                )
-                                .unwrap();
-                        }
-
-                        // Send the new player to all players
-                        for client_id in endpoint.clients() {
-                            endpoint
-                                .send_message(
-                                    client_id,
-                                    ServerMessage::Spawn {
-                                        id: connected_client_id,
-                                        x,
-                                        y,
-                                    },
-                                )
-                                .unwrap();
-                        }
+                        client_connected_writer.send(ClientConnectedEvent { client_id });
                     }
                     ClientMessage::Move { direction } => {
-                        for (server_entity, mut controller, _) in &mut query {
-                            if server_entity.client_id == connected_client_id {
-                                let vel = direction.to_vec();
-                                controller.translation = Some(vel);
-                                break;
-                            }
-                        }
+                        client_move_writer.send(ClientMoveEvent {
+                            client_id,
+                            direction,
+                        });
                     }
                     _ => {
                         println!("Received unknown message")

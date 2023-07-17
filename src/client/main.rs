@@ -10,7 +10,7 @@ use bevy_rapier2d::prelude::{
     Vect,
 };
 use shared::gravity::gravity;
-use shared::server::spawn_floor;
+use shared::server::server::spawn_floor;
 use shared::server_entities::StaticServerEntity;
 use shared::FIXED_TIMESTEP;
 

@@ -13,7 +13,7 @@ use bevy_rapier2d::prelude::{Collider, RigidBody};
 
 use shared::direction::Direction;
 use shared::messages::{ClientMessage, ServerMessage};
-use shared::server::start_server_app;
+use shared::server::server::start_server_app;
 
 use crate::camera_follow::FollowSubject;
 use crate::menu::{JoinServerButton, JoinServerIp, SinglePlayerButton};
