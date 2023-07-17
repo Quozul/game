@@ -11,10 +11,10 @@ use bevy_quinnet::shared::ClientId;
 use bevy_rapier2d::control::KinematicCharacterController;
 use bevy_rapier2d::prelude::{Collider, RigidBody};
 
-use shared::direction::Direction;
 use shared::messages::{ClientMessage, ServerMessage};
 use shared::server::server::start_server_app;
 
+use crate::animation::AnimationBundle;
 use crate::camera_follow::FollowSubject;
 use crate::menu::{JoinServerButton, JoinServerIp, SinglePlayerButton};
 use crate::{AppState, MyId};
@@ -105,52 +105,20 @@ pub fn spawn_player(
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     commands
-        .spawn(RigidBody::KinematicPositionBased)
+        .spawn(RigidBody::KinematicVelocityBased)
         .insert(Collider::cuboid(37.0 / 2.0, 37.0 / 2.0))
-        .insert(KinematicCharacterController::default())
+        .insert(KinematicCharacterController {
+            autostep: None,
+            ..default()
+        })
         .insert(TransformBundle::from(Transform::from_xyz(x, y, 0.0)))
         .insert(ClientEntity { id })
         .insert(SpriteSheetBundle {
             texture_atlas: texture_atlas_handle,
             ..default()
         })
+        .insert(AnimationBundle::default())
         .id()
-}
-
-pub fn controls(
-    my_id: Res<MyId>,
-    keys: Res<Input<KeyCode>>,
-    mut client: ResMut<Client>,
-    mut query: Query<(&ClientEntity, &mut KinematicCharacterController)>,
-) {
-    if let Some(connection) = client.get_connection_mut() {
-        let direction = if keys.pressed(KeyCode::Z) {
-            Some(Direction::Up)
-        } else if keys.pressed(KeyCode::S) {
-            Some(Direction::Down)
-        } else if keys.pressed(KeyCode::D) {
-            Some(Direction::Right)
-        } else if keys.pressed(KeyCode::Q) {
-            Some(Direction::Left)
-        } else {
-            None
-        };
-
-        if let Some(direction) = direction {
-            let vec = direction.to_vec();
-
-            connection
-                .send_message(ClientMessage::Move { direction })
-                .unwrap();
-
-            for (client_entity, mut controller) in &mut query {
-                if client_entity.id == my_id.id {
-                    controller.translation = Some(vec);
-                    break;
-                }
-            }
-        }
-    }
 }
 
 pub(crate) fn text_input(

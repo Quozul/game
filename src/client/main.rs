@@ -1,7 +1,6 @@
 #![feature(async_closure)]
 #![windows_subsystem = "windows"]
 
-use crate::camera_follow::camera_follow;
 use bevy::prelude::*;
 use bevy_quinnet::client::QuinnetClientPlugin;
 use bevy_quinnet::shared::ClientId;
@@ -9,18 +8,25 @@ use bevy_rapier2d::prelude::{
     NoUserData, RapierConfiguration, RapierDebugRenderPlugin, RapierPhysicsPlugin, TimestepMode,
     Vect,
 };
+use leafwing_input_manager::prelude::InputManagerPlugin;
+
 use shared::gravity::gravity;
 use shared::server::server::spawn_floor;
 use shared::server_entities::StaticServerEntity;
 use shared::FIXED_TIMESTEP;
 
+use crate::animation::animate;
+use crate::camera_follow::camera_follow;
 use crate::client::{
-    controls, handle_server_messages, setup_in_game, start_client, start_server, text_input,
+    handle_server_messages, setup_in_game, start_client, start_server, text_input,
 };
+use crate::controls::{add_controller_to_self_player, jump, Action};
 use crate::menu::{setup_menu, MenuItem};
 
+mod animation;
 mod camera_follow;
 mod client;
+mod controls;
 mod menu;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -44,6 +50,7 @@ fn main() {
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.0),
             RapierDebugRenderPlugin::default(),
         ))
+        .add_plugins(InputManagerPlugin::<Action>::default())
         .insert_resource(RapierConfiguration {
             gravity: Vect::new(0.0, -1.0),
             timestep_mode: TimestepMode::Fixed {
@@ -64,9 +71,17 @@ fn main() {
         .add_systems(OnEnter(AppState::InGame), (setup_in_game, spawn_floor))
         .add_systems(
             Update,
-            (start_client, start_server, camera_follow, text_input),
+            (
+                start_client,
+                start_server,
+                camera_follow,
+                text_input,
+                add_controller_to_self_player,
+                jump,
+                animate,
+            ),
         )
-        .add_systems(FixedUpdate, (controls, handle_server_messages, gravity))
+        .add_systems(FixedUpdate, (handle_server_messages, gravity))
         .run();
 }
 

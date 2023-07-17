@@ -15,7 +15,11 @@ pub fn camera_follow(
             let player = player_query.get(player);
 
             if let Ok(player_transform) = player {
-                transform.translation = player_transform.translation;
+                let dx = player_transform.translation.x - transform.translation.x;
+                let dy = player_transform.translation.y - transform.translation.y;
+
+                transform.translation.x += dx * 0.1;
+                transform.translation.y += dy * 0.1;
                 transform.translation.z = 999.0;
             }
         }
