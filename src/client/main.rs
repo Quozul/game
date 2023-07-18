@@ -20,7 +20,7 @@ use crate::camera_follow::camera_follow;
 use crate::client::{
     handle_server_messages, setup_in_game, start_client, start_server, text_input,
 };
-use crate::controls::{add_controller_to_self_player, jump, Action};
+use crate::controls::{add_controller_to_self_player, jump, update_animation, Action};
 use crate::menu::{setup_menu, MenuItem};
 
 mod animation;
@@ -52,7 +52,7 @@ fn main() {
         ))
         .add_plugins(InputManagerPlugin::<Action>::default())
         .insert_resource(RapierConfiguration {
-            gravity: Vect::new(0.0, -1.0),
+            gravity: Vect::ZERO,
             timestep_mode: TimestepMode::Fixed {
                 dt: FIXED_TIMESTEP,
                 substeps: 1,
@@ -78,10 +78,11 @@ fn main() {
                 text_input,
                 add_controller_to_self_player,
                 jump,
+                update_animation,
                 animate,
             ),
         )
-        .add_systems(FixedUpdate, (handle_server_messages, gravity))
+        .add_systems(FixedUpdate, (handle_server_messages))
         .run();
 }
 

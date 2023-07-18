@@ -21,6 +21,10 @@ pub enum ServerMessage {
     YourId {
         id: ClientId,
     },
+    Direction {
+        id: ClientId,
+        direction: Direction,
+    },
 }
 
 #[derive(Deserialize, Serialize)]

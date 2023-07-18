@@ -1,8 +1,6 @@
 use std::net::{IpAddr, Ipv4Addr};
 use std::time::Duration;
 
-use crate::gravity::gravity;
-use crate::FIXED_TIMESTEP;
 use bevy::app::ScheduleRunnerPlugin;
 use bevy::prelude::*;
 use bevy_quinnet::server::certificate::CertificateRetrievalMode;
@@ -13,8 +11,9 @@ use bevy_rapier2d::prelude::{
 
 use crate::messages::{ClientMessage, ServerMessage};
 use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
-use crate::server::message_handlers::{handle_client_connected, handle_client_move};
+use crate::server::message_handlers::{handle_client_connected, handle_client_move, handle_move};
 use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
+use crate::FIXED_TIMESTEP;
 
 pub fn start_server_app() {
     App::new()
@@ -26,7 +25,7 @@ pub fn start_server_app() {
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.0),
         ))
         .insert_resource(RapierConfiguration {
-            gravity: Vect::new(0.0, -1.0),
+            gravity: Vect::ZERO,
             timestep_mode: TimestepMode::Fixed {
                 dt: FIXED_TIMESTEP,
                 substeps: 1,
@@ -38,11 +37,11 @@ pub fn start_server_app() {
         .add_event::<ClientConnectedEvent>()
         .add_event::<ClientMoveEvent>()
         .add_systems(PostStartup, (start_server, spawn_floor))
-        .add_systems(Update, (handle_client_connected, handle_client_move))
         .add_systems(
-            FixedUpdate,
-            (handle_client_messages, send_positions, gravity),
+            Update,
+            (handle_client_connected, handle_client_move, handle_move),
         )
+        .add_systems(FixedUpdate, (handle_client_messages, send_positions))
         .run();
 }
 

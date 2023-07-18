@@ -1,10 +1,8 @@
 use bevy::prelude::*;
 use bevy_quinnet::server::Server;
-use bevy_rapier2d::prelude::{
-    Collider, KinematicCharacterController, KinematicCharacterControllerOutput, RigidBody,
-};
+use bevy_rapier2d::prelude::{Collider, KinematicCharacterController, RigidBody};
 
-use crate::direction::Direction;
+use crate::direction::{Direction, FacingDirection, Move};
 use crate::gravity::apply_force;
 use crate::messages::ServerMessage;
 use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
@@ -24,7 +22,7 @@ pub(crate) fn handle_client_connected(
             // Spawn the player
             commands
                 .spawn(RigidBody::KinematicVelocityBased)
-                .insert(Collider::cuboid(37.0 / 2.0, 37.0 / 2.0))
+                .insert(Collider::cuboid(8.0, 8.0))
                 .insert(KinematicCharacterController {
                     autostep: None,
                     ..default()
@@ -32,6 +30,11 @@ pub(crate) fn handle_client_connected(
                 .insert(TransformBundle::from(Transform::from_xyz(x, y, 0.0)))
                 .insert(NetworkServerEntity {
                     client_id: event.client_id,
+                })
+                .insert(Move {
+                    direction: Direction::Idling {
+                        direction: FacingDirection::Down,
+                    },
                 });
 
             endpoint
@@ -74,23 +77,38 @@ pub(crate) fn handle_client_connected(
     }
 }
 
+pub(crate) fn handle_move(mut query: Query<(&mut KinematicCharacterController, &Move)>) {
+    for (mut controller, move_component) in &mut query {
+        let vel = move_component.direction.to_vec();
+        apply_force(&mut controller, vel);
+    }
+}
+
 pub(crate) fn handle_client_move(
+    mut server: ResMut<Server>,
     mut client_connected_reader: EventReader<ClientMoveEvent>,
-    mut query: Query<(
-        &NetworkServerEntity,
-        &mut KinematicCharacterController,
-        &KinematicCharacterControllerOutput,
-    )>,
+    mut query: Query<(&NetworkServerEntity, &mut Move)>,
 ) {
     for event in client_connected_reader.iter() {
-        for (server_entity, mut controller, output) in &mut query {
-            if server_entity.client_id == event.client_id
-                && (event.direction == Direction::Jump && output.grounded
-                    || event.direction != Direction::Jump)
-            {
-                let vel = event.direction.to_vec();
-                apply_force(&mut controller, vel);
+        for (server_entity, mut move_component) in &mut query {
+            if server_entity.client_id == event.client_id {
+                move_component.direction = event.direction;
                 break;
+            }
+        }
+
+        if let Some(endpoint) = server.get_endpoint_mut() {
+            // Send the direction to all players
+            for client_id in endpoint.clients() {
+                endpoint
+                    .send_message(
+                        client_id,
+                        ServerMessage::Direction {
+                            id: event.client_id,
+                            direction: event.direction,
+                        },
+                    )
+                    .unwrap();
             }
         }
     }

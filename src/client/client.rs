@@ -10,6 +10,7 @@ use bevy_quinnet::client::Client;
 use bevy_quinnet::shared::ClientId;
 use bevy_rapier2d::control::KinematicCharacterController;
 use bevy_rapier2d::prelude::{Collider, RigidBody};
+use shared::direction::{Direction, FacingDirection, Move};
 
 use shared::messages::{ClientMessage, ServerMessage};
 use shared::server::server::start_server_app;
@@ -101,12 +102,12 @@ pub fn spawn_player(
 ) -> Entity {
     let texture_handle = asset_server.load("characters/player.png");
     let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(50.0, 37.0), 7, 16, None, None);
+        TextureAtlas::from_grid(texture_handle, Vec2::new(48.0, 48.0), 6, 10, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     commands
         .spawn(RigidBody::KinematicVelocityBased)
-        .insert(Collider::cuboid(37.0 / 2.0, 37.0 / 2.0))
+        .insert(Collider::cuboid(8.0, 8.0))
         .insert(KinematicCharacterController {
             autostep: None,
             ..default()
@@ -118,6 +119,11 @@ pub fn spawn_player(
             ..default()
         })
         .insert(AnimationBundle::default())
+        .insert(Move {
+            direction: Direction::Idling {
+                direction: FacingDirection::Down,
+            },
+        })
         .id()
 }
 
@@ -150,7 +156,7 @@ pub fn handle_server_messages(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut client: ResMut<Client>,
-    mut query: Query<(Entity, &ClientEntity, &mut Transform)>,
+    mut query: Query<(Entity, &ClientEntity, &mut Transform, &mut Move)>,
     mut my_id: ResMut<MyId>,
 ) {
     if let Some(connection) = client.get_connection_mut() {
@@ -170,7 +176,7 @@ pub fn handle_server_messages(
                     translation,
                     rotation,
                 } => {
-                    for (_, client_entity, mut transform) in &mut query {
+                    for (_, client_entity, mut transform, _) in &mut query {
                         if client_entity.id == id {
                             transform.translation = translation;
                             transform.rotation = rotation;
@@ -182,10 +188,18 @@ pub fn handle_server_messages(
                     my_id.id = id;
                     println!("My id is {}", id);
 
-                    for (entity, client_entity, _) in &mut query {
+                    for (entity, client_entity, _, _) in &mut query {
                         if client_entity.id == id {
                             my_id.entity = Some(entity);
                             println!("Found my entity");
+                            break;
+                        }
+                    }
+                }
+                ServerMessage::Direction { id, direction } => {
+                    for (_, client_entity, _, mut move_component) in &mut query {
+                        if client_entity.id == id {
+                            move_component.direction = direction;
                             break;
                         }
                     }
