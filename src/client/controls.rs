@@ -94,7 +94,7 @@ pub(crate) fn update_animation(
     }
 }
 
-pub(crate) fn jump(
+pub(crate) fn controls(
     mut client: ResMut<Client>,
     mut query: Query<(
         &ActionState<Action>,
@@ -152,9 +152,7 @@ pub(crate) fn jump(
 
                 apply_force(&mut controller, vec);
 
-                connection
-                    .send_message(ClientMessage::Move { direction })
-                    .unwrap();
+                connection.try_send_message(ClientMessage::Move { direction });
             }
         }
     }

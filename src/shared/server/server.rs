@@ -41,7 +41,14 @@ pub fn start_server_app() {
             Update,
             (handle_client_connected, handle_client_move, handle_move),
         )
-        .add_systems(FixedUpdate, (handle_client_messages, send_positions))
+        .add_systems(
+            FixedUpdate,
+            (
+                handle_disconnected_clients,
+                handle_client_messages,
+                send_positions,
+            ),
+        )
         .run();
 }
 
@@ -73,16 +80,14 @@ pub fn send_positions(
     if let Some(endpoint) = server.get_endpoint_mut() {
         for client_id in endpoint.clients() {
             for (server_entity, transform) in &query {
-                endpoint
-                    .send_message(
-                        client_id,
-                        ServerMessage::Position {
-                            id: server_entity.client_id,
-                            translation: transform.translation,
-                            rotation: transform.rotation,
-                        },
-                    )
-                    .unwrap();
+                endpoint.try_send_message(
+                    client_id,
+                    ServerMessage::Position {
+                        id: server_entity.client_id,
+                        translation: transform.translation,
+                        rotation: transform.rotation,
+                    },
+                );
             }
         }
     }
@@ -111,6 +116,24 @@ pub fn handle_client_messages(
                         println!("Received unknown message")
                     }
                 }
+            }
+        }
+    }
+}
+
+pub(crate) fn handle_disconnected_clients(
+    mut commands: Commands,
+    mut server: ResMut<Server>,
+    query: Query<(Entity, &NetworkServerEntity)>,
+) {
+    if let Some(endpoint) = server.get_endpoint_mut() {
+        for (entity, network_entity) in &query {
+            if !endpoint.clients().contains(&network_entity.client_id) {
+                commands.entity(entity).despawn();
+
+                endpoint.try_broadcast_message(ServerMessage::Despawn {
+                    id: network_entity.client_id,
+                })
             }
         }
     }

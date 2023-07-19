@@ -37,27 +37,17 @@ pub(crate) fn handle_client_connected(
                     },
                 });
 
-            endpoint
-                .send_message(
-                    event.client_id,
-                    ServerMessage::YourId {
-                        id: event.client_id,
-                    },
-                )
-                .unwrap();
-
             // Send all players to the new player
             for (server_entity, transform) in &mut query {
-                endpoint
-                    .send_message(
-                        event.client_id,
-                        ServerMessage::Spawn {
-                            id: server_entity.client_id,
-                            x: transform.translation.x,
-                            y: transform.translation.y,
-                        },
-                    )
-                    .unwrap();
+                endpoint.try_send_message(
+                    event.client_id,
+                    ServerMessage::Spawn {
+                        id: server_entity.client_id,
+                        x: transform.translation.x,
+                        y: transform.translation.y,
+                        you: event.client_id == server_entity.client_id,
+                    },
+                );
             }
 
             // Send the new player to all players
@@ -69,6 +59,7 @@ pub(crate) fn handle_client_connected(
                             id: event.client_id,
                             x,
                             y,
+                            you: event.client_id == client_id,
                         },
                     )
                     .unwrap();
@@ -100,15 +91,13 @@ pub(crate) fn handle_client_move(
         if let Some(endpoint) = server.get_endpoint_mut() {
             // Send the direction to all players
             for client_id in endpoint.clients() {
-                endpoint
-                    .send_message(
-                        client_id,
-                        ServerMessage::Direction {
-                            id: event.client_id,
-                            direction: event.direction,
-                        },
-                    )
-                    .unwrap();
+                endpoint.try_send_message(
+                    client_id,
+                    ServerMessage::Direction {
+                        id: event.client_id,
+                        direction: event.direction,
+                    },
+                );
             }
         }
     }

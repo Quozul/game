@@ -9,10 +9,10 @@ use bevy_quinnet::client::Client;
 use shared::messages::{ClientMessage, ServerMessage};
 
 use crate::camera_follow::FollowSubject;
+use crate::message_handlers::despawn_player::DespawnPlayerEvent;
 use crate::message_handlers::spawn_player::SpawnPlayerEvent;
-use crate::message_handlers::update_direction::UpdateDirection;
+use crate::message_handlers::update_direction::UpdateDirectionEvent;
 use crate::message_handlers::update_position::UpdatePositionEvent;
-use crate::message_handlers::update_your_id::UpdateYourId;
 use crate::AppState;
 
 pub fn join_server(next_state: &mut NextState<AppState>, client: &mut Client, server_ip: &str) {
@@ -35,8 +35,7 @@ pub fn join_server(next_state: &mut NextState<AppState>, client: &mut Client, se
 
         client
             .connection()
-            .send_message(ClientMessage::Connected)
-            .unwrap();
+            .try_send_message(ClientMessage::Connected);
     }
 }
 
@@ -45,6 +44,15 @@ pub(crate) fn on_connecting(mut next_state: ResMut<NextState<AppState>>, client:
         if connection.is_connected() {
             info!("Client is connected");
             next_state.set(AppState::InGame);
+        }
+    }
+}
+
+pub(crate) fn on_disconnected(mut next_state: ResMut<NextState<AppState>>, client: ResMut<Client>) {
+    if let Some(connection) = client.get_connection() {
+        if !connection.is_connected() {
+            info!("Client is disconnected");
+            next_state.set(AppState::Menu);
         }
     }
 }
@@ -63,15 +71,15 @@ pub(crate) fn handle_server_messages(
     mut client: ResMut<Client>,
     mut spawn_player_event_writer: EventWriter<SpawnPlayerEvent>,
     mut update_position_event_writer: EventWriter<UpdatePositionEvent>,
-    mut update_your_id_event_writer: EventWriter<UpdateYourId>,
-    mut update_direction_event_writer: EventWriter<UpdateDirection>,
+    mut update_direction_event_writer: EventWriter<UpdateDirectionEvent>,
+    mut despawn_event_writer: EventWriter<DespawnPlayerEvent>,
 ) {
     if let Some(connection) = client.get_connection_mut() {
         while let Ok(Some(message)) = connection.receive_message::<ServerMessage>() {
             match message {
                 // Match on your own message types ...
-                ServerMessage::Spawn { id, x, y } => {
-                    spawn_player_event_writer.send(SpawnPlayerEvent { id, x, y })
+                ServerMessage::Spawn { id, x, y, you } => {
+                    spawn_player_event_writer.send(SpawnPlayerEvent { id, x, y, you })
                 }
                 ServerMessage::Position {
                     id,
@@ -84,11 +92,11 @@ pub(crate) fn handle_server_messages(
                         rotation,
                     });
                 }
-                ServerMessage::YourId { id } => {
-                    update_your_id_event_writer.send(UpdateYourId { id });
-                }
                 ServerMessage::Direction { id, direction } => {
-                    update_direction_event_writer.send(UpdateDirection { id, direction });
+                    update_direction_event_writer.send(UpdateDirectionEvent { id, direction });
+                }
+                ServerMessage::Despawn { id } => {
+                    despawn_event_writer.send(DespawnPlayerEvent { id });
                 }
                 _ => {
                     println!("Received unknown message")

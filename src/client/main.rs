@@ -17,13 +17,15 @@ use shared::FIXED_TIMESTEP;
 
 use crate::animation::animate;
 use crate::camera_follow::camera_follow;
-use crate::client::{handle_server_messages, on_connecting, setup_in_game};
-use crate::controls::{add_controller_to_self_player, jump, update_animation, Action};
+use crate::client::{handle_server_messages, on_connecting, on_disconnected, setup_in_game};
+use crate::controls::{add_controller_to_self_player, controls, update_animation, Action};
 use crate::menu::{ui_example_system, UiState};
+use crate::message_handlers::despawn_player::{handle_player_despawn, DespawnPlayerEvent};
 use crate::message_handlers::spawn_player::{handle_player_spawn, SpawnPlayerEvent};
-use crate::message_handlers::update_direction::{handle_update_direction_event, UpdateDirection};
+use crate::message_handlers::update_direction::{
+    handle_update_direction_event, UpdateDirectionEvent,
+};
 use crate::message_handlers::update_position::{handle_update_position_event, UpdatePositionEvent};
-use crate::message_handlers::update_your_id::{handle_your_id_event, UpdateYourId};
 
 mod animation;
 mod camera_follow;
@@ -58,8 +60,8 @@ fn main() {
         .add_plugins(EguiPlugin)
         .add_event::<SpawnPlayerEvent>()
         .add_event::<UpdatePositionEvent>()
-        .add_event::<UpdateYourId>()
-        .add_event::<UpdateDirection>()
+        .add_event::<UpdateDirectionEvent>()
+        .add_event::<DespawnPlayerEvent>()
         .init_resource::<UiState>()
         .insert_resource(RapierConfiguration {
             gravity: Vect::ZERO,
@@ -77,20 +79,21 @@ fn main() {
         .insert_resource(StaticServerEntity::default())
         .add_state::<AppState>()
         .add_systems(OnEnter(AppState::InGame), (setup_in_game, spawn_floor))
-        .add_systems(Update, on_connecting.run_if(in_state(AppState::Connecting)))
         .add_systems(Update, ui_example_system.run_if(in_state(AppState::Menu)))
+        .add_systems(Update, on_connecting.run_if(in_state(AppState::Connecting)))
+        .add_systems(Update, on_disconnected.run_if(in_state(AppState::InGame)))
         .add_systems(
             Update,
             (
                 camera_follow,
                 add_controller_to_self_player,
-                jump,
+                controls,
                 update_animation,
                 animate,
+                handle_player_spawn,
                 handle_update_direction_event,
                 handle_update_position_event,
-                handle_your_id_event,
-                handle_player_spawn,
+                handle_player_despawn,
             ),
         )
         .add_systems(FixedUpdate, handle_server_messages)

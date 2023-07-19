@@ -10,6 +10,7 @@ pub enum ServerMessage {
     },
     Spawn {
         id: ClientId,
+        you: bool,
         x: f32,
         y: f32,
     },
@@ -18,13 +19,13 @@ pub enum ServerMessage {
         translation: Vec3,
         rotation: Quat,
     },
-    YourId {
-        id: ClientId,
-    },
     Direction {
         id: ClientId,
         direction: Direction,
     },
+    Despawn {
+        id: ClientId
+    }
 }
 
 #[derive(Deserialize, Serialize)]

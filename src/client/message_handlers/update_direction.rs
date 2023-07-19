@@ -5,14 +5,14 @@ use shared::direction::{Direction, Move};
 use shared::server_entities::NetworkServerEntity;
 
 #[derive(Event)]
-pub(crate) struct UpdateDirection {
+pub(crate) struct UpdateDirectionEvent {
     pub(crate) id: ClientId,
     pub(crate) direction: Direction,
 }
 
 pub(crate) fn handle_update_direction_event(
     mut query: Query<(&NetworkServerEntity, &mut Move)>,
-    mut event_reader: EventReader<UpdateDirection>,
+    mut event_reader: EventReader<UpdateDirectionEvent>,
 ) {
     for event in event_reader.iter() {
         for (client_entity, mut move_component) in &mut query {

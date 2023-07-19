@@ -11,6 +11,7 @@ pub(crate) struct SpawnPlayerEvent {
     pub(crate) id: ClientId,
     pub(crate) x: f32,
     pub(crate) y: f32,
+    pub(crate) you: bool,
 }
 
 pub(crate) fn handle_player_spawn(
@@ -51,7 +52,8 @@ pub(crate) fn handle_player_spawn(
             })
             .id();
 
-        if my_id.id == event.id {
+        if event.you {
+            my_id.id = event.id;
             my_id.entity = Some(entity);
         }
     }
