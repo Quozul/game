@@ -1,123 +1,46 @@
-use std::string::ToString;
+use std::thread;
 
 use bevy::prelude::*;
+use bevy_egui::{egui, EguiContexts};
+use bevy_quinnet::client::Client;
 
-#[derive(Component)]
-pub struct SinglePlayerButton;
+use shared::server::server::start_server_app;
 
-#[derive(Component)]
-pub struct JoinServerButton {
-    pub input: Entity,
+use crate::client::join_server;
+use crate::AppState;
+
+#[derive(Default, Resource)]
+pub struct UiState {
+    label: String,
 }
 
-#[derive(Component)]
-pub struct MenuItem;
+pub fn ui_example_system(
+    mut ui_state: ResMut<UiState>,
+    mut contexts: EguiContexts,
+    mut next_state: ResMut<NextState<AppState>>,
+    mut client: ResMut<Client>,
+) {
+    let ctx = contexts.ctx_mut();
 
-#[derive(Component)]
-pub struct JoinServerIp {
-    pub(crate) focus: bool,
-    pub(crate) ip: String,
-}
+    egui::CentralPanel::default().show(ctx, |ui| {
+        let clicked = ui.button("Start server").clicked();
 
-const DEFAULT_IP: &str = "127.0.0.1";
+        if clicked {
+            thread::spawn(|| {
+                start_server_app();
+            });
+            ui_state.label = "127.0.0.1".to_string()
+        }
 
-pub fn setup_menu(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
-        .spawn(Camera2dBundle::default())
-        .insert(Transform::default())
-        .insert(MenuItem);
+        ui.add_space(20.0);
 
-    commands
-        .spawn(NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-            ..default()
-        })
-        .insert(MenuItem)
-        .with_children(|parent| {
-            parent.spawn(
-                TextBundle::from_section(
-                    "A game",
-                    TextStyle {
-                        font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-                        font_size: 30.0,
-                        color: Color::WHITE,
-                    },
-                )
-                .with_style(Style {
-                    margin: UiRect::all(Val::Px(5.0)),
-                    ..default()
-                }),
-            );
+        ui.horizontal(|ui| {
+            ui.label("Server IP: ");
+            ui.text_edit_singleline(&mut ui_state.label);
 
-            parent
-                .spawn(ButtonBundle {
-                    style: Style {
-                        width: Val::Auto,
-                        height: Val::Auto,
-                        padding: UiRect::all(Val::Px(5.0)),
-                        margin: UiRect::vertical(Val::Px(5.0)),
-                        ..default()
-                    },
-                    ..default()
-                })
-                .insert(SinglePlayerButton)
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Single player",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-                            font_size: 30.0,
-                            color: Color::BLACK,
-                        },
-                    ));
-                });
-
-            let input = parent
-                .spawn(
-                    TextBundle::from_section(
-                        DEFAULT_IP,
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Medium.ttf"),
-                            font_size: 1000.0,
-                            color: Color::WHITE,
-                        },
-                    )
-                    .with_text_alignment(TextAlignment::Center),
-                )
-                .insert(JoinServerIp {
-                    ip: DEFAULT_IP.to_string(),
-                    focus: false,
-                })
-                .id();
-
-            parent
-                .spawn(ButtonBundle {
-                    style: Style {
-                        width: Val::Auto,
-                        height: Val::Auto,
-                        padding: UiRect::all(Val::Px(5.0)),
-                        margin: UiRect::vertical(Val::Px(5.0)),
-                        ..default()
-                    },
-                    ..default()
-                })
-                .insert(JoinServerButton { input })
-                .with_children(|parent| {
-                    parent.spawn(TextBundle::from_section(
-                        "Join server",
-                        TextStyle {
-                            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-                            font_size: 30.0,
-                            color: Color::BLACK,
-                        },
-                    ));
-                });
+            if ui.button("Connect").clicked() {
+                join_server(&mut next_state, &mut client, ui_state.label.as_str());
+            }
         });
+    });
 }
