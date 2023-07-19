@@ -18,7 +18,7 @@ use shared::FIXED_TIMESTEP;
 use crate::animation::animate;
 use crate::camera_follow::camera_follow;
 use crate::client::{handle_server_messages, on_connecting, on_disconnected, setup_in_game};
-use crate::controls::{add_controller_to_self_player, controls, update_animation, Action};
+use crate::controls::{add_controller_to_self_player, attack, controls, update_animation, Action};
 use crate::menu::{ui_example_system, UiState};
 use crate::message_handlers::despawn_player::{handle_player_despawn, DespawnPlayerEvent};
 use crate::message_handlers::spawn_player::{handle_player_spawn, SpawnPlayerEvent};
@@ -87,6 +87,7 @@ fn main() {
             (
                 camera_follow,
                 add_controller_to_self_player,
+                attack,
                 controls,
                 update_animation,
                 animate,

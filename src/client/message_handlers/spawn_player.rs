@@ -1,4 +1,5 @@
 use crate::animation::AnimationBundle;
+use crate::controls::AttackState;
 use crate::MyId;
 use bevy::prelude::*;
 use bevy_quinnet::shared::ClientId;
@@ -50,6 +51,7 @@ pub(crate) fn handle_player_spawn(
                     direction: FacingDirection::Down,
                 },
             })
+            .insert(AttackState::default())
             .id();
 
         if event.you {

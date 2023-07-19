@@ -20,6 +20,23 @@ pub(crate) enum Action {
     Attacking,
 }
 
+#[derive(Component)]
+pub(crate) struct AttackState {
+    is_attacking: bool,
+    elapsed: f32,
+}
+
+impl Default for AttackState {
+    fn default() -> Self {
+        AttackState {
+            is_attacking: false,
+            elapsed: 0.0,
+        }
+    }
+}
+
+const ATTACK_DURATION: f32 = 1.0 / 10.0 * 4.0;
+
 pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<MyId>) {
     if my_id.is_changed() {
         if let Some(entity) = my_id.entity {
@@ -94,16 +111,35 @@ pub(crate) fn update_animation(
     }
 }
 
+pub(crate) fn attack(time: Res<Time>, mut query: Query<&mut AttackState>) {
+    for mut attack_state in &mut query {
+        if attack_state.is_attacking {
+            attack_state.elapsed += time.delta_seconds();
+
+            if attack_state.elapsed >= ATTACK_DURATION {
+                attack_state.is_attacking = false;
+            }
+        }
+    }
+}
+
 pub(crate) fn controls(
     mut client: ResMut<Client>,
     mut query: Query<(
         &ActionState<Action>,
         &mut KinematicCharacterController,
         &mut Move,
+        &mut AttackState,
     )>,
 ) {
     if let Some(connection) = client.get_connection_mut() {
-        if let Ok((action_state, mut controller, mut move_component)) = query.get_single_mut() {
+        if let Ok((action_state, mut controller, mut move_component, mut attack_state)) =
+            query.get_single_mut()
+        {
+            if attack_state.is_attacking {
+                return;
+            }
+
             let any_pressed = action_state.pressed(Action::Up)
                 || action_state.pressed(Action::Right)
                 || action_state.pressed(Action::Left)
@@ -111,7 +147,8 @@ pub(crate) fn controls(
             let any_just_released = action_state.just_released(Action::Up)
                 || action_state.just_released(Action::Right)
                 || action_state.just_released(Action::Left)
-                || action_state.just_released(Action::Down);
+                || action_state.just_released(Action::Down)
+                || attack_state.is_changed();
 
             let direction = if action_state.just_pressed(Action::Up)
                 || any_just_released && action_state.pressed(Action::Up)
@@ -132,6 +169,8 @@ pub(crate) fn controls(
             } else if action_state.just_pressed(Action::Attacking)
                 || any_just_released && action_state.pressed(Action::Attacking)
             {
+                attack_state.is_attacking = true;
+                attack_state.elapsed = 0.0;
                 Some(Direction::Attacking {
                     direction: move_component.direction.to_facing_direction(),
                 })
