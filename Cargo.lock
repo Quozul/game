@@ -1802,6 +1802,7 @@ dependencies = [
  "ciborium",
  "futures-lite",
  "leafwing-input-manager",
+ "log",
  "quinn",
  "rcgen",
  "rustls",

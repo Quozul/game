@@ -50,7 +50,7 @@ pub(crate) fn update_animation(
         Changed<Move>,
     >,
 ) {
-    for (mut animation, mut data, mut state, mut move_component) in &mut query {
+    for (mut animation, mut data, mut state, move_component) in &mut query {
         let frames = match move_component.direction {
             Direction::Up => 30..=33,
             Direction::Left => {
@@ -129,6 +129,12 @@ pub(crate) fn jump(
                 || any_just_released && action_state.pressed(Action::Down)
             {
                 Some(Direction::Down)
+            } else if action_state.just_pressed(Action::Attacking)
+                || any_just_released && action_state.pressed(Action::Attacking)
+            {
+                Some(Direction::Attacking {
+                    direction: move_component.direction.to_facing_direction(),
+                })
             } else {
                 if any_just_released && !any_pressed {
                     Some(Direction::Idling {

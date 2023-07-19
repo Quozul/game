@@ -10,7 +10,6 @@ use bevy_rapier2d::prelude::{
 };
 use leafwing_input_manager::prelude::InputManagerPlugin;
 
-use shared::gravity::gravity;
 use shared::server::server::spawn_floor;
 use shared::server_entities::StaticServerEntity;
 use shared::FIXED_TIMESTEP;
@@ -22,12 +21,17 @@ use crate::client::{
 };
 use crate::controls::{add_controller_to_self_player, jump, update_animation, Action};
 use crate::menu::{setup_menu, MenuItem};
+use crate::message_handlers::spawn_player::{handle_player_spawn, SpawnPlayerEvent};
+use crate::message_handlers::update_direction::{handle_update_direction_event, UpdateDirection};
+use crate::message_handlers::update_position::{handle_update_position_event, UpdatePositionEvent};
+use crate::message_handlers::update_your_id::{handle_your_id_event, UpdateYourId};
 
 mod animation;
 mod camera_follow;
 mod client;
 mod controls;
 mod menu;
+pub mod message_handlers;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum AppState {
@@ -51,6 +55,10 @@ fn main() {
             RapierDebugRenderPlugin::default(),
         ))
         .add_plugins(InputManagerPlugin::<Action>::default())
+        .add_event::<SpawnPlayerEvent>()
+        .add_event::<UpdatePositionEvent>()
+        .add_event::<UpdateYourId>()
+        .add_event::<UpdateDirection>()
         .insert_resource(RapierConfiguration {
             gravity: Vect::ZERO,
             timestep_mode: TimestepMode::Fixed {
@@ -80,9 +88,13 @@ fn main() {
                 jump,
                 update_animation,
                 animate,
+                handle_update_direction_event,
+                handle_update_position_event,
+                handle_your_id_event,
+                handle_player_spawn,
             ),
         )
-        .add_systems(FixedUpdate, (handle_server_messages))
+        .add_systems(FixedUpdate, handle_server_messages)
         .run();
 }
 

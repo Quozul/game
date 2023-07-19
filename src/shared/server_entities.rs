@@ -28,5 +28,5 @@ impl Default for StaticServerEntity {
 
 #[derive(Component)]
 pub struct NetworkServerEntity {
-    pub(crate) client_id: u64,
+    pub client_id: u64,
 }
