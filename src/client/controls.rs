@@ -11,6 +11,10 @@ use shared::messages::ClientMessage;
 use crate::animation::{Animation, AnimationData, AnimationState};
 use crate::MyId;
 
+fn timer_from_frame_count(frame_count: u8) -> Timer {
+    Timer::from_seconds(1.0 / 10.0 * frame_count as f32, TimerMode::Once)
+}
+
 #[derive(Actionlike, Clone, Copy, PartialEq, Eq, Hash, Debug, Reflect)]
 pub(crate) enum Action {
     Left,
@@ -23,19 +27,17 @@ pub(crate) enum Action {
 #[derive(Component)]
 pub(crate) struct AttackState {
     is_attacking: bool,
-    elapsed: f32,
+    elapsed: Timer,
 }
 
 impl Default for AttackState {
     fn default() -> Self {
         AttackState {
             is_attacking: false,
-            elapsed: 0.0,
+            elapsed: timer_from_frame_count(4),
         }
     }
 }
-
-const ATTACK_DURATION: f32 = 1.0 / 10.0 * 4.0;
 
 pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<MyId>) {
     if my_id.is_changed() {
@@ -114,9 +116,9 @@ pub(crate) fn update_animation(
 pub(crate) fn attack(time: Res<Time>, mut query: Query<&mut AttackState>) {
     for mut attack_state in &mut query {
         if attack_state.is_attacking {
-            attack_state.elapsed += time.delta_seconds();
+            attack_state.elapsed.tick(time.delta());
 
-            if attack_state.elapsed >= ATTACK_DURATION {
+            if attack_state.elapsed.finished() {
                 attack_state.is_attacking = false;
             }
         }
@@ -170,7 +172,7 @@ pub(crate) fn controls(
                 || any_just_released && action_state.pressed(Action::Attacking)
             {
                 attack_state.is_attacking = true;
-                attack_state.elapsed = 0.0;
+                attack_state.elapsed.reset();
                 Some(Direction::Attacking {
                     direction: move_component.direction.to_facing_direction(),
                 })

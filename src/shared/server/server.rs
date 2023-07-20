@@ -1,17 +1,22 @@
 use std::net::{IpAddr, Ipv4Addr};
 use std::time::Duration;
 
+use crate::direction::handle_move;
 use bevy::app::ScheduleRunnerPlugin;
 use bevy::prelude::*;
 use bevy_quinnet::server::certificate::CertificateRetrievalMode;
 use bevy_quinnet::server::{QuinnetServerPlugin, Server, ServerConfiguration};
 use bevy_rapier2d::prelude::{
-    Collider, NoUserData, RapierConfiguration, RapierPhysicsPlugin, RigidBody, TimestepMode, Vect,
+    Collider, ExternalImpulse, NoUserData, RapierConfiguration, RapierPhysicsPlugin, RigidBody,
+    TimestepMode, Vect,
 };
 
+use crate::health::{attack_enemies, Health};
 use crate::messages::{ClientMessage, ServerMessage};
 use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
-use crate::server::message_handlers::{handle_client_connected, handle_client_move, handle_move};
+use crate::server::message_handlers::{
+    handle_client_connected, handle_client_move, send_direction,
+};
 use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
 use crate::FIXED_TIMESTEP;
 
@@ -39,7 +44,12 @@ pub fn start_server_app() {
         .add_systems(PostStartup, (start_server, spawn_floor))
         .add_systems(
             Update,
-            (handle_client_connected, handle_client_move, handle_move),
+            (
+                handle_client_connected,
+                handle_client_move,
+                handle_move,
+                attack_enemies,
+            ),
         )
         .add_systems(
             FixedUpdate,
@@ -47,6 +57,7 @@ pub fn start_server_app() {
                 handle_disconnected_clients,
                 handle_client_messages,
                 send_positions,
+                send_direction,
             ),
         )
         .run();
@@ -68,27 +79,27 @@ pub fn start_server(mut server: ResMut<Server>) {
 pub fn spawn_floor(mut commands: Commands, mut server_entity_builder: ResMut<StaticServerEntity>) {
     commands
         .spawn(RigidBody::Fixed)
-        .insert(Collider::cuboid(500.0, 10.0))
+        .insert(Collider::cuboid(10.0, 10.0))
         .insert(TransformBundle::from(Transform::from_xyz(0.0, 0.0, 0.0)))
-        .insert(server_entity_builder.next());
+        .insert(server_entity_builder.next())
+        .insert(ExternalImpulse {
+            impulse: Vec2::ZERO,
+            torque_impulse: 0.0,
+        })
+        .insert(Health { health: 10 });
 }
 
-pub fn send_positions(
+pub(crate) fn send_positions(
     mut server: ResMut<Server>,
-    query: Query<(&NetworkServerEntity, &Transform)>,
+    query: Query<(&NetworkServerEntity, &Transform), Changed<Transform>>,
 ) {
     if let Some(endpoint) = server.get_endpoint_mut() {
-        for client_id in endpoint.clients() {
-            for (server_entity, transform) in &query {
-                endpoint.try_send_message(
-                    client_id,
-                    ServerMessage::Position {
-                        id: server_entity.client_id,
-                        translation: transform.translation,
-                        rotation: transform.rotation,
-                    },
-                );
-            }
+        for (server_entity, transform) in &query {
+            endpoint.try_broadcast_message(ServerMessage::Position {
+                id: server_entity.client_id,
+                translation: transform.translation,
+                rotation: transform.rotation,
+            });
         }
     }
 }

@@ -10,6 +10,7 @@ use bevy_rapier2d::prelude::{
     Vect,
 };
 use leafwing_input_manager::prelude::InputManagerPlugin;
+use shared::direction::handle_move;
 
 use shared::server::server::spawn_floor;
 use shared::server_entities::StaticServerEntity;
@@ -89,6 +90,7 @@ fn main() {
                 add_controller_to_self_player,
                 attack,
                 controls,
+                handle_move,
                 update_animation,
                 animate,
                 handle_player_spawn,

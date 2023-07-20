@@ -3,9 +3,7 @@ use crate::controls::AttackState;
 use crate::MyId;
 use bevy::prelude::*;
 use bevy_quinnet::shared::ClientId;
-use bevy_rapier2d::prelude::{Collider, KinematicCharacterController, RigidBody};
-use shared::direction::{Direction, FacingDirection, Move};
-use shared::server_entities::NetworkServerEntity;
+use shared::PlayerBundle::PlayerBundle;
 
 #[derive(Event)]
 pub(crate) struct SpawnPlayerEvent {
@@ -29,28 +27,12 @@ pub(crate) fn handle_player_spawn(
         let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
         let entity = commands
-            .spawn(RigidBody::KinematicVelocityBased)
-            .insert(Collider::cuboid(8.0, 8.0))
-            .insert(KinematicCharacterController {
-                autostep: None,
-                ..default()
-            })
-            .insert(TransformBundle::from(Transform::from_xyz(
-                event.x, event.y, 0.0,
-            )))
-            .insert(NetworkServerEntity {
-                client_id: event.id,
-            })
+            .spawn(PlayerBundle::from_spawn_event(event.id, event.x, event.y))
             .insert(SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle,
                 ..default()
             })
             .insert(AnimationBundle::default())
-            .insert(Move {
-                direction: Direction::Idling {
-                    direction: FacingDirection::Down,
-                },
-            })
             .insert(AttackState::default())
             .id();
 
