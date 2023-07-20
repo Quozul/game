@@ -57,6 +57,7 @@ pub fn start_server_app() {
                 handle_disconnected_clients,
                 handle_client_messages,
                 send_positions,
+                send_health,
                 send_direction,
             ),
         )
@@ -99,6 +100,20 @@ pub(crate) fn send_positions(
                 id: server_entity.client_id,
                 translation: transform.translation,
                 rotation: transform.rotation,
+            });
+        }
+    }
+}
+
+pub(crate) fn send_health(
+    mut server: ResMut<Server>,
+    query: Query<(&NetworkServerEntity, &Health), Changed<Health>>,
+) {
+    if let Some(endpoint) = server.get_endpoint_mut() {
+        for (server_entity, health) in &query {
+            endpoint.try_broadcast_message(ServerMessage::Health {
+                id: server_entity.client_id,
+                new_health: health.health
             });
         }
     }

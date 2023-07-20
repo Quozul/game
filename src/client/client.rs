@@ -14,6 +14,7 @@ use crate::message_handlers::spawn_player::SpawnPlayerEvent;
 use crate::message_handlers::update_direction::UpdateDirectionEvent;
 use crate::message_handlers::update_position::UpdatePositionEvent;
 use crate::AppState;
+use crate::message_handlers::health_changed::HealthChangedEvent;
 
 pub fn join_server(next_state: &mut NextState<AppState>, client: &mut Client, server_ip: &str) {
     if let Ok(ip) = IpAddr::from_str(server_ip) {
@@ -73,6 +74,7 @@ pub(crate) fn handle_server_messages(
     mut update_position_event_writer: EventWriter<UpdatePositionEvent>,
     mut update_direction_event_writer: EventWriter<UpdateDirectionEvent>,
     mut despawn_event_writer: EventWriter<DespawnPlayerEvent>,
+    mut health_changed_event_writer: EventWriter<HealthChangedEvent>,
 ) {
     if let Some(connection) = client.get_connection_mut() {
         while let Ok(Some(message)) = connection.receive_message::<ServerMessage>() {
@@ -98,8 +100,9 @@ pub(crate) fn handle_server_messages(
                 ServerMessage::Despawn { id } => {
                     despawn_event_writer.send(DespawnPlayerEvent { id });
                 }
-                _ => {
-                    println!("Received unknown message")
+                ServerMessage::Health {id , new_health} => {
+                    health_changed_event_writer.send(HealthChangedEvent { id, new_health });
+                    
                 }
             }
         }

@@ -5,7 +5,7 @@ use crate::direction::Move;
 
 #[derive(Component)]
 pub struct Health {
-    pub(crate) health: u8,
+    pub health: u8,
 }
 
 pub fn attack_enemies(

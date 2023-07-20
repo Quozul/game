@@ -1,4 +1,5 @@
 #![feature(async_closure)]
+#![feature(let_chains)]
 #![windows_subsystem = "windows"]
 
 use bevy::prelude::*;
@@ -10,8 +11,8 @@ use bevy_rapier2d::prelude::{
     Vect,
 };
 use leafwing_input_manager::prelude::InputManagerPlugin;
-use shared::direction::handle_move;
 
+use shared::direction::handle_move;
 use shared::server::server::spawn_floor;
 use shared::server_entities::StaticServerEntity;
 use shared::FIXED_TIMESTEP;
@@ -20,8 +21,10 @@ use crate::animation::animate;
 use crate::camera_follow::camera_follow;
 use crate::client::{handle_server_messages, on_connecting, on_disconnected, setup_in_game};
 use crate::controls::{add_controller_to_self_player, attack, controls, update_animation, Action};
-use crate::menu::{ui_example_system, UiState};
+use crate::display_health::display_health;
+use crate::menu::{display_network_stats, ui_example_system, UiState};
 use crate::message_handlers::despawn_player::{handle_player_despawn, DespawnPlayerEvent};
+use crate::message_handlers::health_changed::{handle_health_change, HealthChangedEvent};
 use crate::message_handlers::spawn_player::{handle_player_spawn, SpawnPlayerEvent};
 use crate::message_handlers::update_direction::{
     handle_update_direction_event, UpdateDirectionEvent,
@@ -32,6 +35,7 @@ mod animation;
 mod camera_follow;
 mod client;
 mod controls;
+mod display_health;
 mod menu;
 pub mod message_handlers;
 
@@ -63,6 +67,7 @@ fn main() {
         .add_event::<UpdatePositionEvent>()
         .add_event::<UpdateDirectionEvent>()
         .add_event::<DespawnPlayerEvent>()
+        .add_event::<HealthChangedEvent>()
         .init_resource::<UiState>()
         .insert_resource(RapierConfiguration {
             gravity: Vect::ZERO,
@@ -97,6 +102,9 @@ fn main() {
                 handle_update_direction_event,
                 handle_update_position_event,
                 handle_player_despawn,
+                handle_health_change,
+                display_network_stats,
+                display_health,
             ),
         )
         .add_systems(FixedUpdate, handle_server_messages)

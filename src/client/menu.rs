@@ -14,7 +14,7 @@ pub struct UiState {
     label: String,
 }
 
-pub fn ui_example_system(
+pub(crate) fn ui_example_system(
     mut ui_state: ResMut<UiState>,
     mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
@@ -43,4 +43,16 @@ pub fn ui_example_system(
             }
         });
     });
+}
+
+pub(crate) fn display_network_stats(mut contexts: EguiContexts, client: ResMut<Client>) {
+    let ctx = contexts.ctx_mut();
+
+    if let Some(connection) = client.get_connection() && let Some(stats) = connection.stats() {
+        egui::Window::new("Network stats").show(ctx, |ui| {
+            ui.label(format!("udp_rx {} msgs", stats.udp_rx.datagrams));
+            ui.label(format!("udp_tx {} msgs", stats.udp_tx.datagrams));
+            ui.label(format!("ping {} ms", stats.frame_rx.ping));
+        });
+    }
 }

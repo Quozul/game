@@ -5,9 +5,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub enum ServerMessage {
-    HelloWorld {
-        world: String,
-    },
     Spawn {
         id: ClientId,
         you: bool,
@@ -24,13 +21,16 @@ pub enum ServerMessage {
         direction: Direction,
     },
     Despawn {
-        id: ClientId
-    }
+        id: ClientId,
+    },
+    Health {
+        id: ClientId, 
+        new_health: u8,
+    },
 }
 
 #[derive(Deserialize, Serialize)]
 pub enum ClientMessage {
-    HelloWorld { world: String },
     Connected,
     Move { direction: Direction },
 }
