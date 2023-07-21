@@ -1,6 +1,7 @@
 pub mod direction;
 pub mod gravity;
 pub mod health;
+pub mod map;
 pub mod messages;
 pub mod player_bundle;
 pub mod server;

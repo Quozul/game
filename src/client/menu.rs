@@ -55,3 +55,16 @@ pub(crate) fn display_network_stats(mut contexts: EguiContexts, client: ResMut<C
         });
     }
 }
+
+#[derive(Resource)]
+pub(crate) struct AssetsLoading {
+    pub(crate) slime: Option<Handle<Image>>,
+    pub(crate) player: Option<Handle<Image>>,
+    pub(crate) font: Option<Handle<Font>>,
+}
+
+pub(crate) fn setup_assets(server: Res<AssetServer>, mut loading: ResMut<AssetsLoading>) {
+    loading.font = Some(server.load("fonts/LazyFox_3.ttf"));
+    loading.player = Some(server.load("characters/player.png"));
+    loading.slime = Some(server.load("characters/slime.png"));
+}

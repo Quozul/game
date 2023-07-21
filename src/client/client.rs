@@ -7,6 +7,7 @@ use bevy_quinnet::client::connection::ConnectionConfiguration;
 use bevy_quinnet::client::Client;
 
 use shared::messages::{ClientMessage, ServerMessage};
+use shared::server_entities::NetworkServerEntity;
 
 use crate::camera_follow::FollowSubject;
 use crate::message_handlers::despawn_player::DespawnEntityEvent;
@@ -75,6 +76,15 @@ pub(crate) fn setup_in_game(mut commands: Commands) {
 
 pub(crate) fn close_connection(mut client: ResMut<Client>) {
     let _ = client.close_all_connections();
+}
+
+pub(crate) fn clean_server_entities(
+    mut commands: Commands,
+    query: Query<Entity, Or<(With<NetworkServerEntity>, With<Camera>)>>,
+) {
+    for entity in &query {
+        commands.entity(entity).despawn_recursive();
+    }
 }
 
 pub(crate) fn handle_server_messages(

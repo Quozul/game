@@ -9,6 +9,7 @@ use bevy_rapier2d::prelude::{
 
 use crate::direction::handle_move;
 use crate::health::{attack_enemies, despawn_dead, slime_attack};
+use crate::map::spawn_map;
 use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
 use crate::server::message_handlers::{
     handle_client_connected, handle_client_move, send_direction,
@@ -45,7 +46,7 @@ pub fn start_server_app() {
         .insert_resource(StaticServerEntity::default())
         .add_event::<ClientConnectedEvent>()
         .add_event::<ClientMoveEvent>()
-        .add_systems(PostStartup, start_server)
+        .add_systems(PostStartup, (start_server, spawn_map))
         .add_systems(
             Update,
             (

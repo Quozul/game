@@ -3,8 +3,9 @@ use bevy::sprite::Anchor;
 
 use shared::player_bundle::PlayerBundle;
 
-use crate::animation::AnimationBundle;
+use crate::animations::animate::AnimationBundle;
 use crate::controls::AttackState;
+use crate::menu::AssetsLoading;
 use crate::MyId;
 
 #[derive(Event)]
@@ -26,21 +27,26 @@ pub(crate) struct Texture {
 }
 
 pub(crate) fn handle_player_spawn(
+    assets: ResMut<AssetsLoading>,
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
     mut event_reader: EventReader<SpawnPlayerEvent>,
     mut my_id: ResMut<MyId>,
 ) {
     for event in event_reader.iter() {
-        let texture_handle = asset_server.load("characters/player.png");
-        let texture_atlas =
-            TextureAtlas::from_grid(texture_handle, Vec2::new(48.0, 48.0), 6, 10, None, None);
+        let texture_atlas = TextureAtlas::from_grid(
+            assets.player.clone().unwrap(),
+            Vec2::new(48.0, 48.0),
+            6,
+            10,
+            None,
+            None,
+        );
         let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
         let text_style = TextStyle {
-            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-            font_size: 60.0,
+            font: assets.font.clone().unwrap(),
+            font_size: 10.0,
             color: Color::WHITE,
         };
         let text_alignment = TextAlignment::Center;

@@ -5,7 +5,7 @@ use shared::direction::{Direction, FacingDirection, Move};
 use shared::player_bundle::Player;
 use shared::slime_bundle::Slime;
 
-use crate::animation::{Animation, AnimationData, AnimationState};
+use crate::animations::animate::{Animation, AnimationData, AnimationState};
 use crate::message_handlers::spawn_player::Texture;
 
 pub(crate) fn update_player_animation(

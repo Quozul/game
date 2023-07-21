@@ -104,7 +104,7 @@ pub(crate) fn spawn_slime(
     mut server: ResMut<Server>,
     query: Query<&Slime>,
 ) {
-    if query.is_empty() {
+    if query.iter().count() < 3 {
         let id = static_server_entity.next_id();
         let mut rng = thread_rng();
         let x = rng.gen_range(-50.0..50.0);
