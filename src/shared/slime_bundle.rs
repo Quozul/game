@@ -1,4 +1,5 @@
-use bevy::prelude::{default, Bundle, Component, Transform, TransformBundle, Vec2};
+use bevy::prelude::{default, Bundle, Component, Timer, Transform, TransformBundle, Vec2};
+use bevy::time::TimerMode;
 use bevy_rapier2d::prelude::{
     Collider, Damping, ExternalImpulse, KinematicCharacterController, LockedAxes, RigidBody,
 };
@@ -8,7 +9,9 @@ use crate::health::Health;
 use crate::server_entities::NetworkServerEntity;
 
 #[derive(Component)]
-pub struct Slime;
+pub struct Slime {
+    pub last_attack: Timer,
+}
 
 #[derive(Bundle)]
 pub struct SlimeBundle {
@@ -54,7 +57,9 @@ impl SlimeBundle {
                 linear_damping: 10.0,
                 angular_damping: 10.0,
             },
-            slime: Slime {},
+            slime: Slime {
+                last_attack: Timer::from_seconds(1.0, TimerMode::Once),
+            },
         }
     }
 }

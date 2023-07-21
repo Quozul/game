@@ -74,7 +74,7 @@ pub(crate) fn setup_in_game(mut commands: Commands) {
 }
 
 pub(crate) fn close_connection(mut client: ResMut<Client>) {
-    client.close_all_connections();
+    let _ = client.close_all_connections();
 }
 
 pub(crate) fn handle_server_messages(

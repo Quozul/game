@@ -15,11 +15,12 @@ use shared::direction::handle_move;
 use shared::FIXED_TIMESTEP;
 
 use crate::animation::animate;
+use crate::animations::{update_player_animation, update_slime_animation};
 use crate::camera_follow::camera_follow;
 use crate::client::{
     close_connection, handle_server_messages, on_connecting, on_disconnected, setup_in_game,
 };
-use crate::controls::{add_controller_to_self_player, attack, controls, update_animation, Action};
+use crate::controls::{add_controller_to_self_player, attack, controls, Action};
 use crate::display_health::display_health;
 use crate::menu::{display_network_stats, ui_example_system, UiState};
 use crate::message_handlers::despawn_player::{handle_entity_despawn, DespawnEntityEvent};
@@ -32,6 +33,7 @@ use crate::message_handlers::update_direction::{
 use crate::message_handlers::update_position::{handle_update_position_event, UpdatePositionEvent};
 
 mod animation;
+mod animations;
 mod camera_follow;
 mod client;
 mod controls;
@@ -96,7 +98,8 @@ fn main() {
                 add_controller_to_self_player,
                 attack,
                 controls,
-                update_animation,
+                update_player_animation,
+                update_slime_animation,
                 animate,
                 handle_player_spawn,
                 handle_update_direction_event,

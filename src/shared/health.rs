@@ -1,5 +1,6 @@
 use bevy::prelude::{
-    Changed, Commands, Component, DespawnRecursiveExt, Entity, Query, Res, ResMut, Transform, Vec2,
+    Changed, Commands, Component, DespawnRecursiveExt, Entity, Query, Res, ResMut, Time, Transform,
+    Vec2,
 };
 use bevy_quinnet::server::Server;
 use bevy_rapier2d::prelude::{ExternalImpulse, QueryFilter, RapierContext};
@@ -7,6 +8,7 @@ use bevy_rapier2d::prelude::{ExternalImpulse, QueryFilter, RapierContext};
 use crate::direction::Move;
 use crate::messages::ServerMessage;
 use crate::server_entities::NetworkServerEntity;
+use crate::slime_bundle::Slime;
 
 #[derive(Component)]
 pub struct Health {
@@ -42,6 +44,17 @@ pub fn attack_enemies(
     }
 }
 
+pub(crate) fn slime_attack(time: Res<Time>, mut query: Query<(&mut Move, &mut Slime)>) {
+    for (mut move_component, mut slime) in &mut query {
+        slime.last_attack.tick(time.delta());
+
+        if slime.last_attack.finished() {
+            slime.last_attack.reset();
+            move_component.direction = rand::random();
+        }
+    }
+}
+
 pub fn despawn_dead(
     mut commands: Commands,
     mut server: ResMut<Server>,
@@ -49,7 +62,6 @@ pub fn despawn_dead(
 ) {
     for (entity, health, server_entity) in &query {
         if health.health <= 0 {
-            println!("Despawn entity");
             commands.entity(entity).despawn_recursive();
 
             if let Some(endpoint) = server.get_endpoint_mut() {

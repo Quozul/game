@@ -1,4 +1,4 @@
-use bevy::prelude::{default, Bundle, Transform, TransformBundle, Vec2};
+use bevy::prelude::{default, Bundle, Component, Transform, TransformBundle, Vec2};
 use bevy_quinnet::shared::ClientId;
 use bevy_rapier2d::prelude::{
     Collider, Damping, ExternalImpulse, KinematicCharacterController, LockedAxes, RigidBody,
@@ -7,6 +7,9 @@ use bevy_rapier2d::prelude::{
 use crate::direction::{Direction, FacingDirection, Move};
 use crate::health::Health;
 use crate::server_entities::NetworkServerEntity;
+
+#[derive(Component)]
+pub struct Player;
 
 #[derive(Bundle)]
 pub struct PlayerBundle {
@@ -20,6 +23,7 @@ pub struct PlayerBundle {
     pub external_force: ExternalImpulse,
     pub health: Health,
     pub damping: Damping,
+    pub player: Player,
 }
 
 impl PlayerBundle {
@@ -48,6 +52,7 @@ impl PlayerBundle {
                 linear_damping: 10.0,
                 angular_damping: 10.0,
             },
+            player: Player {},
         }
     }
 }

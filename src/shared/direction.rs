@@ -1,14 +1,18 @@
+use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
+
 use bevy::prelude::{Component, Query, Vec2};
 use bevy_rapier2d::prelude::KinematicCharacterController;
+use rand::distributions::Standard;
+use rand::prelude::Distribution;
+use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
 
 #[derive(Component)]
 pub struct Move {
     pub direction: Direction,
 }
 
-#[derive(Deserialize, Serialize, PartialEq, Copy, Clone)]
+#[derive(Deserialize, Serialize, PartialEq, Copy, Clone, Debug)]
 pub enum FacingDirection {
     Up,
     Left,
@@ -39,9 +43,29 @@ impl FacingDirection {
             FacingDirection::Up
         }
     }
+
+    pub fn should_flip(&self) -> Option<bool> {
+        match self {
+            FacingDirection::Up => None,
+            FacingDirection::Left => Some(true),
+            FacingDirection::Right => Some(false),
+            FacingDirection::Down => None,
+        }
+    }
 }
 
-#[derive(Deserialize, Serialize, PartialEq, Copy, Clone)]
+impl Distribution<FacingDirection> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> FacingDirection {
+        match rng.gen_range(0..=3) {
+            0 => FacingDirection::Up,
+            1 => FacingDirection::Left,
+            2 => FacingDirection::Right,
+            _ => FacingDirection::Down,
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, PartialEq, Copy, Clone, Debug)]
 pub enum Direction {
     Up,
     Left,
@@ -87,6 +111,23 @@ impl Direction {
         match self {
             Direction::Attacking { .. } => true,
             _ => false,
+        }
+    }
+}
+
+impl Distribution<Direction> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Direction {
+        match rng.gen_range(0..=5) {
+            0 => Direction::Up,
+            1 => Direction::Left,
+            2 => Direction::Right,
+            3 => Direction::Down,
+            4 => Direction::Idling {
+                direction: rand::random(),
+            },
+            _ => Direction::Attacking {
+                direction: rand::random(),
+            },
         }
     }
 }

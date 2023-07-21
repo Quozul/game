@@ -8,7 +8,7 @@ use bevy_rapier2d::prelude::{
 };
 
 use crate::direction::handle_move;
-use crate::health::{attack_enemies, despawn_dead};
+use crate::health::{attack_enemies, despawn_dead, slime_attack};
 use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
 use crate::server::message_handlers::{
     handle_client_connected, handle_client_move, send_direction,
@@ -65,6 +65,7 @@ pub fn start_server_app() {
                 send_direction,
                 spawn_slime,
                 handle_move,
+                slime_attack,
             ),
         )
         .run();
