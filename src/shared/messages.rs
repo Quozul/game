@@ -1,31 +1,35 @@
 use crate::direction::Direction;
 use bevy::prelude::{Quat, Vec3};
-use bevy_quinnet::shared::ClientId;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
 pub enum ServerMessage {
-    Spawn {
-        id: ClientId,
+    SpawnPlayer {
+        id: u64,
         you: bool,
         x: f32,
         y: f32,
     },
     Position {
-        id: ClientId,
+        id: u64,
         translation: Vec3,
         rotation: Quat,
     },
     Direction {
-        id: ClientId,
+        id: u64,
         direction: Direction,
     },
     Despawn {
-        id: ClientId,
+        id: u64,
     },
     Health {
-        id: ClientId, 
+        id: u64,
         new_health: u8,
+    },
+    SpawnSlime {
+        id: u64,
+        x: f32,
+        y: f32,
     },
 }
 

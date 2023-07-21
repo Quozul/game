@@ -3,14 +3,13 @@ use std::thread;
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
 use bevy_quinnet::client::Client;
-
-use shared::server::server::start_server_app;
+use shared::server::start_server_app;
 
 use crate::client::join_server;
 use crate::AppState;
 
 #[derive(Default, Resource)]
-pub struct UiState {
+pub(crate) struct UiState {
     label: String,
 }
 

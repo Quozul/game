@@ -1,22 +1,15 @@
 use bevy::prelude::{Component, Resource};
-
-#[derive(Component)]
-pub struct ServerStaticEntityComp {
-    id: u64,
-}
+use bevy_quinnet::shared::ClientId;
 
 #[derive(Resource)]
-pub struct StaticServerEntity {
+pub(crate) struct StaticServerEntity {
     id: u64,
 }
 
 impl StaticServerEntity {
-    pub fn next(&mut self) -> ServerStaticEntityComp {
-        let new_entity = ServerStaticEntityComp { id: self.id };
-
+    pub fn next_id(&mut self) -> u64 {
         self.id += 1;
-
-        new_entity
+        self.id.clone()
     }
 }
 
@@ -28,5 +21,6 @@ impl Default for StaticServerEntity {
 
 #[derive(Component)]
 pub struct NetworkServerEntity {
-    pub client_id: u64,
+    pub id: u64,
+    pub client_id: Option<ClientId>,
 }

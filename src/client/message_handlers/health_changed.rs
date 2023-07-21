@@ -11,11 +11,11 @@ pub(crate) struct HealthChangedEvent {
 
 pub(crate) fn handle_health_change(
     mut event_reader: EventReader<HealthChangedEvent>,
-    mut query: Query<( &NetworkServerEntity, &mut Health)>,
+    mut query: Query<(&NetworkServerEntity, &mut Health)>,
 ) {
     for event in event_reader.iter() {
         for (network_entity, mut health) in &mut query {
-            if event.id == network_entity.client_id {
+            if event.id == network_entity.id {
                 health.health = event.new_health;
                 break;
             }

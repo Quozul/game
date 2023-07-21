@@ -9,6 +9,7 @@ use shared::gravity::apply_force;
 use shared::messages::ClientMessage;
 
 use crate::animation::{Animation, AnimationData, AnimationState};
+use crate::message_handlers::spawn_player::Texture;
 use crate::MyId;
 
 fn timer_from_frame_count(frame_count: u8) -> Timer {
@@ -59,57 +60,52 @@ pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<M
 }
 
 pub(crate) fn update_animation(
-    mut query: Query<
-        (
-            &mut Animation,
-            &mut AnimationData,
-            &mut AnimationState,
-            &Move,
-        ),
-        Changed<Move>,
-    >,
+    mut animation_query: Query<(&mut Animation, &mut AnimationData, &mut AnimationState)>,
+    query: Query<(&Texture, &Move), Changed<Move>>,
 ) {
-    for (mut animation, mut data, mut state, move_component) in &mut query {
-        let frames = match move_component.direction {
-            Direction::Up => 30..=33,
-            Direction::Left => {
-                data.flip_x = true;
-                24..=29
-            }
-            Direction::Right => {
-                data.flip_x = false;
-                24..=29
-            }
-            Direction::Down => 18..=23,
-            Direction::Idling { direction } => match direction {
-                FacingDirection::Up => 12..=17,
-                FacingDirection::Down => 0..=5,
-                FacingDirection::Left => {
+    for (texture, move_component) in &query {
+        if let Ok((mut animation, mut data, mut state)) = animation_query.get_mut(texture.texture) {
+            let frames = match move_component.direction {
+                Direction::Up => 30..=33,
+                Direction::Left => {
                     data.flip_x = true;
-                    6..=11
+                    24..=29
                 }
-                FacingDirection::Right => {
+                Direction::Right => {
                     data.flip_x = false;
-                    6..=11
+                    24..=29
                 }
-            },
-            Direction::Attacking { direction } => match direction {
-                FacingDirection::Up => 48..=51,
-                FacingDirection::Left => {
-                    data.flip_x = true;
-                    42..=45
-                }
-                FacingDirection::Right => {
-                    data.flip_x = false;
-                    42..=45
-                }
-                FacingDirection::Down => 36..=39,
-            },
-        };
+                Direction::Down => 18..=23,
+                Direction::Idling { direction } => match direction {
+                    FacingDirection::Up => 12..=17,
+                    FacingDirection::Down => 0..=5,
+                    FacingDirection::Left => {
+                        data.flip_x = true;
+                        6..=11
+                    }
+                    FacingDirection::Right => {
+                        data.flip_x = false;
+                        6..=11
+                    }
+                },
+                Direction::Attacking { direction } => match direction {
+                    FacingDirection::Up => 48..=51,
+                    FacingDirection::Left => {
+                        data.flip_x = true;
+                        42..=45
+                    }
+                    FacingDirection::Right => {
+                        data.flip_x = false;
+                        42..=45
+                    }
+                    FacingDirection::Down => 36..=39,
+                },
+            };
 
-        animation.0 = benimator::Animation::from_indices(frames, FrameRate::from_fps(10.0));
+            animation.0 = benimator::Animation::from_indices(frames, FrameRate::from_fps(10.0));
 
-        state.0.reset();
+            state.0.reset();
+        }
     }
 }
 

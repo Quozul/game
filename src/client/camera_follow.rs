@@ -3,9 +3,9 @@ use bevy::prelude::*;
 use crate::MyId;
 
 #[derive(Component)]
-pub struct FollowSubject;
+pub(crate) struct FollowSubject;
 
-pub fn camera_follow(
+pub(crate) fn camera_follow(
     time: Res<Time>,
     my_id: ResMut<MyId>,
     mut camera_query: Query<&mut Transform, With<FollowSubject>>,

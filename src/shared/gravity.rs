@@ -1,5 +1,4 @@
-use bevy::prelude::{Query, Res};
-use bevy_rapier2d::prelude::{KinematicCharacterController, RapierConfiguration, Vect};
+use bevy_rapier2d::prelude::{KinematicCharacterController, Vect};
 
 pub fn apply_force(controller: &mut KinematicCharacterController, force: Vect) {
     let previous_translation = match controller.translation {

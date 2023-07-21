@@ -1,4 +1,4 @@
-use bevy::prelude::{Component, Query, Res, Time, Vec2};
+use bevy::prelude::{Component, Query, Vec2};
 use bevy_rapier2d::prelude::KinematicCharacterController;
 use serde::{Deserialize, Serialize};
 use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
@@ -91,9 +91,7 @@ impl Direction {
     }
 }
 
-pub fn handle_move(
-    /*time: Res<Time>, */ mut query: Query<(&mut KinematicCharacterController, &Move)>,
-) {
+pub fn handle_move(mut query: Query<(&mut KinematicCharacterController, &Move)>) {
     for (mut controller, move_component) in &mut query {
         let vel = move_component.direction.get_vec();
         controller.translation = vel;

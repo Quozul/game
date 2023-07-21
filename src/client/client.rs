@@ -9,14 +9,19 @@ use bevy_quinnet::client::Client;
 use shared::messages::{ClientMessage, ServerMessage};
 
 use crate::camera_follow::FollowSubject;
-use crate::message_handlers::despawn_player::DespawnPlayerEvent;
+use crate::message_handlers::despawn_player::DespawnEntityEvent;
+use crate::message_handlers::health_changed::HealthChangedEvent;
 use crate::message_handlers::spawn_player::SpawnPlayerEvent;
+use crate::message_handlers::spawn_slime::SpawnSlimeEvent;
 use crate::message_handlers::update_direction::UpdateDirectionEvent;
 use crate::message_handlers::update_position::UpdatePositionEvent;
 use crate::AppState;
-use crate::message_handlers::health_changed::HealthChangedEvent;
 
-pub fn join_server(next_state: &mut NextState<AppState>, client: &mut Client, server_ip: &str) {
+pub(crate) fn join_server(
+    next_state: &mut NextState<AppState>,
+    client: &mut Client,
+    server_ip: &str,
+) {
     if let Ok(ip) = IpAddr::from_str(server_ip) {
         debug!("Connecting...");
 
@@ -68,19 +73,24 @@ pub(crate) fn setup_in_game(mut commands: Commands) {
         .insert(FollowSubject);
 }
 
+pub(crate) fn close_connection(mut client: ResMut<Client>) {
+    client.close_all_connections();
+}
+
 pub(crate) fn handle_server_messages(
     mut client: ResMut<Client>,
     mut spawn_player_event_writer: EventWriter<SpawnPlayerEvent>,
     mut update_position_event_writer: EventWriter<UpdatePositionEvent>,
     mut update_direction_event_writer: EventWriter<UpdateDirectionEvent>,
-    mut despawn_event_writer: EventWriter<DespawnPlayerEvent>,
+    mut despawn_event_writer: EventWriter<DespawnEntityEvent>,
     mut health_changed_event_writer: EventWriter<HealthChangedEvent>,
+    mut spawn_slime_event_writer: EventWriter<SpawnSlimeEvent>,
 ) {
     if let Some(connection) = client.get_connection_mut() {
         while let Ok(Some(message)) = connection.receive_message::<ServerMessage>() {
             match message {
                 // Match on your own message types ...
-                ServerMessage::Spawn { id, x, y, you } => {
+                ServerMessage::SpawnPlayer { id, x, y, you } => {
                     spawn_player_event_writer.send(SpawnPlayerEvent { id, x, y, you })
                 }
                 ServerMessage::Position {
@@ -98,11 +108,13 @@ pub(crate) fn handle_server_messages(
                     update_direction_event_writer.send(UpdateDirectionEvent { id, direction });
                 }
                 ServerMessage::Despawn { id } => {
-                    despawn_event_writer.send(DespawnPlayerEvent { id });
+                    despawn_event_writer.send(DespawnEntityEvent { id });
                 }
-                ServerMessage::Health {id , new_health} => {
+                ServerMessage::Health { id, new_health } => {
                     health_changed_event_writer.send(HealthChangedEvent { id, new_health });
-                    
+                }
+                ServerMessage::SpawnSlime { id, x, y } => {
+                    spawn_slime_event_writer.send(SpawnSlimeEvent { id, x, y });
                 }
             }
         }

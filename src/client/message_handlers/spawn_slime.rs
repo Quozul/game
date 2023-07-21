@@ -1,41 +1,29 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
-use shared::player_bundle::PlayerBundle;
+use shared::slime_bundle::SlimeBundle;
 
 use crate::animation::AnimationBundle;
 use crate::controls::AttackState;
-use crate::MyId;
+use crate::message_handlers::spawn_player::{HealthDisplay, Texture};
 
 #[derive(Event)]
-pub(crate) struct SpawnPlayerEvent {
+pub(crate) struct SpawnSlimeEvent {
     pub(crate) id: u64,
     pub(crate) x: f32,
     pub(crate) y: f32,
-    pub(crate) you: bool,
 }
 
-#[derive(Component)]
-pub(crate) struct HealthDisplay {
-    pub(crate) display: Entity,
-}
-
-#[derive(Component)]
-pub(crate) struct Texture {
-    pub(crate) texture: Entity,
-}
-
-pub(crate) fn handle_player_spawn(
+pub(crate) fn handle_slime_spawn(
     mut texture_atlases: ResMut<Assets<TextureAtlas>>,
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    mut event_reader: EventReader<SpawnPlayerEvent>,
-    mut my_id: ResMut<MyId>,
+    mut event_reader: EventReader<SpawnSlimeEvent>,
 ) {
     for event in event_reader.iter() {
-        let texture_handle = asset_server.load("characters/player.png");
+        let texture_handle = asset_server.load("characters/slime.png");
         let texture_atlas =
-            TextureAtlas::from_grid(texture_handle, Vec2::new(48.0, 48.0), 6, 10, None, None);
+            TextureAtlas::from_grid(texture_handle, Vec2::new(32.0, 32.0), 6, 10, None, None);
         let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
         let text_style = TextStyle {
@@ -51,7 +39,7 @@ pub(crate) fn handle_player_spawn(
                 text_anchor: Anchor::BottomCenter,
                 text_2d_bounds: Default::default(),
                 transform: Transform {
-                    translation: Vec3::new(0.0, 16.0, 0.0),
+                    translation: Vec3::new(0.0, 10.0, 0.0),
                     ..default()
                 },
                 ..default()
@@ -61,16 +49,13 @@ pub(crate) fn handle_player_spawn(
         let texture = commands
             .spawn(SpriteSheetBundle {
                 texture_atlas: texture_atlas_handle,
-                transform: Transform::from_xyz(0.0, 16.0, 0.0),
                 ..default()
             })
             .insert(AnimationBundle::default())
             .id();
 
-        let entity = commands
-            .spawn(PlayerBundle::from_spawn_event(
-                event.id, None, event.x, event.y,
-            ))
+        commands
+            .spawn(SlimeBundle::from_spawn_event(event.id, event.x, event.y))
             .insert(Visibility::Visible)
             .insert(ComputedVisibility::default())
             .insert(AttackState::default())
@@ -79,12 +64,6 @@ pub(crate) fn handle_player_spawn(
             })
             .insert(Texture { texture })
             .add_child(health_display)
-            .add_child(texture)
-            .id();
-
-        if event.you {
-            my_id.id = event.id;
-            my_id.entity = Some(entity);
-        }
+            .add_child(texture);
     }
 }
