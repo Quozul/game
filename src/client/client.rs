@@ -15,6 +15,7 @@ use crate::message_handlers::health_changed::HealthChangedEvent;
 use crate::message_handlers::spawn_player::SpawnPlayerEvent;
 use crate::message_handlers::spawn_slime::SpawnSlimeEvent;
 use crate::message_handlers::update_direction::UpdateDirectionEvent;
+use crate::message_handlers::update_facing::UpdateFacingEvent;
 use crate::message_handlers::update_position::UpdatePositionEvent;
 use crate::AppState;
 
@@ -95,6 +96,7 @@ pub(crate) fn handle_server_messages(
     mut despawn_event_writer: EventWriter<DespawnEntityEvent>,
     mut health_changed_event_writer: EventWriter<HealthChangedEvent>,
     mut spawn_slime_event_writer: EventWriter<SpawnSlimeEvent>,
+    mut update_facing_event_writer: EventWriter<UpdateFacingEvent>,
 ) {
     if let Some(connection) = client.get_connection_mut() {
         while let Ok(Some(message)) = connection.receive_message::<ServerMessage>() {
@@ -114,8 +116,11 @@ pub(crate) fn handle_server_messages(
                         rotation,
                     });
                 }
-                ServerMessage::Direction { id, direction, facing } => {
-                    update_direction_event_writer.send(UpdateDirectionEvent { id, direction, facing });
+                ServerMessage::Direction { id, direction } => {
+                    update_direction_event_writer.send(UpdateDirectionEvent { id, direction });
+                }
+                ServerMessage::Facing { id, facing } => {
+                    update_facing_event_writer.send(UpdateFacingEvent { id, facing });
                 }
                 ServerMessage::Despawn { id } => {
                     despawn_event_writer.send(DespawnEntityEvent { id });

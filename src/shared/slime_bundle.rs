@@ -4,7 +4,7 @@ use bevy_rapier2d::prelude::{
     Collider, Damping, ExternalImpulse, KinematicCharacterController, LockedAxes, RigidBody,
 };
 
-use crate::direction::{Direction, FacingDirection, Move};
+use crate::direction::{Direction, Facing, Move};
 use crate::health::Health;
 use crate::server_entities::NetworkServerEntity;
 
@@ -21,6 +21,7 @@ pub struct SlimeBundle {
     pub transform: TransformBundle,
     pub server_entity: NetworkServerEntity,
     pub move_component: Move,
+    pub facing: Facing,
     pub rotation_constraints: LockedAxes,
     pub external_force: ExternalImpulse,
     pub health: Health,
@@ -44,8 +45,8 @@ impl SlimeBundle {
             },
             move_component: Move {
                 direction: Direction::Idling,
-                facing: FacingDirection::Down,
             },
+            facing: Facing { angle: 0.0 },
             rotation_constraints: LockedAxes::ROTATION_LOCKED,
             external_force: ExternalImpulse {
                 impulse: Vec2::ZERO,

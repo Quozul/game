@@ -15,12 +15,13 @@ use shared::direction::handle_move;
 use shared::map::spawn_map;
 use shared::FIXED_TIMESTEP;
 
+use crate::animations::entity_animations::flip_animation;
 use crate::camera_follow::camera_follow;
 use crate::client::{
     clean_server_entities, close_connection, handle_server_messages, on_connecting,
     on_disconnected, setup_in_game,
 };
-use crate::controls::{add_controller_to_self_player, attack, controls, Action};
+use crate::controls::{add_controller_to_self_player, attack, controls, mouse_controls, Action};
 use crate::display_health::display_health;
 use crate::menu::{display_network_stats, setup_assets, ui_example_system, AssetsLoading, UiState};
 use crate::message_handlers::despawn_player::{handle_entity_despawn, DespawnEntityEvent};
@@ -30,6 +31,7 @@ use crate::message_handlers::spawn_slime::{handle_slime_spawn, SpawnSlimeEvent};
 use crate::message_handlers::update_direction::{
     handle_update_direction_event, UpdateDirectionEvent,
 };
+use crate::message_handlers::update_facing::{handle_update_facing_event, UpdateFacingEvent};
 use crate::message_handlers::update_position::{handle_update_position_event, UpdatePositionEvent};
 use animations::animate::animate;
 use animations::entity_animations::{update_player_animation, update_slime_animation};
@@ -72,6 +74,7 @@ fn main() {
         .add_event::<DespawnEntityEvent>()
         .add_event::<HealthChangedEvent>()
         .add_event::<SpawnSlimeEvent>()
+        .add_event::<UpdateFacingEvent>()
         .init_resource::<UiState>()
         .insert_resource(AssetsLoading {
             slime: None,
@@ -108,8 +111,11 @@ fn main() {
                 add_controller_to_self_player,
                 attack,
                 controls,
+                mouse_controls,
+                flip_animation,
                 update_player_animation,
                 update_slime_animation,
+                handle_update_facing_event,
                 animate,
                 handle_player_spawn,
                 handle_update_direction_event,

@@ -7,7 +7,7 @@ use rand::{thread_rng, Rng};
 
 use crate::health::Health;
 use crate::messages::{ClientMessage, ServerMessage};
-use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
+use crate::server::message_events::{ClientConnectedEvent, ClientFacingEvent, ClientMoveEvent};
 use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
 use crate::slime_bundle::{Slime, SlimeBundle};
 
@@ -57,6 +57,7 @@ pub(crate) fn handle_client_messages(
     mut server: ResMut<Server>,
     mut client_connected_writer: EventWriter<ClientConnectedEvent>,
     mut client_move_writer: EventWriter<ClientMoveEvent>,
+    mut client_facing_writer: EventWriter<ClientFacingEvent>,
 ) {
     if let Some(endpoint) = server.get_endpoint_mut() {
         for client_id in endpoint.clients() {
@@ -66,12 +67,14 @@ pub(crate) fn handle_client_messages(
                     ClientMessage::Connected => {
                         client_connected_writer.send(ClientConnectedEvent { client_id });
                     }
-                    ClientMessage::Move { direction, facing } => {
+                    ClientMessage::Move { direction } => {
                         client_move_writer.send(ClientMoveEvent {
                             client_id,
                             direction,
-                            facing,
                         });
+                    }
+                    ClientMessage::Facing { facing } => {
+                        client_facing_writer.send(ClientFacingEvent { client_id, facing });
                     }
                 }
             }

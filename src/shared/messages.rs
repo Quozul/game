@@ -1,4 +1,4 @@
-use crate::direction::{Direction, FacingDirection};
+use crate::direction::Direction;
 use bevy::prelude::{Quat, Vec3};
 use serde::{Deserialize, Serialize};
 
@@ -18,7 +18,10 @@ pub enum ServerMessage {
     Direction {
         id: u64,
         direction: Direction,
-        facing: FacingDirection,
+    },
+    Facing {
+        id: u64,
+        facing: f32,
     },
     Despawn {
         id: u64,
@@ -37,8 +40,6 @@ pub enum ServerMessage {
 #[derive(Deserialize, Serialize)]
 pub enum ClientMessage {
     Connected,
-    Move {
-        direction: Direction,
-        facing: FacingDirection,
-    },
+    Move { direction: Direction },
+    Facing { facing: f32 },
 }

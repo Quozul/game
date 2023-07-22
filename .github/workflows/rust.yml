@@ -6,6 +6,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  binary: game
 
 jobs:
   build-linux:
@@ -14,7 +15,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update; sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
+
+      - name: Cache
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/bin/
@@ -23,14 +30,26 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Build
-        run: cargo build --verbose --release --locked --bin client
-      - uses: actions/upload-artifact@v3
+        run: cargo build --verbose --release --locked --bin client --target x86_64-unknown-linux-gnu
+
+      - name: Prepare package
+        run: |
+          mkdir linux
+          cp target/x86_64-unknown-linux-gnu/release/${{ env.binary }} linux/
+          cp -r assets linux/
+
+      - name: Package as a zip
+        working-directory: ./linux
+        run: |
+          zip --recurse-paths ../${{ env.binary }}.zip .
+
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: game-client
-          path: |
-            target/release/client
-            assets
+          path: ${{ env.binary }}.zip
+          name: linux
 
   build-windows:
 
@@ -38,7 +57,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/cache@v3
+
+      - name: Cache
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cargo/bin/
@@ -47,11 +68,22 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
       - name: Build
-        run: cargo build --verbose --release --locked --bin client
-      - uses: actions/upload-artifact@v3
+        run: cargo build --verbose --release --locked --bin client --target x86_64-pc-windows-msvc
+
+      - name: Prepare package
+        run: |
+          mkdir windows
+          cp target/x86_64-pc-windows-msvc/release/${{ env.binary }}.exe windows/
+          cp -r assets windows/
+
+      - name: Package as a zip
+        run: |
+          Compress-Archive -Path windows/* -DestinationPath ${{ env.binary }}.zip
+
+      - name: Upload binaries to artifacts
+        uses: actions/upload-artifact@v3
         with:
-          name: game-client
-          path: |
-            target/release/client
-            assets
+          path: ${{ env.binary }}.zip
+          name: windows

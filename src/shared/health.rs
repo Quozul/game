@@ -4,8 +4,10 @@ use bevy::prelude::{
 };
 use bevy_quinnet::server::Server;
 use bevy_rapier2d::prelude::{ExternalImpulse, QueryFilter, RapierContext};
+use rand::Rng;
+use std::f32::consts::PI;
 
-use crate::direction::Move;
+use crate::direction::{Facing, Move};
 use crate::messages::ServerMessage;
 use crate::server_entities::NetworkServerEntity;
 use crate::slime_bundle::Slime;
@@ -17,13 +19,13 @@ pub struct Health {
 
 pub fn attack_enemies(
     rapier_context: Res<RapierContext>,
-    player_query: Query<(Entity, &Transform, &Move), Changed<Move>>,
+    player_query: Query<(Entity, &Transform, &Move, &Facing), Changed<Move>>,
     mut enemy_query: Query<(&mut ExternalImpulse, &mut Health)>,
 ) {
-    for (entity, transform, move_component) in &player_query {
+    for (entity, transform, move_component, facing) in &player_query {
         if move_component.direction.is_attacking() {
             let ray_pos = Vec2::new(transform.translation.x, transform.translation.y);
-            let ray_dir = move_component.facing.to_vec();
+            let ray_dir = facing.to_vec();
             let max_toi = 50.0;
             let solid = true;
             let filter = QueryFilter::exclude_fixed().exclude_collider(entity);
@@ -44,13 +46,19 @@ pub fn attack_enemies(
     }
 }
 
-pub(crate) fn slime_attack(time: Res<Time>, mut query: Query<(&mut Move, &mut Slime)>) {
-    for (mut move_component, mut slime) in &mut query {
+pub(crate) fn slime_attack(
+    time: Res<Time>,
+    mut query: Query<(&mut Move, &mut Facing, &mut Slime)>,
+) {
+    let mut rng = rand::thread_rng();
+
+    for (mut move_component, mut facing, mut slime) in &mut query {
         slime.last_attack.tick(time.delta());
 
         if slime.last_attack.finished() {
             slime.last_attack.reset();
             move_component.direction = rand::random();
+            facing.angle = rng.gen_range(-PI..PI);
         }
     }
 }

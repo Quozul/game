@@ -10,7 +10,21 @@ use serde::{Deserialize, Serialize};
 #[derive(Component)]
 pub struct Move {
     pub direction: Direction,
-    pub facing: FacingDirection,
+}
+
+#[derive(Component)]
+pub struct Facing {
+    pub angle: f32,
+}
+
+impl Facing {
+    pub fn facing_direction(&self) -> FacingDirection {
+        FacingDirection::from_angle(self.angle)
+    }
+
+    pub fn to_vec(&self) -> Vec2 {
+        Vec2::new(self.angle.cos(), self.angle.sin())
+    }
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Copy, Clone, Debug)]
@@ -78,7 +92,7 @@ impl Distribution<FacingDirection> for Standard {
 
 #[derive(Deserialize, Serialize, PartialEq, Copy, Clone, Debug)]
 pub enum Direction {
-    Move { facing: FacingDirection },
+    Move { facing: Vec2 },
     Idling,
     Attacking,
 }
@@ -86,14 +100,21 @@ pub enum Direction {
 impl Direction {
     pub fn get_vec(&self) -> Option<Vec2> {
         match self {
-            Direction::Move { facing } => Some(facing.to_vec()),
+            Direction::Move { facing } => Some(*facing),
             _ => None,
+        }
+    }
+
+    pub fn to_vec(&self) -> Vec2 {
+        match self {
+            Direction::Move { facing } => *facing,
+            _ => Vec2::ZERO,
         }
     }
 
     pub fn to_facing_direction(&self) -> FacingDirection {
         match self {
-            Direction::Move { facing } => *facing,
+            Direction::Move { facing: vec } => FacingDirection::from_angle(vec.y.atan2(vec.x)),
             _ => FacingDirection::Down,
         }
     }
@@ -108,9 +129,9 @@ impl Direction {
 
 impl Distribution<Direction> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Direction {
-        match rng.gen_range(0..=5) {
+        match rng.gen_range(0..=2) {
             0 => Direction::Move {
-                facing: rand::random(),
+                facing: Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize(),
             },
             1 => Direction::Idling,
             _ => Direction::Attacking,

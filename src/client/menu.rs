@@ -49,8 +49,8 @@ pub(crate) fn display_network_stats(mut contexts: EguiContexts, client: ResMut<C
 
     if let Some(connection) = client.get_connection() && let Some(stats) = connection.stats() {
         egui::Window::new("Network stats").show(ctx, |ui| {
-            ui.label(format!("udp_rx {} msgs", stats.udp_rx.datagrams));
-            ui.label(format!("udp_tx {} msgs", stats.udp_tx.datagrams));
+            ui.label(format!("udp_rx {:.2} kB", stats.udp_rx.bytes as f32 / 8.0 / 1000.0));
+            ui.label(format!("udp_tx {:.2} kB", stats.udp_tx.bytes as f32 / 8.0 / 1000.0));
             ui.label(format!("ping {} ms", stats.frame_rx.ping));
         });
     }

@@ -1,10 +1,10 @@
 use bevy::prelude::*;
 use bevy_quinnet::server::Server;
 
-use crate::direction::Move;
+use crate::direction::{Facing, Move};
 use crate::messages::ServerMessage;
 use crate::player_bundle::PlayerBundle;
-use crate::server::message_events::{ClientConnectedEvent, ClientMoveEvent};
+use crate::server::message_events::{ClientConnectedEvent, ClientFacingEvent, ClientMoveEvent};
 use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
 use crate::slime_bundle::Slime;
 
@@ -81,7 +81,20 @@ pub(crate) fn handle_client_move(
         for (server_entity, mut move_component) in &mut query {
             if server_entity.client_id == Some(event.client_id) {
                 move_component.direction = event.direction;
-                move_component.facing = event.facing;
+                break;
+            }
+        }
+    }
+}
+
+pub(crate) fn handle_client_facing(
+    mut client_connected_reader: EventReader<ClientFacingEvent>,
+    mut query: Query<(&NetworkServerEntity, &mut Facing)>,
+) {
+    for event in client_connected_reader.iter() {
+        for (server_entity, mut facing) in &mut query {
+            if server_entity.client_id == Some(event.client_id) {
+                facing.angle = event.facing;
                 break;
             }
         }
@@ -97,7 +110,20 @@ pub(crate) fn send_direction(
             endpoint.try_broadcast_message(ServerMessage::Direction {
                 id: server_entity.id,
                 direction: move_component.direction,
-                facing: move_component.facing,
+            });
+        }
+    }
+}
+
+pub(crate) fn send_facing(
+    mut server: ResMut<Server>,
+    mut query: Query<(&NetworkServerEntity, &Facing), Changed<Facing>>,
+) {
+    if let Some(endpoint) = server.get_endpoint_mut() {
+        for (server_entity, facing) in &mut query {
+            endpoint.try_broadcast_message(ServerMessage::Facing {
+                id: server_entity.id,
+                facing: facing.angle,
             });
         }
     }
