@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_quinnet::client::Client;
 use leafwing_input_manager::prelude::*;
 
-use shared::direction::{Direction, Facing, Move};
+use shared::direction::{Direction, Move, Rotation};
 use shared::health::timer_from_frame_count;
 use shared::messages::ClientMessage;
 
@@ -96,12 +96,14 @@ pub(crate) fn controls(
                 Direction::Idling
             };
 
-            move_component.direction = direction;
+            if direction != move_component.direction {
+                move_component.direction = direction;
 
-            if let Some(connection) = client.get_connection_mut() {
-                connection.try_send_message(ClientMessage::Move {
-                    direction: move_component.direction,
-                });
+                if let Some(connection) = client.get_connection_mut() {
+                    connection.try_send_message(ClientMessage::Move {
+                        direction: move_component.direction,
+                    });
+                }
             }
         }
     }
@@ -110,7 +112,7 @@ pub(crate) fn controls(
 pub(crate) fn mouse_controls(
     my_id: Res<MyId>,
     mut client: ResMut<Client>,
-    mut query: Query<(&Transform, &mut Facing, &Move)>,
+    mut query: Query<(&Transform, &mut Rotation, &Move)>,
     windows: Query<&Window>,
     camera_q: Query<(&Camera, &GlobalTransform), With<FollowSubject>>,
 ) {

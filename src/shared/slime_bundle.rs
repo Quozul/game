@@ -4,8 +4,8 @@ use bevy_rapier2d::prelude::{
     Collider, Damping, ExternalImpulse, KinematicCharacterController, LockedAxes, RigidBody,
 };
 
-use crate::direction::{Direction, Facing, Move};
-use crate::health::{timer_from_frame_count, DeadState, Health};
+use crate::direction::{Direction, Move, Rotation};
+use crate::health::Health;
 use crate::server_entities::NetworkServerEntity;
 
 #[derive(Component)]
@@ -21,13 +21,12 @@ pub struct SlimeBundle {
     pub transform: TransformBundle,
     pub server_entity: NetworkServerEntity,
     pub move_component: Move,
-    pub facing: Facing,
+    pub facing: Rotation,
     pub rotation_constraints: LockedAxes,
     pub external_force: ExternalImpulse,
     pub health: Health,
     pub damping: Damping,
     pub slime: Slime,
-    pub dead_state: DeadState,
 }
 
 impl SlimeBundle {
@@ -47,7 +46,7 @@ impl SlimeBundle {
             move_component: Move {
                 direction: Direction::Idling,
             },
-            facing: Facing { angle: 0.0 },
+            facing: Rotation { angle: 0.0 },
             rotation_constraints: LockedAxes::ROTATION_LOCKED,
             external_force: ExternalImpulse {
                 impulse: Vec2::ZERO,
@@ -60,9 +59,6 @@ impl SlimeBundle {
             },
             slime: Slime {
                 last_attack: Timer::from_seconds(1.0, TimerMode::Once),
-            },
-            dead_state: DeadState {
-                elapsed: timer_from_frame_count(5),
             },
         }
     }

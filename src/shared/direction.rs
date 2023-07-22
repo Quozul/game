@@ -13,11 +13,11 @@ pub struct Move {
 }
 
 #[derive(Component)]
-pub struct Facing {
+pub struct Rotation {
     pub angle: f32,
 }
 
-impl Facing {
+impl Rotation {
     pub fn facing_direction(&self) -> FacingDirection {
         FacingDirection::from_angle(self.angle)
     }

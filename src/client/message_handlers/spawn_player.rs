@@ -1,5 +1,6 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
+use shared::direction::FacingDirection;
 
 use shared::player_bundle::PlayerBundle;
 
@@ -24,6 +25,11 @@ pub(crate) struct HealthDisplay {
 #[derive(Component)]
 pub(crate) struct Texture {
     pub(crate) texture: Entity,
+}
+
+#[derive(Component)]
+pub(crate) struct FacingDirectionComponent {
+    pub(crate) direction: FacingDirection,
 }
 
 pub(crate) fn handle_player_spawn(
@@ -84,6 +90,9 @@ pub(crate) fn handle_player_spawn(
                 display: health_display,
             })
             .insert(Texture { texture })
+            .insert(FacingDirectionComponent {
+                direction: FacingDirection::Down,
+            })
             .add_child(health_display)
             .add_child(texture)
             .id();

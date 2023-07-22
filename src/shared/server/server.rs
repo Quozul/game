@@ -5,7 +5,7 @@ use bevy_quinnet::server::certificate::CertificateRetrievalMode;
 use bevy_quinnet::server::{Server, ServerConfiguration};
 use rand::{thread_rng, Rng};
 
-use crate::health::Health;
+use crate::health::{timer_from_frame_count, DeadState, Health};
 use crate::messages::{ClientMessage, ServerMessage};
 use crate::server::message_events::{ClientConnectedEvent, ClientFacingEvent, ClientMoveEvent};
 use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
@@ -108,13 +108,17 @@ pub(crate) fn spawn_slime(
     mut server: ResMut<Server>,
     query: Query<&Slime>,
 ) {
-    if query.iter().count() < 3 {
+    if query.iter().count() < 0 {
         let id = static_server_entity.next_id();
         let mut rng = thread_rng();
         let x = rng.gen_range(-50.0..50.0);
         let y = rng.gen_range(-50.0..50.0);
 
-        commands.spawn(SlimeBundle::from_spawn_event(id, x, y));
+        commands
+            .spawn(SlimeBundle::from_spawn_event(id, x, y))
+            .insert(DeadState {
+                elapsed: timer_from_frame_count(5),
+            });
 
         if let Some(endpoint) = server.get_endpoint_mut() {
             endpoint.try_broadcast_message(ServerMessage::SpawnSlime { id, x, y });

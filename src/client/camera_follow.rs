@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use shared::direction::Facing;
+use shared::direction::Rotation;
 
 use crate::MyId;
 
@@ -11,7 +11,7 @@ pub(crate) fn camera_follow(
     time: Res<Time>,
     my_id: ResMut<MyId>,
     mut camera_query: Query<&mut Transform, With<FollowSubject>>,
-    player_query: Query<(&Facing, &Transform), Without<FollowSubject>>,
+    player_query: Query<(&Rotation, &Transform), Without<FollowSubject>>,
 ) {
     if let Some(player) = my_id.entity {
         let speed = time.delta_seconds() * 5.0;

@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_quinnet::server::Server;
 
-use crate::direction::{Direction, Facing, Move};
+use crate::direction::{Direction, Move, Rotation};
+use crate::health::{timer_from_frame_count, DeadState};
 use crate::messages::ServerMessage;
 use crate::player_bundle::PlayerBundle;
 use crate::server::message_events::{ClientConnectedEvent, ClientFacingEvent, ClientMoveEvent};
@@ -23,12 +24,16 @@ pub(crate) fn handle_client_connected(
             let y = 50.0;
 
             // Spawn the player
-            commands.spawn(PlayerBundle::from_spawn_event(
-                id,
-                Some(event.client_id),
-                x,
-                y,
-            ));
+            commands
+                .spawn(PlayerBundle::from_spawn_event(
+                    id,
+                    Some(event.client_id),
+                    x,
+                    y,
+                ))
+                .insert(DeadState {
+                    elapsed: timer_from_frame_count(3),
+                });
 
             // Send all players to the new player
             for (server_entity, transform) in &query {
@@ -91,7 +96,7 @@ pub(crate) fn handle_client_move(
 
 pub(crate) fn handle_client_facing(
     mut client_connected_reader: EventReader<ClientFacingEvent>,
-    mut query: Query<(&NetworkServerEntity, &mut Facing)>,
+    mut query: Query<(&NetworkServerEntity, &mut Rotation)>,
 ) {
     for event in client_connected_reader.iter() {
         for (server_entity, mut facing) in &mut query {
@@ -119,7 +124,7 @@ pub(crate) fn send_direction(
 
 pub(crate) fn send_facing(
     mut server: ResMut<Server>,
-    mut query: Query<(&NetworkServerEntity, &Facing), Changed<Facing>>,
+    mut query: Query<(&NetworkServerEntity, &Rotation), Changed<Rotation>>,
 ) {
     if let Some(endpoint) = server.get_endpoint_mut() {
         for (server_entity, facing) in &mut query {

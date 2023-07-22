@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_quinnet::shared::ClientId;
-use shared::direction::Facing;
+use shared::direction::Rotation;
 
 use shared::server_entities::NetworkServerEntity;
 
@@ -11,7 +11,7 @@ pub(crate) struct UpdateFacingEvent {
 }
 
 pub(crate) fn handle_update_facing_event(
-    mut query: Query<(&NetworkServerEntity, &mut Facing)>,
+    mut query: Query<(&NetworkServerEntity, &mut Rotation)>,
     mut event_reader: EventReader<UpdateFacingEvent>,
 ) {
     for event in event_reader.iter() {

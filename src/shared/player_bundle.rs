@@ -4,8 +4,8 @@ use bevy_rapier2d::prelude::{
     Collider, Damping, ExternalImpulse, KinematicCharacterController, LockedAxes, RigidBody,
 };
 
-use crate::direction::{Direction, Facing, Move};
-use crate::health::{timer_from_frame_count, DeadState, Health};
+use crate::direction::{Direction, Move, Rotation};
+use crate::health::Health;
 use crate::server_entities::NetworkServerEntity;
 
 #[derive(Component)]
@@ -19,13 +19,12 @@ pub struct PlayerBundle {
     pub transform: TransformBundle,
     pub network_server_entity: NetworkServerEntity,
     pub move_component: Move,
-    pub facing: Facing,
+    pub facing: Rotation,
     pub rotation_constraints: LockedAxes,
     pub external_force: ExternalImpulse,
     pub health: Health,
     pub damping: Damping,
     pub player: Player,
-    pub dead_state: DeadState,
 }
 
 impl PlayerBundle {
@@ -42,7 +41,7 @@ impl PlayerBundle {
             move_component: Move {
                 direction: Direction::Idling,
             },
-            facing: Facing { angle: 0.0 },
+            facing: Rotation { angle: 0.0 },
             rotation_constraints: LockedAxes::ROTATION_LOCKED,
             external_force: ExternalImpulse {
                 impulse: Vec2::ZERO,
@@ -54,9 +53,6 @@ impl PlayerBundle {
                 angular_damping: 10.0,
             },
             player: Player {},
-            dead_state: DeadState {
-                elapsed: timer_from_frame_count(3),
-            },
         }
     }
 }

@@ -15,7 +15,7 @@ use shared::direction::handle_move;
 use shared::map::spawn_map;
 use shared::FIXED_TIMESTEP;
 
-use crate::animations::entity_animations::flip_animation;
+use crate::animations::entity_animations::{flip_animation, update_facing_direction};
 use crate::camera_follow::camera_follow;
 use crate::client::{
     clean_server_entities, close_connection, handle_server_messages, on_connecting,
@@ -113,6 +113,7 @@ fn main() {
                 controls,
                 mouse_controls,
                 flip_animation,
+                update_facing_direction,
                 update_player_animation,
                 update_slime_animation,
                 handle_update_facing_event,

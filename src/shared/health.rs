@@ -7,7 +7,7 @@ use bevy_rapier2d::prelude::{ExternalImpulse, QueryFilter, RapierContext};
 use rand::Rng;
 use std::f32::consts::PI;
 
-use crate::direction::{Direction, Facing, Move};
+use crate::direction::{Direction, Move, Rotation};
 use crate::messages::ServerMessage;
 use crate::server_entities::NetworkServerEntity;
 use crate::slime_bundle::Slime;
@@ -19,7 +19,7 @@ pub struct Health {
 
 pub fn attack_enemies(
     rapier_context: Res<RapierContext>,
-    player_query: Query<(Entity, &Transform, &Move, &Facing), Changed<Move>>,
+    player_query: Query<(Entity, &Transform, &Move, &Rotation), Changed<Move>>,
     mut enemy_query: Query<(&mut ExternalImpulse, &mut Health)>,
 ) {
     for (entity, transform, move_component, facing) in &player_query {
@@ -48,7 +48,7 @@ pub fn attack_enemies(
 
 pub(crate) fn slime_attack(
     time: Res<Time>,
-    mut query: Query<(&mut Move, &mut Facing, &mut Slime)>,
+    mut query: Query<(&mut Move, &mut Rotation, &mut Slime)>,
 ) {
     let mut rng = rand::thread_rng();
 
