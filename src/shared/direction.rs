@@ -113,10 +113,12 @@ impl Direction {
         }
     }
 
-    pub fn to_facing_direction(&self) -> FacingDirection {
+    pub fn get_facing_direction(&self) -> Option<FacingDirection> {
         match self {
-            Direction::Move { facing: vec } => FacingDirection::from_angle(vec.y.atan2(vec.x)),
-            _ => FacingDirection::Down,
+            Direction::Move { facing: vec } => {
+                Some(FacingDirection::from_angle(vec.y.atan2(vec.x)))
+            }
+            _ => None,
         }
     }
 

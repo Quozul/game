@@ -36,8 +36,11 @@ pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<M
             let mut input_map = InputMap::default();
 
             input_map.insert(MouseButton::Left, Action::Attacking);
+            input_map.insert(KeyCode::Space, Action::Attacking);
+            input_map.insert(GamepadButtonType::South, Action::Attacking);
 
             input_map.insert(VirtualDPad::arrow_keys(), Action::Move);
+            input_map.insert(DualAxis::left_stick(), Action::Move);
             input_map.insert(
                 VirtualDPad {
                     up: KeyCode::Z.into(),
@@ -107,31 +110,37 @@ pub(crate) fn controls(
 pub(crate) fn mouse_controls(
     my_id: Res<MyId>,
     mut client: ResMut<Client>,
-    mut query: Query<(&Transform, &mut Facing)>,
+    mut query: Query<(&Transform, &mut Facing, &Move)>,
     windows: Query<&Window>,
     camera_q: Query<(&Camera, &GlobalTransform), With<FollowSubject>>,
 ) {
     if let Some(entity) = my_id.entity {
-        if let Ok((transform, mut facing)) = query.get_mut(entity) {
+        if let Ok((transform, mut facing, move_component)) = query.get_mut(entity) {
             if let Ok(window) = windows.get_single() {
                 let (camera, camera_transform) = camera_q.single();
 
-                if let Some(world_position) = window
+                let angle = if let Some(world_position) = window
                     .cursor_position()
                     .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor))
                     .map(|ray| ray.origin.truncate())
                 {
-                    let angle = (world_position.y - transform.translation.y)
-                        .atan2(world_position.x - transform.translation.x);
+                    Some(
+                        (world_position.y - transform.translation.y)
+                            .atan2(world_position.x - transform.translation.x),
+                    )
+                } else if let Some(direction) = move_component.direction.get_facing_direction() {
+                    Some(direction.to_angle())
+                } else {
+                    None
+                };
 
-                    if (facing.angle - angle).abs() > 0.1 {
-                        facing.angle = angle;
+                if let Some(angle) = angle && (facing.angle - angle).abs() > 0.1 {
+                    facing.angle = angle;
 
-                        if let Some(connection) = client.get_connection_mut() {
-                            connection.try_send_message(ClientMessage::Facing {
-                                facing: facing.angle,
-                            });
-                        }
+                    if let Some(connection) = client.get_connection_mut() {
+                        connection.try_send_message(ClientMessage::Facing {
+                            facing: facing.angle,
+                        });
                     }
                 }
             }
