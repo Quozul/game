@@ -43,9 +43,8 @@ impl SlimeBundle {
                 client_id: None,
             },
             move_component: Move {
-                direction: Direction::Idling {
-                    direction: FacingDirection::Down,
-                },
+                direction: Direction::Idling,
+                facing: FacingDirection::Down,
             },
             rotation_constraints: LockedAxes::ROTATION_LOCKED,
             external_force: ExternalImpulse {

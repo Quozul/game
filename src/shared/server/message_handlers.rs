@@ -81,6 +81,7 @@ pub(crate) fn handle_client_move(
         for (server_entity, mut move_component) in &mut query {
             if server_entity.client_id == Some(event.client_id) {
                 move_component.direction = event.direction;
+                move_component.facing = event.facing;
                 break;
             }
         }
@@ -96,6 +97,7 @@ pub(crate) fn send_direction(
             endpoint.try_broadcast_message(ServerMessage::Direction {
                 id: server_entity.id,
                 direction: move_component.direction,
+                facing: move_component.facing,
             });
         }
     }

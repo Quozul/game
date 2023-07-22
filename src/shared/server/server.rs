@@ -66,10 +66,11 @@ pub(crate) fn handle_client_messages(
                     ClientMessage::Connected => {
                         client_connected_writer.send(ClientConnectedEvent { client_id });
                     }
-                    ClientMessage::Move { direction } => {
+                    ClientMessage::Move { direction, facing } => {
                         client_move_writer.send(ClientMoveEvent {
                             client_id,
                             direction,
+                            facing,
                         });
                     }
                 }

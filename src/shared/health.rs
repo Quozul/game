@@ -23,7 +23,7 @@ pub fn attack_enemies(
     for (entity, transform, move_component) in &player_query {
         if move_component.direction.is_attacking() {
             let ray_pos = Vec2::new(transform.translation.x, transform.translation.y);
-            let ray_dir = move_component.direction.to_facing_direction().to_vec();
+            let ray_dir = move_component.facing.to_vec();
             let max_toi = 50.0;
             let solid = true;
             let filter = QueryFilter::exclude_fixed().exclude_collider(entity);

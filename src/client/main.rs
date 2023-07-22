@@ -119,8 +119,9 @@ fn main() {
                 handle_slime_spawn,
                 display_network_stats,
                 display_health,
+                handle_move,
             ),
         )
-        .add_systems(FixedUpdate, (handle_server_messages, handle_move))
+        .add_systems(FixedUpdate, handle_server_messages)
         .run();
 }

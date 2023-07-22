@@ -38,9 +38,8 @@ impl PlayerBundle {
             transform: TransformBundle::from(Transform::from_xyz(x, y, 0.0)),
             network_server_entity: NetworkServerEntity { id, client_id },
             move_component: Move {
-                direction: Direction::Idling {
-                    direction: FacingDirection::Down,
-                },
+                direction: Direction::Idling,
+                facing: FacingDirection::Down,
             },
             rotation_constraints: LockedAxes::ROTATION_LOCKED,
             external_force: ExternalImpulse {

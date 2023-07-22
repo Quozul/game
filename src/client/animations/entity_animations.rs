@@ -14,27 +14,43 @@ pub(crate) fn update_player_animation(
 ) {
     for (texture, move_component) in &query {
         if let Ok((mut animation, mut data, mut state)) = animation_query.get_mut(texture.texture) {
-            if let Some(flip_x) = move_component.direction.to_facing_direction().should_flip() {
-                data.flip_x = flip_x;
-            }
-
             let frames = match move_component.direction {
-                Direction::Up => 30..=33,
-                Direction::Left => 24..=29,
-                Direction::Right => 24..=29,
-                Direction::Down => 18..=23,
-                Direction::Idling { direction } => match direction {
-                    FacingDirection::Up => 12..=17,
-                    FacingDirection::Down => 0..=5,
-                    FacingDirection::Left => 6..=11,
-                    FacingDirection::Right => 6..=11,
-                },
-                Direction::Attacking { direction } => match direction {
-                    FacingDirection::Up => 48..=51,
-                    FacingDirection::Left => 42..=45,
-                    FacingDirection::Right => 42..=45,
-                    FacingDirection::Down => 36..=39,
-                },
+                Direction::Move { facing } => {
+                    if let Some(flip_x) = facing.should_flip() {
+                        data.flip_x = flip_x;
+                    }
+
+                    match facing {
+                        FacingDirection::Up => 30..=33,
+                        FacingDirection::Left => 24..=29,
+                        FacingDirection::Right => 24..=29,
+                        FacingDirection::Down => 18..=23,
+                    }
+                }
+                Direction::Idling => {
+                    if let Some(flip_x) = move_component.facing.should_flip() {
+                        data.flip_x = flip_x;
+                    }
+
+                    match move_component.facing {
+                        FacingDirection::Up => 12..=17,
+                        FacingDirection::Down => 0..=5,
+                        FacingDirection::Left => 6..=11,
+                        FacingDirection::Right => 6..=11,
+                    }
+                }
+                Direction::Attacking => {
+                    if let Some(flip_x) = move_component.facing.should_flip() {
+                        data.flip_x = flip_x;
+                    }
+
+                    match move_component.facing {
+                        FacingDirection::Up => 48..=51,
+                        FacingDirection::Left => 42..=45,
+                        FacingDirection::Right => 42..=45,
+                        FacingDirection::Down => 36..=39,
+                    }
+                }
             };
 
             animation.0 = benimator::Animation::from_indices(frames, FrameRate::from_fps(10.0));
@@ -50,15 +66,12 @@ pub(crate) fn update_slime_animation(
 ) {
     for (texture, move_component) in &query {
         if let Ok((mut animation, mut data, mut state)) = animation_query.get_mut(texture.texture) {
-            if let Some(flip_x) = move_component.direction.to_facing_direction().should_flip() {
+            if let Some(flip_x) = move_component.facing.should_flip() {
                 data.flip_x = flip_x;
             }
 
             let frames = match move_component.direction {
-                Direction::Up => 7..=12,
-                Direction::Left => 7..=12,
-                Direction::Right => 7..=12,
-                Direction::Down => 7..=12,
+                Direction::Move { .. } => 7..=12,
                 Direction::Idling { .. } => 0..=3,
                 Direction::Attacking { .. } => 17..=20,
             };

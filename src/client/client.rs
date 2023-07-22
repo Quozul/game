@@ -114,8 +114,8 @@ pub(crate) fn handle_server_messages(
                         rotation,
                     });
                 }
-                ServerMessage::Direction { id, direction } => {
-                    update_direction_event_writer.send(UpdateDirectionEvent { id, direction });
+                ServerMessage::Direction { id, direction, facing } => {
+                    update_direction_event_writer.send(UpdateDirectionEvent { id, direction, facing });
                 }
                 ServerMessage::Despawn { id } => {
                     despawn_event_writer.send(DespawnEntityEvent { id });

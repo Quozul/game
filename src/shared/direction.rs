@@ -1,6 +1,6 @@
-use std::f32::consts::{FRAC_PI_2, FRAC_PI_4};
+use std::f32::consts::PI;
 
-use bevy::prelude::{Component, Query, Vec2};
+use bevy::prelude::{Component, Query, Res, Time, Vec2};
 use bevy_rapier2d::prelude::KinematicCharacterController;
 use rand::distributions::Standard;
 use rand::prelude::Distribution;
@@ -10,6 +10,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Component)]
 pub struct Move {
     pub direction: Direction,
+    pub facing: FacingDirection,
 }
 
 #[derive(Deserialize, Serialize, PartialEq, Copy, Clone, Debug)]
@@ -30,18 +31,23 @@ impl FacingDirection {
         }
     }
 
-    pub fn from_vec(vec: Vec2) -> FacingDirection {
-        let angle = vec.y.atan2(vec.x);
+    pub fn from_angle(angle: f32) -> FacingDirection {
+        let normalized_angle = (angle + 2.0 * PI) % (2.0 * PI);
 
-        if (-FRAC_PI_4..FRAC_PI_4).contains(&angle) {
+        if normalized_angle < PI / 4.0 || normalized_angle >= 7.0 * PI / 4.0 {
             FacingDirection::Right
-        } else if (FRAC_PI_4..FRAC_PI_2).contains(&angle) {
-            FacingDirection::Down
-        } else if !(-FRAC_PI_2..FRAC_PI_2).contains(&angle) {
+        } else if normalized_angle >= PI / 4.0 && normalized_angle < 3.0 * PI / 4.0 {
+            FacingDirection::Up
+        } else if normalized_angle >= 3.0 * PI / 4.0 && normalized_angle < 5.0 * PI / 4.0 {
             FacingDirection::Left
         } else {
-            FacingDirection::Up
+            FacingDirection::Down
         }
+    }
+
+    pub fn from_vec(vec: Vec2) -> FacingDirection {
+        let angle = vec.y.atan2(vec.x);
+        Self::from_angle(angle)
     }
 
     pub fn should_flip(&self) -> Option<bool> {
@@ -51,6 +57,11 @@ impl FacingDirection {
             FacingDirection::Right => Some(false),
             FacingDirection::Down => None,
         }
+    }
+
+    pub fn to_angle(&self) -> f32 {
+        let vec = self.to_vec();
+        vec.y.atan2(vec.x)
     }
 }
 
@@ -67,43 +78,23 @@ impl Distribution<FacingDirection> for Standard {
 
 #[derive(Deserialize, Serialize, PartialEq, Copy, Clone, Debug)]
 pub enum Direction {
-    Up,
-    Left,
-    Right,
-    Down,
-    Idling { direction: FacingDirection },
-    Attacking { direction: FacingDirection },
+    Move { facing: FacingDirection },
+    Idling,
+    Attacking,
 }
 
 impl Direction {
     pub fn get_vec(&self) -> Option<Vec2> {
         match self {
-            Direction::Up => Some(Vec2::new(0.0, 1.0)),
-            Direction::Left => Some(Vec2::new(-1.0, 0.0)),
-            Direction::Right => Some(Vec2::new(1.0, 0.0)),
-            Direction::Down => Some(Vec2::new(0.0, -1.0)),
+            Direction::Move { facing } => Some(facing.to_vec()),
             _ => None,
-        }
-    }
-
-    pub fn to_vec(&self) -> Vec2 {
-        match self {
-            Direction::Up => Vec2::new(0.0, 1.0),
-            Direction::Left => Vec2::new(-1.0, 0.0),
-            Direction::Right => Vec2::new(1.0, 0.0),
-            Direction::Down => Vec2::new(0.0, -1.0),
-            _ => Vec2::ZERO,
         }
     }
 
     pub fn to_facing_direction(&self) -> FacingDirection {
         match self {
-            Direction::Up => FacingDirection::Up,
-            Direction::Left => FacingDirection::Left,
-            Direction::Right => FacingDirection::Right,
-            Direction::Down => FacingDirection::Down,
-            Direction::Idling { direction } => *direction,
-            Direction::Attacking { direction } => *direction,
+            Direction::Move { facing } => *facing,
+            _ => FacingDirection::Down,
         }
     }
 
@@ -118,23 +109,23 @@ impl Direction {
 impl Distribution<Direction> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Direction {
         match rng.gen_range(0..=5) {
-            0 => Direction::Up,
-            1 => Direction::Left,
-            2 => Direction::Right,
-            3 => Direction::Down,
-            4 => Direction::Idling {
-                direction: rand::random(),
+            0 => Direction::Move {
+                facing: rand::random(),
             },
-            _ => Direction::Attacking {
-                direction: rand::random(),
-            },
+            1 => Direction::Idling,
+            _ => Direction::Attacking,
         }
     }
 }
 
-pub fn handle_move(mut query: Query<(&mut KinematicCharacterController, &Move)>) {
+const SPEED: f32 = 0.1;
+
+pub fn handle_move(time: Res<Time>, mut query: Query<(&mut KinematicCharacterController, &Move)>) {
     for (mut controller, move_component) in &mut query {
-        let vel = move_component.direction.get_vec();
-        controller.translation = vel;
+        if let Some(vel) = move_component.direction.get_vec() {
+            controller.translation = Some(vel * time.delta().as_millis() as f32 * SPEED);
+        } else {
+            controller.translation = None
+        }
     }
 }
