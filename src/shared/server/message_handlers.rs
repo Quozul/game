@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_quinnet::server::Server;
 
-use crate::direction::{Facing, Move};
+use crate::direction::{Direction, Facing, Move};
 use crate::messages::ServerMessage;
 use crate::player_bundle::PlayerBundle;
 use crate::server::message_events::{ClientConnectedEvent, ClientFacingEvent, ClientMoveEvent};
@@ -79,7 +79,9 @@ pub(crate) fn handle_client_move(
 ) {
     for event in client_connected_reader.iter() {
         for (server_entity, mut move_component) in &mut query {
-            if server_entity.client_id == Some(event.client_id) {
+            if server_entity.client_id == Some(event.client_id)
+                && move_component.direction != Direction::Dying
+            {
                 move_component.direction = event.direction;
                 break;
             }

@@ -1,24 +1,17 @@
 use bevy::prelude::*;
 use bevy_quinnet::client::Client;
 use leafwing_input_manager::prelude::*;
-use leafwing_input_manager::user_input::InputKind;
 
 use shared::direction::{Direction, Facing, Move};
+use shared::health::timer_from_frame_count;
 use shared::messages::ClientMessage;
 
 use crate::camera_follow::FollowSubject;
 use crate::MyId;
 
-fn timer_from_frame_count(frame_count: u8) -> Timer {
-    Timer::from_seconds(1.0 / 10.0 * frame_count as f32, TimerMode::Once)
-}
-
 #[derive(Actionlike, Clone, Copy, PartialEq, Eq, Hash, Debug, Reflect)]
 pub(crate) enum Action {
-    Left,
-    Right,
-    Up,
-    Down,
+    Move,
     Attacking,
 }
 
@@ -40,19 +33,25 @@ impl Default for AttackState {
 pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<MyId>) {
     if my_id.is_changed() {
         if let Some(entity) = my_id.entity {
-            commands
-                .entity(entity)
-                .insert(InputManagerBundle::<Action> {
-                    action_state: ActionState::default(),
-                    input_map: InputMap::new([
-                        (InputKind::Keyboard(KeyCode::Q), Action::Left),
-                        (InputKind::Keyboard(KeyCode::D), Action::Right),
-                        (InputKind::Keyboard(KeyCode::Z), Action::Up),
-                        (InputKind::Keyboard(KeyCode::S), Action::Down),
-                        (InputKind::Keyboard(KeyCode::Space), Action::Attacking),
-                        (InputKind::Mouse(MouseButton::Left), Action::Attacking),
-                    ]),
-                });
+            let mut input_map = InputMap::default();
+
+            input_map.insert(MouseButton::Left, Action::Attacking);
+
+            input_map.insert(VirtualDPad::arrow_keys(), Action::Move);
+            input_map.insert(
+                VirtualDPad {
+                    up: KeyCode::Z.into(),
+                    down: KeyCode::S.into(),
+                    left: KeyCode::Q.into(),
+                    right: KeyCode::D.into(),
+                },
+                Action::Move,
+            );
+
+            commands.entity(entity).insert(InputManagerBundle {
+                input_map,
+                ..Default::default()
+            });
         }
     }
 }
@@ -80,68 +79,26 @@ pub(crate) fn controls(
                 return;
             }
 
-            let any_pressed = action_state.pressed(Action::Up)
-                || action_state.pressed(Action::Right)
-                || action_state.pressed(Action::Left)
-                || action_state.pressed(Action::Down);
-            let any_just_released = action_state.just_released(Action::Up)
-                || action_state.just_released(Action::Right)
-                || action_state.just_released(Action::Left)
-                || action_state.just_released(Action::Down)
-                || attack_state.is_changed();
-            let any_just_pressed = action_state.just_pressed(Action::Up)
-                || action_state.just_pressed(Action::Right)
-                || action_state.just_pressed(Action::Left)
-                || action_state.just_pressed(Action::Down);
-
-            let mut vec = move_component.direction.to_vec();
-
-            if any_just_pressed || any_just_released {
-                if action_state.pressed(Action::Right) {
-                    vec.x = 1.0;
-                } else if action_state.pressed(Action::Left) {
-                    vec.x = -1.0;
-                } else {
-                    vec.x = 0.0;
-                }
-
-                if action_state.pressed(Action::Up) {
-                    vec.y = 1.0;
-                } else if action_state.pressed(Action::Down) {
-                    vec.y = -1.0;
-                } else {
-                    vec.y = 0.0;
-                }
-            } else {
-                vec = Vec2::ZERO;
-            }
-
-            let direction = if action_state.just_pressed(Action::Attacking)
-                || any_just_released && action_state.pressed(Action::Attacking)
-            {
+            let direction = if action_state.pressed(Action::Attacking) {
                 attack_state.is_attacking = true;
                 attack_state.elapsed.reset();
-                Some(Direction::Attacking)
-            } else if any_just_pressed || any_just_released && vec != Vec2::ZERO {
-                Some(Direction::Move {
-                    facing: vec.normalize(),
-                })
-            } else {
-                if any_just_released && !any_pressed {
-                    Some(Direction::Idling)
-                } else {
-                    None
+                Direction::Attacking
+            } else if action_state.pressed(Action::Move) {
+                let axis_pair = action_state.axis_pair(Action::Move).unwrap();
+
+                Direction::Move {
+                    facing: Vec2::new(axis_pair.x(), axis_pair.y()).normalize(),
                 }
+            } else {
+                Direction::Idling
             };
 
-            if let Some(direction) = direction {
-                move_component.direction = direction;
+            move_component.direction = direction;
 
-                if let Some(connection) = client.get_connection_mut() {
-                    connection.try_send_message(ClientMessage::Move {
-                        direction: move_component.direction,
-                    });
-                }
+            if let Some(connection) = client.get_connection_mut() {
+                connection.try_send_message(ClientMessage::Move {
+                    direction: move_component.direction,
+                });
             }
         }
     }

@@ -5,7 +5,7 @@ use bevy_rapier2d::prelude::{
 };
 
 use crate::direction::{Direction, Facing, Move};
-use crate::health::Health;
+use crate::health::{timer_from_frame_count, DeadState, Health};
 use crate::server_entities::NetworkServerEntity;
 
 #[derive(Component)]
@@ -27,6 +27,7 @@ pub struct SlimeBundle {
     pub health: Health,
     pub damping: Damping,
     pub slime: Slime,
+    pub dead_state: DeadState,
 }
 
 impl SlimeBundle {
@@ -59,6 +60,9 @@ impl SlimeBundle {
             },
             slime: Slime {
                 last_attack: Timer::from_seconds(1.0, TimerMode::Once),
+            },
+            dead_state: DeadState {
+                elapsed: timer_from_frame_count(5),
             },
         }
     }

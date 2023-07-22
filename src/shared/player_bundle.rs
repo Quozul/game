@@ -5,7 +5,7 @@ use bevy_rapier2d::prelude::{
 };
 
 use crate::direction::{Direction, Facing, Move};
-use crate::health::Health;
+use crate::health::{timer_from_frame_count, DeadState, Health};
 use crate::server_entities::NetworkServerEntity;
 
 #[derive(Component)]
@@ -25,6 +25,7 @@ pub struct PlayerBundle {
     pub health: Health,
     pub damping: Damping,
     pub player: Player,
+    pub dead_state: DeadState,
 }
 
 impl PlayerBundle {
@@ -53,6 +54,9 @@ impl PlayerBundle {
                 angular_damping: 10.0,
             },
             player: Player {},
+            dead_state: DeadState {
+                elapsed: timer_from_frame_count(3),
+            },
         }
     }
 }

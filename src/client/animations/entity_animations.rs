@@ -64,11 +64,14 @@ pub(crate) fn update_player_animation(
                     FacingDirection::Right => 42..=45,
                     FacingDirection::Down => 36..=39,
                 },
+                Direction::Dying => 54..=56,
             };
 
             animation.0 = benimator::Animation::from_indices(frames, FrameRate::from_fps(10.0));
 
-            if move_component.direction == Direction::Attacking {
+            if move_component.direction == Direction::Attacking
+                || move_component.direction == Direction::Dying
+            {
                 state.0.reset();
             }
         }
@@ -83,15 +86,14 @@ pub(crate) fn update_slime_animation(
         if let Ok((mut animation, mut state)) = animation_query.get_mut(texture.texture) {
             let frames = match move_component.direction {
                 Direction::Move { .. } => 7..=12,
-                Direction::Idling { .. } => 0..=3,
-                Direction::Attacking { .. } => 17..=20,
+                Direction::Idling => 0..=3,
+                Direction::Attacking => 17..=20,
+                Direction::Dying => 24..=30,
             };
 
             animation.0 = benimator::Animation::from_indices(frames, FrameRate::from_fps(10.0));
 
-            if move_component.direction == Direction::Attacking {
-                state.0.reset();
-            }
+            state.0.reset();
         }
     }
 }

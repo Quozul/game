@@ -95,6 +95,7 @@ pub enum Direction {
     Move { facing: Vec2 },
     Idling,
     Attacking,
+    Dying,
 }
 
 impl Direction {
