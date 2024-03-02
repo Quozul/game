@@ -89,7 +89,7 @@ fn main() {
             },
             ..default()
         })
-        .insert_resource(FixedTime::new_from_secs(FIXED_TIMESTEP))
+        .insert_resource(Time::<Fixed>::from_seconds(FIXED_TIMESTEP as f64))
         .insert_resource(MyId {
             id: 0,
             entity: None,

@@ -1,7 +1,7 @@
 use bevy::prelude::{Component, Resource};
 use bevy_quinnet::shared::ClientId;
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub(crate) struct StaticServerEntity {
     id: u64,
 }
@@ -9,13 +9,7 @@ pub(crate) struct StaticServerEntity {
 impl StaticServerEntity {
     pub fn next_id(&mut self) -> u64 {
         self.id += 1;
-        self.id.clone()
-    }
-}
-
-impl Default for StaticServerEntity {
-    fn default() -> Self {
-        StaticServerEntity { id: 0 }
+        self.id
     }
 }
 

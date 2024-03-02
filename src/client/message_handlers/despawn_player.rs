@@ -15,7 +15,7 @@ pub(crate) fn handle_entity_despawn(
     mut my_id: ResMut<MyId>,
     query: Query<(Entity, &NetworkServerEntity)>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         if event.id == my_id.id {
             if let Some(entity) = my_id.entity {
                 commands.entity(entity).despawn_recursive();

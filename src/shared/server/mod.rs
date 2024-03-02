@@ -42,7 +42,7 @@ pub fn start_server_app() {
             },
             ..default()
         })
-        .insert_resource(FixedTime::new_from_secs(FIXED_TIMESTEP))
+        .insert_resource(Time::<Fixed>::from_seconds(FIXED_TIMESTEP as f64))
         .insert_resource(StaticServerEntity::default())
         .add_event::<ClientConnectedEvent>()
         .add_event::<ClientMoveEvent>()

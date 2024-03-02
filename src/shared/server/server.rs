@@ -1,11 +1,11 @@
 use std::net::{IpAddr, Ipv4Addr};
 
 use bevy::prelude::*;
-use bevy_quinnet::server::certificate::CertificateRetrievalMode;
 use bevy_quinnet::server::{Server, ServerConfiguration};
-use rand::{thread_rng, Rng};
+use bevy_quinnet::server::certificate::CertificateRetrievalMode;
+use rand::{Rng, thread_rng};
 
-use crate::health::{timer_from_frame_count, DeadState, Health};
+use crate::health::{DeadState, Health, timer_from_frame_count};
 use crate::messages::{ClientMessage, ServerMessage};
 use crate::server::message_events::{ClientConnectedEvent, ClientFacingEvent, ClientMoveEvent};
 use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
@@ -106,9 +106,9 @@ pub(crate) fn spawn_slime(
     mut commands: Commands,
     mut static_server_entity: ResMut<StaticServerEntity>,
     mut server: ResMut<Server>,
-    query: Query<&Slime>,
+    changed: RemovedComponents<Slime>,
 ) {
-    if query.iter().count() < 0 {
+    if changed.is_empty() {
         let id = static_server_entity.next_id();
         let mut rng = thread_rng();
         let x = rng.gen_range(-50.0..50.0);

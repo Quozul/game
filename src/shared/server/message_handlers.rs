@@ -18,7 +18,7 @@ pub(crate) fn handle_client_connected(
     slime_query: Query<(&NetworkServerEntity, &Transform), With<Slime>>,
 ) {
     if let Some(endpoint) = server.get_endpoint_mut() {
-        for event in client_connected_reader.iter() {
+        for event in client_connected_reader.read() {
             let id = static_server_entity.next_id();
             let x = 50.0;
             let y = 50.0;
@@ -82,7 +82,7 @@ pub(crate) fn handle_client_move(
     mut client_connected_reader: EventReader<ClientMoveEvent>,
     mut query: Query<(&NetworkServerEntity, &mut Move)>,
 ) {
-    for event in client_connected_reader.iter() {
+    for event in client_connected_reader.read() {
         for (server_entity, mut move_component) in &mut query {
             if server_entity.client_id == Some(event.client_id)
                 && move_component.direction != Direction::Dying
@@ -98,7 +98,7 @@ pub(crate) fn handle_client_facing(
     mut client_connected_reader: EventReader<ClientFacingEvent>,
     mut query: Query<(&NetworkServerEntity, &mut Rotation)>,
 ) {
-    for event in client_connected_reader.iter() {
+    for event in client_connected_reader.read() {
         for (server_entity, mut facing) in &mut query {
             if server_entity.client_id == Some(event.client_id) {
                 facing.angle = event.facing;

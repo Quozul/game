@@ -1,3 +1,5 @@
+use std::f32::consts::PI;
+
 use bevy::prelude::{
     Changed, Commands, Component, DespawnRecursiveExt, Entity, Query, Res, ResMut, Time, Timer,
     TimerMode, Transform, Vec2,
@@ -5,7 +7,6 @@ use bevy::prelude::{
 use bevy_quinnet::server::Server;
 use bevy_rapier2d::prelude::{ExternalImpulse, QueryFilter, RapierContext};
 use rand::Rng;
-use std::f32::consts::PI;
 
 use crate::direction::{Direction, Move, Rotation};
 use crate::messages::ServerMessage;
@@ -76,7 +77,7 @@ pub fn timer_from_frame_count(frame_count: u8) -> Timer {
 
 pub fn animate_dead(mut query: Query<(&Health, &mut Move, &mut DeadState), Changed<Health>>) {
     for (health, mut move_component, mut dead_state) in &mut query {
-        if health.health <= 0 {
+        if health.health == 0 {
             move_component.direction = Direction::Dying;
             dead_state.elapsed.reset()
         }
@@ -97,7 +98,7 @@ pub fn despawn_dead(
     query: Query<(Entity, &Health, &DeadState, &NetworkServerEntity)>,
 ) {
     for (entity, health, dead_state, server_entity) in &query {
-        if health.health <= 0 && dead_state.elapsed.finished() {
+        if health.health == 0 && dead_state.elapsed.finished() {
             commands.entity(entity).despawn_recursive();
 
             if let Some(endpoint) = server.get_endpoint_mut() {

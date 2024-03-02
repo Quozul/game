@@ -14,7 +14,7 @@ pub(crate) fn handle_update_facing_event(
     mut query: Query<(&NetworkServerEntity, &mut Rotation)>,
     mut event_reader: EventReader<UpdateFacingEvent>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         for (client_entity, mut facing) in &mut query {
             if client_entity.id == event.id {
                 facing.angle = event.facing;

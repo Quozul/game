@@ -9,7 +9,7 @@ use shared::messages::ClientMessage;
 use crate::camera_follow::FollowSubject;
 use crate::MyId;
 
-#[derive(Actionlike, Clone, Copy, PartialEq, Eq, Hash, Debug, Reflect)]
+#[derive(Actionlike, PartialEq, Eq, Hash, Clone, Copy, Debug, Reflect)]
 pub(crate) enum Action {
     Move,
     Attacking,
@@ -35,20 +35,20 @@ pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<M
         if let Some(entity) = my_id.entity {
             let mut input_map = InputMap::default();
 
-            input_map.insert(MouseButton::Left, Action::Attacking);
-            input_map.insert(KeyCode::Space, Action::Attacking);
-            input_map.insert(GamepadButtonType::South, Action::Attacking);
+            input_map.insert(Action::Attacking, MouseButton::Left);
+            input_map.insert(Action::Attacking, KeyCode::Space);
+            input_map.insert(Action::Attacking, GamepadButtonType::South);
 
-            input_map.insert(VirtualDPad::arrow_keys(), Action::Move);
-            input_map.insert(DualAxis::left_stick(), Action::Move);
+            input_map.insert(Action::Move, VirtualDPad::arrow_keys());
+            input_map.insert(Action::Move, DualAxis::left_stick());
             input_map.insert(
+                Action::Move,
                 VirtualDPad {
                     up: KeyCode::Z.into(),
                     down: KeyCode::S.into(),
                     left: KeyCode::Q.into(),
                     right: KeyCode::D.into(),
                 },
-                Action::Move,
             );
 
             commands.entity(entity).insert(InputManagerBundle {
@@ -82,12 +82,12 @@ pub(crate) fn controls(
                 return;
             }
 
-            let direction = if action_state.pressed(Action::Attacking) {
+            let direction = if action_state.pressed(&Action::Attacking) {
                 attack_state.is_attacking = true;
                 attack_state.elapsed.reset();
                 Direction::Attacking
-            } else if action_state.pressed(Action::Move) {
-                let axis_pair = action_state.axis_pair(Action::Move).unwrap();
+            } else if action_state.pressed(&Action::Move) {
+                let axis_pair = action_state.axis_pair(&Action::Move).unwrap();
 
                 Direction::Move {
                     facing: Vec2::new(axis_pair.x(), axis_pair.y()).normalize(),
@@ -136,7 +136,9 @@ pub(crate) fn mouse_controls(
                     None
                 };
 
-                if let Some(angle) = angle && (facing.angle - angle).abs() > 0.1 {
+                if let Some(angle) = angle
+                    && (facing.angle - angle).abs() > 0.1
+                {
                     facing.angle = angle;
 
                     if let Some(connection) = client.get_connection_mut() {

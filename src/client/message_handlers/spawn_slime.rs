@@ -21,7 +21,7 @@ pub(crate) fn handle_slime_spawn(
     mut commands: Commands,
     mut event_reader: EventReader<SpawnSlimeEvent>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         let texture_atlas = TextureAtlas::from_grid(
             assets.slime.clone().unwrap(),
             Vec2::new(32.0, 32.0),
@@ -63,7 +63,7 @@ pub(crate) fn handle_slime_spawn(
         commands
             .spawn(SlimeBundle::from_spawn_event(event.id, event.x, event.y))
             .insert(Visibility::Visible)
-            .insert(ComputedVisibility::default())
+            .insert(InheritedVisibility::default())
             .insert(AttackState::default())
             .insert(HealthDisplay {
                 display: health_display,

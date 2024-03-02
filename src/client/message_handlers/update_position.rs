@@ -13,7 +13,7 @@ pub(crate) fn handle_update_position_event(
     mut query: Query<(&NetworkServerEntity, &mut Transform)>,
     mut event_reader: EventReader<UpdatePositionEvent>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         for (client_entity, mut transform) in &mut query {
             if client_entity.id == event.id {
                 transform.translation = event.translation;

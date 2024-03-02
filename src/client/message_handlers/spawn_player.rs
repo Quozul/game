@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy::sprite::Anchor;
-use shared::direction::FacingDirection;
 
+use shared::direction::FacingDirection;
 use shared::player_bundle::PlayerBundle;
 
 use crate::animations::animate::AnimationBundle;
@@ -39,7 +39,7 @@ pub(crate) fn handle_player_spawn(
     mut event_reader: EventReader<SpawnPlayerEvent>,
     mut my_id: ResMut<MyId>,
 ) {
-    for event in event_reader.iter() {
+    for event in event_reader.read() {
         let texture_atlas = TextureAtlas::from_grid(
             assets.player.clone().unwrap(),
             Vec2::new(48.0, 48.0),
@@ -84,7 +84,7 @@ pub(crate) fn handle_player_spawn(
                 event.id, None, event.x, event.y,
             ))
             .insert(Visibility::Visible)
-            .insert(ComputedVisibility::default())
+            .insert(InheritedVisibility::default())
             .insert(AttackState::default())
             .insert(HealthDisplay {
                 display: health_display,
