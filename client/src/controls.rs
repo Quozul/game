@@ -41,20 +41,11 @@ pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<M
 
             input_map.insert(Action::Move, VirtualDPad::arrow_keys());
             input_map.insert(Action::Move, DualAxis::left_stick());
-            input_map.insert(
-                Action::Move,
-                VirtualDPad {
-                    up: KeyCode::KeyZ.into(),
-                    down: KeyCode::KeyS.into(),
-                    left: KeyCode::KeyQ.into(),
-                    right: KeyCode::KeyD.into(),
-                },
-            );
+            input_map.insert(Action::Move, VirtualDPad::wasd());
 
-            commands.entity(entity).insert(InputManagerBundle {
-                input_map,
-                ..Default::default()
-            });
+            commands
+                .entity(entity)
+                .insert(InputManagerBundle::with_map(input_map));
         }
     }
 }
