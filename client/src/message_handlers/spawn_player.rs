@@ -65,16 +65,17 @@ pub(crate) fn handle_player_spawn(
             .id();
 
         let texture = commands
-            .spawn(SpriteSheetBundle {
-                sprite: Sprite::default(),
-                atlas: TextureAtlas {
-                    layout: layout_handle,
-                    index: 0,
+            .spawn((
+                SpriteBundle {
+                    texture: texture_handle,
+                    transform: Transform::from_xyz(0.0, 16.0, 0.0),
+                    ..default()
                 },
-                texture: texture_handle,
-                transform: Transform::from_xyz(0.0, 16.0, 0.0),
-                ..default()
-            })
+                TextureAtlas {
+                    layout: layout_handle,
+                    ..default()
+                },
+            ))
             .insert(AnimationBundle::default())
             .id();
 
