@@ -121,10 +121,11 @@ pub(crate) fn mouse_controls(
                         (world_position.y - transform.translation.y)
                             .atan2(world_position.x - transform.translation.x),
                     )
-                } else if let Some(direction) = move_component.direction.get_facing_direction() {
-                    Some(direction.to_angle())
                 } else {
-                    None
+                    move_component
+                        .direction
+                        .get_facing_direction()
+                        .map(|direction| direction.to_angle())
                 };
 
                 if let Some(angle) = angle

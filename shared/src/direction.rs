@@ -48,11 +48,11 @@ impl FacingDirection {
     pub fn from_angle(angle: f32) -> FacingDirection {
         let normalized_angle = (angle + 2.0 * PI) % (2.0 * PI);
 
-        if normalized_angle < PI / 4.0 || normalized_angle >= 7.0 * PI / 4.0 {
+        if !(PI / 4.0..7.0 * PI / 4.0).contains(&normalized_angle) {
             FacingDirection::Right
-        } else if normalized_angle >= PI / 4.0 && normalized_angle < 3.0 * PI / 4.0 {
+        } else if (PI / 4.0..3.0 * PI / 4.0).contains(&normalized_angle) {
             FacingDirection::Up
-        } else if normalized_angle >= 3.0 * PI / 4.0 && normalized_angle < 5.0 * PI / 4.0 {
+        } else if (3.0 * PI / 4.0..5.0 * PI / 4.0).contains(&normalized_angle) {
             FacingDirection::Left
         } else {
             FacingDirection::Down
@@ -123,10 +123,7 @@ impl Direction {
     }
 
     pub fn is_attacking(&self) -> bool {
-        match self {
-            Direction::Attacking { .. } => true,
-            _ => false,
-        }
+        matches!(self, Direction::Attacking { .. })
     }
 }
 

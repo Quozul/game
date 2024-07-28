@@ -24,7 +24,9 @@ pub(crate) fn flip_animation(
                 _ => facing.direction.should_flip(),
             };
 
-            if let Some(should_flip) = should_flip && should_flip != data.flip_x {
+            if let Some(should_flip) = should_flip
+                && should_flip != data.flip_x
+            {
                 data.flip_x = should_flip;
             }
         }
