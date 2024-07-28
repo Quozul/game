@@ -40,12 +40,13 @@ pub fn animate(
     time: Res<Time>,
     mut query: Query<(
         &mut AnimationState,
-        &mut TextureAtlasSprite,
+        &mut TextureAtlas,
+        &mut Sprite,
         &Animation,
         Option<&AnimationData>,
     )>,
 ) {
-    for (mut state, mut texture, animation, data) in query.iter_mut() {
+    for (mut state, mut texture, mut sprite, animation, data) in query.iter_mut() {
         // Update the state
         state.update(&animation.0, time.delta());
 
@@ -53,7 +54,7 @@ pub fn animate(
         texture.index = state.frame_index();
 
         if let Some(data) = data {
-            texture.flip_x = data.flip_x
+            sprite.flip_x = data.flip_x
         }
     }
 }

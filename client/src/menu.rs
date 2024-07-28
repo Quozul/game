@@ -2,7 +2,7 @@ use std::thread;
 
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts};
-use bevy_quinnet::client::Client;
+use bevy_quinnet::client::QuinnetClient;
 use shared::server::start_server_app;
 
 use crate::client::join_server;
@@ -17,7 +17,7 @@ pub(crate) fn ui_example_system(
     mut ui_state: ResMut<UiState>,
     mut contexts: EguiContexts,
     mut next_state: ResMut<NextState<AppState>>,
-    mut client: ResMut<Client>,
+    mut client: ResMut<QuinnetClient>,
 ) {
     let ctx = contexts.ctx_mut();
 
@@ -44,13 +44,21 @@ pub(crate) fn ui_example_system(
     });
 }
 
-pub(crate) fn display_network_stats(mut contexts: EguiContexts, client: ResMut<Client>) {
+pub(crate) fn display_network_stats(mut contexts: EguiContexts, client: ResMut<QuinnetClient>) {
     let ctx = contexts.ctx_mut();
 
-    if let Some(connection) = client.get_connection() && let Some(stats) = connection.stats() {
+    if let Some(connection) = client.get_connection()
+        && let Some(stats) = connection.connection_stats()
+    {
         egui::Window::new("Network stats").show(ctx, |ui| {
-            ui.label(format!("udp_rx {:.2} kB", stats.udp_rx.bytes as f32 / 8.0 / 1000.0));
-            ui.label(format!("udp_tx {:.2} kB", stats.udp_tx.bytes as f32 / 8.0 / 1000.0));
+            ui.label(format!(
+                "udp_rx {:.2} kB",
+                stats.udp_rx.bytes as f32 / 8.0 / 1000.0
+            ));
+            ui.label(format!(
+                "udp_tx {:.2} kB",
+                stats.udp_tx.bytes as f32 / 8.0 / 1000.0
+            ));
             ui.label(format!("ping {} ms", stats.frame_rx.ping));
         });
     }

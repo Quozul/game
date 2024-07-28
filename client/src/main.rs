@@ -5,10 +5,7 @@
 use bevy::prelude::*;
 use bevy_egui::EguiPlugin;
 use bevy_quinnet::client::QuinnetClientPlugin;
-use bevy_rapier2d::prelude::{
-    NoUserData, RapierConfiguration, RapierDebugRenderPlugin, RapierPhysicsPlugin, TimestepMode,
-    Vect,
-};
+use bevy_rapier2d::prelude::{NoUserData, RapierDebugRenderPlugin, RapierPhysicsPlugin};
 use leafwing_input_manager::prelude::InputManagerPlugin;
 
 use shared::direction::handle_move;
@@ -35,6 +32,7 @@ use crate::message_handlers::update_facing::{handle_update_facing_event, UpdateF
 use crate::message_handlers::update_position::{handle_update_position_event, UpdatePositionEvent};
 use animations::animate::animate;
 use animations::entity_animations::{update_player_animation, update_slime_animation};
+use shared::gravity::get_rapier_configuration;
 
 mod animations;
 mod camera_follow;
@@ -81,20 +79,13 @@ fn main() {
             player: None,
             font: None,
         })
-        .insert_resource(RapierConfiguration {
-            gravity: Vect::ZERO,
-            timestep_mode: TimestepMode::Fixed {
-                dt: FIXED_TIMESTEP,
-                substeps: 1,
-            },
-            ..default()
-        })
+        .insert_resource(get_rapier_configuration())
         .insert_resource(Time::<Fixed>::from_seconds(FIXED_TIMESTEP as f64))
         .insert_resource(MyId {
             id: 0,
             entity: None,
         })
-        .add_state::<AppState>()
+        .init_state::<AppState>()
         .add_systems(Startup, setup_assets)
         .add_systems(OnEnter(AppState::InGame), (setup_in_game, spawn_map))
         .add_systems(

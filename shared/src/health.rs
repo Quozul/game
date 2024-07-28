@@ -4,7 +4,7 @@ use bevy::prelude::{
     Changed, Commands, Component, DespawnRecursiveExt, Entity, Query, Res, ResMut, Time, Timer,
     TimerMode, Transform, Vec2,
 };
-use bevy_quinnet::server::Server;
+use bevy_quinnet::server::QuinnetServer;
 use bevy_rapier2d::prelude::{ExternalImpulse, QueryFilter, RapierContext};
 use rand::Rng;
 
@@ -94,7 +94,7 @@ pub fn tick_dead(time: Res<Time>, mut query: Query<(&mut DeadState, &Move)>) {
 
 pub fn despawn_dead(
     mut commands: Commands,
-    mut server: ResMut<Server>,
+    mut server: ResMut<QuinnetServer>,
     query: Query<(Entity, &Health, &DeadState, &NetworkServerEntity)>,
 ) {
     for (entity, health, dead_state, server_entity) in &query {

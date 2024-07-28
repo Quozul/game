@@ -17,31 +17,25 @@ pub(crate) struct SpawnSlimeEvent {
 
 pub(crate) fn handle_slime_spawn(
     assets: ResMut<AssetsLoading>,
-    mut texture_atlases: ResMut<Assets<TextureAtlas>>,
+    mut texture_atlases: ResMut<Assets<TextureAtlasLayout>>,
     mut commands: Commands,
     mut event_reader: EventReader<SpawnSlimeEvent>,
 ) {
     for event in event_reader.read() {
-        let texture_atlas = TextureAtlas::from_grid(
-            assets.slime.clone().unwrap(),
-            Vec2::new(32.0, 32.0),
-            6,
-            10,
-            None,
-            None,
-        );
-        let texture_atlas_handle = texture_atlases.add(texture_atlas);
+        let texture_handle = assets.slime.clone().unwrap();
+        let layout = TextureAtlasLayout::from_grid(UVec2::new(32, 32), 6, 10, None, None);
+        let layout_handle = texture_atlases.add(layout);
 
         let text_style = TextStyle {
             font: assets.font.clone().unwrap(),
             font_size: 10.0,
             color: Color::WHITE,
         };
-        let text_alignment = TextAlignment::Center;
+        let text_alignment = JustifyText::Center;
 
         let health_display = commands
             .spawn(Text2dBundle {
-                text: Text::from_section("HP", text_style.clone()).with_alignment(text_alignment),
+                text: Text::from_section("HP", text_style.clone()).with_justify(text_alignment),
                 text_anchor: Anchor::BottomCenter,
                 text_2d_bounds: Default::default(),
                 transform: Transform {
@@ -54,7 +48,12 @@ pub(crate) fn handle_slime_spawn(
 
         let texture = commands
             .spawn(SpriteSheetBundle {
-                texture_atlas: texture_atlas_handle,
+                sprite: Sprite::default(),
+                atlas: TextureAtlas {
+                    layout: layout_handle,
+                    index: 0,
+                },
+                texture: texture_handle,
                 ..default()
             })
             .insert(AnimationBundle::default())

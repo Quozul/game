@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_quinnet::server::Server;
+use bevy_quinnet::server::QuinnetServer;
 
 use crate::direction::{Direction, Move, Rotation};
 use crate::health::{timer_from_frame_count, DeadState};
@@ -10,7 +10,7 @@ use crate::server_entities::{NetworkServerEntity, StaticServerEntity};
 use crate::slime_bundle::Slime;
 
 pub(crate) fn handle_client_connected(
-    mut server: ResMut<Server>,
+    mut server: ResMut<QuinnetServer>,
     mut commands: Commands,
     mut static_server_entity: ResMut<StaticServerEntity>,
     mut client_connected_reader: EventReader<ClientConnectedEvent>,
@@ -109,7 +109,7 @@ pub(crate) fn handle_client_facing(
 }
 
 pub(crate) fn send_direction(
-    mut server: ResMut<Server>,
+    mut server: ResMut<QuinnetServer>,
     mut query: Query<(&NetworkServerEntity, &Move), Changed<Move>>,
 ) {
     if let Some(endpoint) = server.get_endpoint_mut() {
@@ -123,7 +123,7 @@ pub(crate) fn send_direction(
 }
 
 pub(crate) fn send_facing(
-    mut server: ResMut<Server>,
+    mut server: ResMut<QuinnetServer>,
     mut query: Query<(&NetworkServerEntity, &Rotation), Changed<Rotation>>,
 ) {
     if let Some(endpoint) = server.get_endpoint_mut() {

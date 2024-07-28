@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_quinnet::client::Client;
+use bevy_quinnet::client::QuinnetClient;
 use leafwing_input_manager::prelude::*;
 
 use shared::direction::{Direction, Move, Rotation};
@@ -44,10 +44,10 @@ pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<M
             input_map.insert(
                 Action::Move,
                 VirtualDPad {
-                    up: KeyCode::Z.into(),
-                    down: KeyCode::S.into(),
-                    left: KeyCode::Q.into(),
-                    right: KeyCode::D.into(),
+                    up: KeyCode::KeyZ.into(),
+                    down: KeyCode::KeyS.into(),
+                    left: KeyCode::KeyQ.into(),
+                    right: KeyCode::KeyD.into(),
                 },
             );
 
@@ -73,7 +73,7 @@ pub(crate) fn attack(time: Res<Time>, mut query: Query<&mut AttackState>) {
 
 pub(crate) fn controls(
     my_id: Res<MyId>,
-    mut client: ResMut<Client>,
+    mut client: ResMut<QuinnetClient>,
     mut query: Query<(&ActionState<Action>, &mut Move, &mut AttackState)>,
 ) {
     if let Some(entity) = my_id.entity {
@@ -111,7 +111,7 @@ pub(crate) fn controls(
 
 pub(crate) fn mouse_controls(
     my_id: Res<MyId>,
-    mut client: ResMut<Client>,
+    mut client: ResMut<QuinnetClient>,
     mut query: Query<(&Transform, &mut Rotation, &Move)>,
     windows: Query<&Window>,
     camera_q: Query<(&Camera, &GlobalTransform), With<FollowSubject>>,
