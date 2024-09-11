@@ -10,6 +10,8 @@ opt-level = 3
 resolver = "2"
 members = [
     "client",
+    "multiplayer",
+    "multiplayer_bin",
     "server",
     "shared",
 ]
