@@ -7,7 +7,7 @@ edition = "2021"
 shared = { path = "../shared" }
 benimator = "4.1"
 bevy = { version = "0.14", features = ["dynamic_linking"] }
-bevy_egui = "0.28"
-bevy_quinnet = "0.9.0"
-bevy_rapier2d = "0.27.0"
-leafwing-input-manager = "0.14"
+bevy_egui = "0.29"
+bevy_quinnet = "0.10"
+bevy_rapier2d = "0.27"
+leafwing-input-manager = "0.15"

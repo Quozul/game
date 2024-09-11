@@ -18,7 +18,7 @@ use crate::client::{
     clean_server_entities, close_connection, handle_server_messages, on_connecting,
     on_disconnected, setup_in_game,
 };
-use crate::controls::{add_controller_to_self_player, attack, controls, mouse_controls, Action};
+use crate::controls::{add_controller_to_self_player, attack, controls, mouse_controls};
 use crate::display_health::display_health;
 use crate::menu::{display_network_stats, setup_assets, ui_example_system, AssetsLoading, UiState};
 use crate::message_handlers::despawn_player::{handle_entity_despawn, DespawnEntityEvent};
@@ -30,6 +30,7 @@ use crate::message_handlers::update_direction::{
 };
 use crate::message_handlers::update_facing::{handle_update_facing_event, UpdateFacingEvent};
 use crate::message_handlers::update_position::{handle_update_position_event, UpdatePositionEvent};
+use crate::player_action::PlayerAction;
 use animations::animate::animate;
 use animations::entity_animations::{update_player_animation, update_slime_animation};
 use shared::gravity::get_rapier_configuration;
@@ -41,6 +42,7 @@ mod controls;
 mod display_health;
 mod menu;
 pub mod message_handlers;
+mod player_action;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub(crate) enum AppState {
@@ -64,7 +66,7 @@ fn main() {
             RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(16.0),
             RapierDebugRenderPlugin::default(),
         ))
-        .add_plugins(InputManagerPlugin::<Action>::default())
+        .add_plugins(InputManagerPlugin::<PlayerAction>::default())
         .add_plugins(EguiPlugin)
         .add_event::<SpawnPlayerEvent>()
         .add_event::<UpdatePositionEvent>()

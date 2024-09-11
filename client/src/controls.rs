@@ -7,13 +7,8 @@ use shared::health::timer_from_frame_count;
 use shared::messages::ClientMessage;
 
 use crate::camera_follow::FollowSubject;
+use crate::player_action::PlayerAction;
 use crate::MyId;
-
-#[derive(Actionlike, PartialEq, Eq, Hash, Clone, Copy, Debug, Reflect)]
-pub(crate) enum Action {
-    Move,
-    Attacking,
-}
 
 #[derive(Component)]
 pub(crate) struct AttackState {
@@ -33,15 +28,7 @@ impl Default for AttackState {
 pub(crate) fn add_controller_to_self_player(mut commands: Commands, my_id: Res<MyId>) {
     if my_id.is_changed() {
         if let Some(entity) = my_id.entity {
-            let mut input_map = InputMap::default();
-
-            input_map.insert(Action::Attacking, MouseButton::Left);
-            input_map.insert(Action::Attacking, KeyCode::Space);
-            input_map.insert(Action::Attacking, GamepadButtonType::South);
-
-            input_map.insert(Action::Move, VirtualDPad::arrow_keys());
-            input_map.insert(Action::Move, DualAxis::left_stick());
-            input_map.insert(Action::Move, VirtualDPad::wasd());
+            let input_map = PlayerAction::default_input_map();
 
             commands
                 .entity(entity)
@@ -65,7 +52,7 @@ pub(crate) fn attack(time: Res<Time>, mut query: Query<&mut AttackState>) {
 pub(crate) fn controls(
     my_id: Res<MyId>,
     mut client: ResMut<QuinnetClient>,
-    mut query: Query<(&ActionState<Action>, &mut Move, &mut AttackState)>,
+    mut query: Query<(&ActionState<PlayerAction>, &mut Move, &mut AttackState)>,
 ) {
     if let Some(entity) = my_id.entity {
         if let Ok((action_state, mut move_component, mut attack_state)) = query.get_mut(entity) {
@@ -73,18 +60,19 @@ pub(crate) fn controls(
                 return;
             }
 
-            let direction = if action_state.pressed(&Action::Attacking) {
+            let direction = if action_state.just_pressed(&PlayerAction::Attack) {
                 attack_state.is_attacking = true;
                 attack_state.elapsed.reset();
                 Direction::Attacking
-            } else if action_state.pressed(&Action::Move) {
-                let axis_pair = action_state.axis_pair(&Action::Move).unwrap();
-
-                Direction::Move {
-                    facing: Vec2::new(axis_pair.x(), axis_pair.y()).normalize(),
-                }
             } else {
-                Direction::Idling
+                let axis_pair = action_state.axis_pair(&PlayerAction::Move);
+                if axis_pair.x != 0.0 || axis_pair.y != 0.0 {
+                    Direction::Move {
+                        facing: Vec2::new(axis_pair.x, axis_pair.y).normalize(),
+                    }
+                } else {
+                    Direction::Idling
+                }
             };
 
             if direction != move_component.direction {
