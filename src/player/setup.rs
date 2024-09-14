@@ -26,7 +26,7 @@ pub fn setup_player(
             CannonBundle::new(
                 bullet_texture,
                 Vec3::new(0.0, 0.0, 1.0),
-                materials.add(Color::linear_rgb(0., 0., 1.)),
+                materials.add(Color::linear_rgb(100., 100., 100.)),
             ),
         ))
         .id();

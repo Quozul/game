@@ -29,6 +29,7 @@ fn get_drag_force(linear_velocity: &Vec2) -> Vec2 {
         * CROSS_SECTIONAL_AREA
 }
 
+#[allow(dead_code)]
 fn get_terminal_velocity(mass: f32, force: &Force) -> f32 {
     ((2.0 * mass * force.0.length()) / (FLUID_DENSITY * CROSS_SECTIONAL_AREA * DRAG_COEFFICIENT))
         .sqrt()

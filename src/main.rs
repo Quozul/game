@@ -7,6 +7,7 @@ mod projectile;
 mod utils;
 mod velocity;
 
+use crate::camera::post_processing::plugin::PostProcessPlugin;
 use crate::enemy::plugin::EnemyPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::projectile::plugin::ProjectilePlugin;
@@ -44,6 +45,7 @@ fn main() {
             EnemyPlugin,
             VelocityPlugin,
             ProjectilePlugin,
+            PostProcessPlugin,
             camera::plugin::CameraPlugin,
         ))
         .init_state::<AppState>()

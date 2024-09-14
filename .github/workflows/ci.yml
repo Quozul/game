@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [ space_game ]
+  pull_request:
+    branches: [ space_game ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # Run cargo test
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Install Rust Nightly
+        run: rustup toolchain install nightly
+
+      - name: Install Canelift
+        run: rustup component add rustc-codegen-cranelift-preview --toolchain nightly
+
+      - name: Install Dependencies
+        run: sudo apt-get update; sudo apt-get -y install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev mold clang
+
+      - name: Run cargo test
+        run: cargo test
+
+  # Run cargo clippy -- -D warnings
+  clippy_check:
+    name: Clippy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.toml') }}
+
+      - name: Install Rust Nightly
+        run: rustup toolchain install nightly
+
+      - name: Install Canelift
+        run: rustup component add clippy rustc-codegen-cranelift-preview --toolchain nightly
+
+      - name: Install Dependencies
+        run: sudo apt-get update; sudo apt-get -y install --no-install-recommends libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev mold clang
+
+      - name: Run clippy
+        run: cargo clippy -- -D warnings
+
+  # Run cargo fmt --all -- --check
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v4
+
+      - name: Run cargo fmt
+        run: cargo fmt --all -- --check

@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Quozul"]
 
+[features]
+dynamic_linking = ["bevy/dynamic_linking"]
+
 [dependencies]
 rand = "0.9.0-alpha.2"
 
@@ -29,7 +32,6 @@ features = [
     "bevy_ui",
     "bevy_winit",
     "default_font",
-    "dynamic_linking",
     "hdr",
     "multi_threaded",
     "png",

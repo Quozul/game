@@ -12,7 +12,7 @@ pub fn spawn_enemy(
     commands.spawn((
         MaterialMesh2dBundle {
             mesh: rect_mesh,
-            material: materials.add(Color::linear_rgb(1.0, 0.0, 0.0)),
+            material: materials.add(Color::linear_rgb(1.0, 0.5, 0.5)),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..Default::default()
         },
