@@ -1,4 +1,4 @@
-use crate::camera::components::MainCamera;
+use crate::camera::main_camera::MainCamera;
 use bevy::math::Vec2;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;

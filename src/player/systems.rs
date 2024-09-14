@@ -1,5 +1,6 @@
-use crate::camera::components::MainCamera;
+use crate::camera::main_camera::MainCamera;
 use crate::player::components::Player;
+use crate::utils::calculate_rotation_angle::calculate_rotation_angle;
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
 use crate::velocity::components::Force;
 use bevy::prelude::*;
@@ -47,21 +48,9 @@ pub fn rotate_towards_mouse(
 
     if let Some(world_position) = get_mouse_world_position_from_queries(q_windows, q_camera) {
         let player_translation = player_transform.translation.xy();
+        let target_angle = calculate_rotation_angle(player_translation, world_position);
+
         let current_angle = player_transform.rotation;
-        let target_angle =
-            Quat::from_rotation_z(calculate_rotation_angle(player_translation, world_position));
         player_transform.rotation = current_angle.lerp(target_angle, 0.1);
-    }
-}
-
-fn calculate_rotation_angle(from: Vec2, to: Vec2) -> f32 {
-    let direction = (to - from).normalize();
-    let dot_product = direction.dot(Vec2::Y);
-    let angle = dot_product.acos();
-
-    if to.x > from.x {
-        -angle
-    } else {
-        angle
     }
 }

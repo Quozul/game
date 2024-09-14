@@ -1,11 +1,15 @@
+#![feature(let_chains)]
+
 mod camera;
 mod enemy;
 mod player;
+mod projectile;
 mod utils;
 mod velocity;
 
 use crate::enemy::plugin::EnemyPlugin;
 use crate::player::plugin::PlayerPlugin;
+use crate::projectile::plugin::ProjectilePlugin;
 use crate::velocity::plugin::VelocityPlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
 use bevy::prelude::*;
@@ -19,9 +23,12 @@ enum AppState {
 
 fn main() {
     App::new()
-        .insert_resource(Time::<Fixed>::from_hz(120.0))
         .add_plugins((
-            DefaultPlugins,
+            DefaultPlugins.set(bevy::log::LogPlugin {
+                level: bevy::log::Level::INFO,
+                filter: "wgpu=error,naga=warn,game=debug".to_string(),
+                ..default()
+            }),
             FpsOverlayPlugin {
                 config: FpsOverlayConfig {
                     text_config: TextStyle {
@@ -36,6 +43,7 @@ fn main() {
             PlayerPlugin,
             EnemyPlugin,
             VelocityPlugin,
+            ProjectilePlugin,
             camera::plugin::CameraPlugin,
         ))
         .init_state::<AppState>()

@@ -22,3 +22,13 @@ pub struct RigidBodyBundle {
     force: Force,
     mass: Mass,
 }
+
+impl RigidBodyBundle {
+    pub fn new(mass: f32, initial_velocity: Vec2) -> Self {
+        Self {
+            mass: Mass(mass),
+            velocity: Velocity(initial_velocity),
+            force: Default::default(),
+        }
+    }
+}

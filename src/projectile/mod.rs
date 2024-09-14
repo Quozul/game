@@ -1,4 +1,4 @@
+pub mod cannon_bundle;
 mod components;
 pub mod plugin;
-mod setup;
 mod systems;

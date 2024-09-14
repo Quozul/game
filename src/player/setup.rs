@@ -1,5 +1,6 @@
-use crate::camera::components::PlayerCameraBundle;
+use crate::camera::bundle::PlayerCameraBundle;
 use crate::player::components::Player;
+use crate::projectile::cannon_bundle::CannonBundle;
 use crate::velocity::components::RigidBodyBundle;
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
@@ -10,6 +11,7 @@ pub fn setup_player(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // Spawn the player
+    let bullet_texture = meshes.add(Ellipse::new(2.5, 2.5));
     let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 100.0)));
     let player_id = commands
         .spawn((
@@ -21,6 +23,11 @@ pub fn setup_player(
             },
             Player,
             RigidBodyBundle::default(),
+            CannonBundle::new(
+                bullet_texture,
+                Vec3::new(0.0, 0.0, 1.0),
+                materials.add(Color::linear_rgb(0., 0., 1.)),
+            ),
         ))
         .id();
 
