@@ -1,0 +1,67 @@
+use crate::camera::components::MainCamera;
+use crate::player::components::Player;
+use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
+use crate::velocity::components::Force;
+use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
+
+const PLAYER_SPEED: f32 = 5.0;
+
+pub fn move_player(
+    mut rectangles: Query<&mut Force, With<Player>>,
+    kb_input: Res<ButtonInput<KeyCode>>,
+) {
+    let Ok(mut force) = rectangles.get_single_mut() else {
+        return;
+    };
+
+    let mut direction = Vec2::ZERO;
+
+    if kb_input.pressed(KeyCode::KeyW) {
+        direction.y += 1.;
+    }
+
+    if kb_input.pressed(KeyCode::KeyS) {
+        direction.y -= 1.;
+    }
+
+    if kb_input.pressed(KeyCode::KeyA) {
+        direction.x -= 1.;
+    }
+
+    if kb_input.pressed(KeyCode::KeyD) {
+        direction.x += 1.;
+    }
+
+    force.0 = direction.normalize_or_zero() * PLAYER_SPEED;
+}
+
+pub fn rotate_towards_mouse(
+    mut rectangles: Query<&mut Transform, With<Player>>,
+    q_windows: Query<&Window, With<PrimaryWindow>>,
+    q_camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
+) {
+    let Ok(mut player_transform) = rectangles.get_single_mut() else {
+        return;
+    };
+
+    if let Some(world_position) = get_mouse_world_position_from_queries(q_windows, q_camera) {
+        let player_translation = player_transform.translation.xy();
+        let current_angle = player_transform.rotation;
+        let target_angle =
+            Quat::from_rotation_z(calculate_rotation_angle(player_translation, world_position));
+        player_transform.rotation = current_angle.lerp(target_angle, 0.1);
+    }
+}
+
+fn calculate_rotation_angle(from: Vec2, to: Vec2) -> f32 {
+    let direction = (to - from).normalize();
+    let dot_product = direction.dot(Vec2::Y);
+    let angle = dot_product.acos();
+
+    if to.x > from.x {
+        -angle
+    } else {
+        angle
+    }
+}

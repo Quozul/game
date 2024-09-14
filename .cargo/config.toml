@@ -1,0 +1,32 @@
+# for Linux
+[target.x86_64-unknown-linux-gnu]
+linker = "clang"
+rustflags = [
+    "-C",
+    "link-arg=-fuse-ld=/usr/bin/mold",
+    "-Zshare-generics=y",
+]
+
+# for Windows
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld.exe"
+
+[unstable]
+codegen-backend = true
+
+[profile.dev]
+codegen-backend = "cranelift"
+opt-level = 1
+
+[profile.dev.package."*"]
+codegen-backend = "llvm"
+opt-level = 3
+
+# Enable more optimization in the release profile at the cost of compile time.
+[profile.release]
+# Compile the entire crate as one unit.
+# Slows compile times, marginal improvements.
+codegen-units = 1
+# Do a second optimization pass over the entire program, including dependencies.
+# Slows compile times, marginal improvements.
+lto = "thin"
