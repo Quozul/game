@@ -23,7 +23,6 @@ enum AppState {
 
 fn main() {
     App::new()
-        .insert_resource(Time::<Fixed>::from_hz(30.0))
         .add_plugins((
             DefaultPlugins.set(bevy::log::LogPlugin {
                 level: bevy::log::Level::INFO,

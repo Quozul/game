@@ -6,7 +6,7 @@ use crate::velocity::components::Force;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
-const PLAYER_SPEED: f32 = 5.0;
+const THROTTLE: f32 = 500.0;
 
 pub fn move_player(
     mut rectangles: Query<&mut Force, With<Player>>,
@@ -34,7 +34,7 @@ pub fn move_player(
         direction.x += 1.;
     }
 
-    force.0 = direction.normalize_or_zero() * PLAYER_SPEED;
+    force.0 = direction.normalize_or_zero() * THROTTLE;
 }
 
 pub fn rotate_towards_mouse(
