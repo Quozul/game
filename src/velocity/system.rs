@@ -4,6 +4,7 @@ use bevy::prelude::*;
 const FLUID_DENSITY: f32 = 1.2; // TODO: 1.2 kg/m^3 at room temperature
 const DRAG_COEFFICIENT: f32 = 1.05; // Cube drag coefficient
 const CROSS_SECTIONAL_AREA: f32 = 1.0; // TODO: Should be the area of the shape
+const FRICTION_COEFFICIENT: f32 = 0.75;
 
 pub fn update_velocity(
     mut q_velocity: Query<(&mut Transform, &mut Velocity, &Force, &Mass)>,
@@ -12,11 +13,10 @@ pub fn update_velocity(
     let delta_time = time.delta_seconds();
 
     for (mut transform, mut velocity, applied_force, mass) in q_velocity.iter_mut() {
-        let drag_force = get_drag_force(&velocity.0);
-        let air_resistance = -drag_force;
-        let acceleration = applied_force.0 + air_resistance;
-        velocity.0 += (acceleration / mass.0) * delta_time;
-        transform.translation += velocity.0.extend(0.);
+        let damping = velocity.0 * FRICTION_COEFFICIENT;
+        let acceleration = (applied_force.0 - damping) / mass.0;
+        velocity.0 += acceleration * delta_time;
+        transform.translation += velocity.0.extend(0.) * delta_time;
     }
 }
 

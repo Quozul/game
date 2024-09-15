@@ -5,7 +5,6 @@ use bevy::color::Color;
 use bevy::core_pipeline::bloom::BloomSettings;
 use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
 
 #[derive(Bundle)]
 pub struct PlayerCameraBundle {
@@ -29,7 +28,8 @@ impl PlayerCameraBundle {
                 projection: OrthographicProjection {
                     far: 1000.,
                     near: -1000.,
-                    scaling_mode: ScalingMode::FixedVertical(720.0),
+                    // scaling_mode: ScalingMode::FixedVertical(720.0),
+                    scale: 1.0,
                     ..default()
                 },
                 tonemapping: Tonemapping::TonyMcMapface,

@@ -6,6 +6,9 @@ use std::time::Duration;
 #[derive(Component)]
 pub struct Projectile;
 
+#[derive(Component, Default)]
+pub struct Life(pub Duration);
+
 #[derive(Component)]
 pub struct Cannon {
     pub mesh_handle: Handle<Mesh>,

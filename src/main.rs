@@ -7,7 +7,6 @@ mod projectile;
 mod utils;
 mod velocity;
 
-use crate::camera::post_processing::plugin::PostProcessPlugin;
 use crate::enemy::plugin::EnemyPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::projectile::plugin::ProjectilePlugin;
@@ -24,6 +23,7 @@ enum AppState {
 
 fn main() {
     App::new()
+        .insert_resource(Time::<Fixed>::from_hz(30.0))
         .add_plugins((
             DefaultPlugins.set(bevy::log::LogPlugin {
                 level: bevy::log::Level::INFO,
@@ -45,7 +45,7 @@ fn main() {
             EnemyPlugin,
             VelocityPlugin,
             ProjectilePlugin,
-            PostProcessPlugin,
+            // PostProcessPlugin,
             camera::plugin::CameraPlugin,
         ))
         .init_state::<AppState>()
