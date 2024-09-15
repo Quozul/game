@@ -1,5 +1,5 @@
-use crate::physics::components::{Impulse, RigidBodyBundle};
-use crate::projectile::components::{CannonProperties, Projectile};
+use crate::physics::components::{DragCoefficient, RigidBodyBundle};
+use crate::projectile::components::{CannonProperties, Lifetime, Projectile};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -8,13 +8,15 @@ pub struct ProjectileBundle {
     material: MaterialMesh2dBundle<ColorMaterial>,
     rigid_body: RigidBodyBundle,
     projectile: Projectile,
-    impulse: Impulse,
+    life_time: Lifetime,
 }
+
+const PROJECTILE_SPEED: f32 = 1_000.0; // 1_000.0 seems like a good value
 
 impl ProjectileBundle {
     pub fn from_cannon(origin: &Transform, cannon: &CannonProperties, angle: Vec2) -> Self {
         let bullet_mesh = Mesh2dHandle(cannon.mesh_handle.clone());
-        let initial_velocity = angle * 1000.0;
+        let initial_velocity = angle * PROJECTILE_SPEED;
 
         let offset = origin.rotation.mul_vec3(cannon.offset);
 
@@ -25,9 +27,12 @@ impl ProjectileBundle {
                 transform: Transform::from_translation(origin.translation + offset),
                 ..Default::default()
             },
-            rigid_body: RigidBodyBundle::new(1.0, initial_velocity, 0.05),
+            rigid_body: RigidBodyBundle::new()
+                .with_mass(1.0)
+                .with_initial_velocity(initial_velocity)
+                .with_drag_coefficient(DragCoefficient::CIRCLE),
             projectile: Projectile,
-            impulse: Impulse::default(),
+            life_time: Lifetime::default(),
         }
     }
 }

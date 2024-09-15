@@ -20,3 +20,6 @@ pub struct CannonProperties {
 pub struct Cannon {
     pub properties: Vec<CannonProperties>,
 }
+
+#[derive(Component, Default)]
+pub struct Lifetime(pub Duration);

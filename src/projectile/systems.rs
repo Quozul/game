@@ -1,7 +1,7 @@
 use crate::camera::events::TriggerCameraShakeEvent;
 use crate::camera::main_camera::MainCamera;
 use crate::physics::components::{Impulse, Velocity};
-use crate::projectile::components::{Cannon, Projectile};
+use crate::projectile::components::{Cannon, Lifetime, Projectile};
 use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::calculate_direction_angle;
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
@@ -65,11 +65,17 @@ pub fn cannon_cooldown(mut q_cannons: Query<&mut Cannon>, time: Res<Time>) {
 
 pub fn remove_bullets(
     mut commands: Commands,
-    q_projectiles: Query<(&Velocity, Entity), With<Projectile>>,
+    q_projectiles: Query<(&Lifetime, Entity), With<Projectile>>,
 ) {
     for (velocity, entity) in q_projectiles.iter() {
-        if velocity.linear_velocity.length_squared() < 1. {
+        if velocity.0.as_secs() > 1 {
             commands.entity(entity).despawn();
         }
+    }
+}
+
+pub fn increment_lifetime(mut q_lifetimes: Query<&mut Lifetime>, time: Res<Time>) {
+    for mut life_time in q_lifetimes.iter_mut() {
+        life_time.0 += time.delta();
     }
 }

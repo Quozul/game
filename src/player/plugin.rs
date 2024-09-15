@@ -1,5 +1,5 @@
 use crate::player::setup::setup_player;
-use crate::player::systems::{move_player, rotate_towards_mouse};
+use crate::player::systems::{move_player, rotate_towards_mouse, update_velocity_display};
 use crate::AppState;
 use bevy::prelude::*;
 
@@ -10,7 +10,8 @@ impl Plugin for PlayerPlugin {
         app.add_systems(OnEnter(AppState::InGame), setup_player)
             .add_systems(
                 Update,
-                (move_player, rotate_towards_mouse).run_if(in_state(AppState::InGame)),
+                (move_player, rotate_towards_mouse, update_velocity_display)
+                    .run_if(in_state(AppState::InGame)),
             );
     }
 }

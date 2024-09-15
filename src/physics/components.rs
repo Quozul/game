@@ -1,16 +1,19 @@
 use bevy::math::Vec2;
 use bevy::prelude::*;
 
+/// Gives the Entity the ability to move
 #[derive(Component, Default)]
 pub struct Velocity {
     pub linear_velocity: Vec2,
 }
 
+/// Move the Entity with an external force
 #[derive(Component, Default)]
 pub struct Force {
     pub linear_force: Vec2,
 }
 
+/// Move the Entity with an external impulse
 #[derive(Component, Default)]
 pub struct Impulse {
     pub linear_impulse: Vec2,
@@ -47,18 +50,22 @@ pub struct RigidBodyBundle {
 }
 
 impl RigidBodyBundle {
-    pub fn new(mass: f32, initial_velocity: Vec2, drag_coefficient: f32) -> Self {
-        Self {
-            mass: Mass(mass),
-            velocity: Velocity {
-                linear_velocity: initial_velocity,
-            }, // Kind of acts as an initial impulse
-            drag_coefficient: DragCoefficient(drag_coefficient),
-        }
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn with_drag_coefficient(mut self, drag_coefficient: DragCoefficient) -> Self {
         self.drag_coefficient = drag_coefficient;
+        self
+    }
+
+    pub fn with_initial_velocity(mut self, initial_velocity: Vec2) -> Self {
+        self.velocity.linear_velocity = initial_velocity;
+        self
+    }
+
+    pub fn with_mass(mut self, mass: f32) -> Self {
+        self.mass = Mass(mass);
         self
     }
 }

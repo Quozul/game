@@ -1,6 +1,6 @@
 use crate::camera::bundle::PlayerCameraBundle;
 use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
-use crate::player::components::Player;
+use crate::player::components::{Player, VelocityDisplay};
 use crate::projectile::cannon_bundle::{CannonBundle, CreateCannon};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
@@ -10,6 +10,24 @@ pub fn setup_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    let text_style = TextStyle {
+        font_size: 16.0,
+        ..default()
+    };
+    let velocity_display = commands
+        .spawn((TextBundle::from_sections(vec![
+            TextSection::new("speed: ", text_style.clone()),
+            TextSection::new("0", text_style),
+        ])
+        .with_text_justify(JustifyText::Center)
+        .with_style(Style {
+            position_type: PositionType::Absolute,
+            bottom: Val::Px(5.0),
+            right: Val::Px(5.0),
+            ..default()
+        }),))
+        .id();
+
     // Spawn the player
     let small_bullet_texture = meshes.add(Ellipse::new(1.0, 1.0));
     let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 100.0)));
@@ -22,7 +40,10 @@ pub fn setup_player(
                 ..Default::default()
             },
             Player,
-            RigidBodyBundle::default().with_drag_coefficient(DragCoefficient::CUBE),
+            VelocityDisplay(velocity_display),
+            RigidBodyBundle::new()
+                .with_mass(10.0)
+                .with_drag_coefficient(DragCoefficient::CUBE),
             Force::default(),
             Impulse::default(),
             CannonBundle::new(vec![
