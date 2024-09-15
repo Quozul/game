@@ -2,15 +2,16 @@
 
 mod camera;
 mod enemy;
+mod physics;
 mod player;
 mod projectile;
 mod utils;
-mod velocity;
 
+use crate::camera::post_processing::plugin::PostProcessPlugin;
 use crate::enemy::plugin::EnemyPlugin;
+use crate::physics::plugin::PhysicsPlugin;
 use crate::player::plugin::PlayerPlugin;
 use crate::projectile::plugin::ProjectilePlugin;
-use crate::velocity::plugin::VelocityPlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
 use bevy::prelude::*;
 
@@ -42,9 +43,9 @@ fn main() {
         .add_plugins((
             PlayerPlugin,
             EnemyPlugin,
-            VelocityPlugin,
+            PhysicsPlugin,
             ProjectilePlugin,
-            // PostProcessPlugin,
+            PostProcessPlugin,
             camera::plugin::CameraPlugin,
         ))
         .init_state::<AppState>()

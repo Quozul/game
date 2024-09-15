@@ -1,7 +1,7 @@
 use crate::camera::bundle::PlayerCameraBundle;
+use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
 use crate::player::components::Player;
-use crate::projectile::cannon_bundle::CannonBundle;
-use crate::velocity::components::RigidBodyBundle;
+use crate::projectile::cannon_bundle::{CannonBundle, CreateCannon};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -11,7 +11,7 @@ pub fn setup_player(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     // Spawn the player
-    let bullet_texture = meshes.add(Ellipse::new(2.5, 2.5));
+    let small_bullet_texture = meshes.add(Ellipse::new(1.0, 1.0));
     let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 100.0)));
     let player_id = commands
         .spawn((
@@ -22,12 +22,27 @@ pub fn setup_player(
                 ..Default::default()
             },
             Player,
-            RigidBodyBundle::default(),
-            CannonBundle::new(
-                bullet_texture,
-                Vec3::new(0.0, 0.0, 1.0),
-                materials.add(Color::linear_rgb(100., 100., 100.)),
-            ),
+            RigidBodyBundle::default().with_drag_coefficient(DragCoefficient::CUBE),
+            Force::default(),
+            Impulse::default(),
+            CannonBundle::new(vec![
+                CreateCannon {
+                    mesh_handle: small_bullet_texture.clone(),
+                    offset: Vec3::new(25.0, -50.0, 1.0),
+                    material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
+                    recoil: 200.0,
+                    reload: 200,
+                    spread: 2.0,
+                },
+                CreateCannon {
+                    mesh_handle: small_bullet_texture.clone(),
+                    offset: Vec3::new(-25.0, -50.0, 1.0),
+                    material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
+                    recoil: 200.0,
+                    reload: 200,
+                    spread: 2.0,
+                },
+            ]),
         ))
         .id();
 

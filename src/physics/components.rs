@@ -2,17 +2,26 @@ use bevy::math::Vec2;
 use bevy::prelude::*;
 
 #[derive(Component, Default)]
-pub struct Velocity(pub Vec2);
+pub struct Velocity {
+    pub linear_velocity: Vec2,
+}
 
 #[derive(Component, Default)]
-pub struct Force(pub Vec2);
+pub struct Force {
+    pub linear_force: Vec2,
+}
+
+#[derive(Component, Default)]
+pub struct Impulse {
+    pub linear_impulse: Vec2,
+}
 
 #[derive(Component)]
 pub struct Mass(pub f32);
 
 impl Default for Mass {
     fn default() -> Self {
-        Self(1.)
+        Self(1.0)
     }
 }
 
@@ -33,7 +42,6 @@ impl Default for DragCoefficient {
 #[derive(Bundle, Default)]
 pub struct RigidBodyBundle {
     velocity: Velocity,
-    force: Force,
     mass: Mass,
     drag_coefficient: DragCoefficient,
 }
@@ -42,9 +50,15 @@ impl RigidBodyBundle {
     pub fn new(mass: f32, initial_velocity: Vec2, drag_coefficient: f32) -> Self {
         Self {
             mass: Mass(mass),
-            velocity: Velocity(initial_velocity), // Kind of acts as a initial impulse
+            velocity: Velocity {
+                linear_velocity: initial_velocity,
+            }, // Kind of acts as an initial impulse
             drag_coefficient: DragCoefficient(drag_coefficient),
-            ..default()
         }
+    }
+
+    pub fn with_drag_coefficient(mut self, drag_coefficient: DragCoefficient) -> Self {
+        self.drag_coefficient = drag_coefficient;
+        self
     }
 }

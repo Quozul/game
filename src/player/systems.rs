@@ -1,8 +1,8 @@
 use crate::camera::main_camera::MainCamera;
+use crate::physics::components::Force;
 use crate::player::components::Player;
 use crate::utils::calculate_rotation_angle::calculate_rotation_angle;
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
-use crate::velocity::components::Force;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
@@ -34,7 +34,13 @@ pub fn move_player(
         direction.x += 1.;
     }
 
-    force.0 = direction.normalize_or_zero() * THROTTLE;
+    let throttle = if kb_input.pressed(KeyCode::ShiftLeft) {
+        THROTTLE * 5.0
+    } else {
+        THROTTLE
+    };
+
+    force.linear_force = direction.normalize_or_zero() * throttle;
 }
 
 pub fn rotate_towards_mouse(

@@ -6,13 +6,17 @@ use std::time::Duration;
 #[derive(Component)]
 pub struct Projectile;
 
-#[derive(Component, Default)]
-pub struct Life(pub Duration);
-
-#[derive(Component)]
-pub struct Cannon {
+pub struct CannonProperties {
     pub mesh_handle: Handle<Mesh>,
     pub offset: Vec3,
     pub material_handle: Handle<ColorMaterial>,
     pub cooldown: Duration,
+    pub recoil: f32,
+    pub reload: u64,
+    pub spread: f32,
+}
+
+#[derive(Component)]
+pub struct Cannon {
+    pub properties: Vec<CannonProperties>,
 }
