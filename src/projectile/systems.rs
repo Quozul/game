@@ -1,12 +1,14 @@
 use crate::camera::events::TriggerCameraShakeEvent;
 use crate::camera::main_camera::MainCamera;
-use crate::physics::movements_components::Impulse;
+use crate::physics::events::CollisionEvent;
+use crate::physics::movements_components::{Impulse, Mass, Velocity};
 use crate::projectile::components::{Cannon, Lifetime, Projectile};
 use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::calculate_direction_angle;
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
+use std::process::Command;
 use std::time::Duration;
 
 pub fn shoot_bullets(
@@ -63,13 +65,29 @@ pub fn cannon_cooldown(mut q_cannons: Query<&mut Cannon>, time: Res<Time>) {
     }
 }
 
-pub fn remove_bullets(
+pub fn remove_bullets_of_old_age(
     mut commands: Commands,
     q_projectiles: Query<(&Lifetime, Entity), With<Projectile>>,
 ) {
     for (velocity, entity) in q_projectiles.iter() {
-        if velocity.0.as_secs() > 1 {
+        if velocity.0.as_secs() > 10 {
             commands.entity(entity).despawn();
+        }
+    }
+}
+
+pub fn remove_bullets_on_collision(
+    mut command: Commands,
+    mut event: EventReader<CollisionEvent>,
+    q_projectiles: Query<Entity, With<Projectile>>,
+) {
+    for ev in event.read() {
+        if let Ok(entity) = q_projectiles.get(ev.first) {
+            command.entity(entity).despawn();
+        }
+
+        if let Ok(entity) = q_projectiles.get(ev.second) {
+            command.entity(entity).despawn();
         }
     }
 }

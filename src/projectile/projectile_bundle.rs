@@ -1,3 +1,4 @@
+use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::movements_components::{DragCoefficient, RigidBodyBundle};
 use crate::projectile::components::{CannonProperties, Lifetime, Projectile};
 use bevy::prelude::*;
@@ -9,9 +10,11 @@ pub struct ProjectileBundle {
     rigid_body: RigidBodyBundle,
     projectile: Projectile,
     life_time: Lifetime,
+    pub circle_collider: CircleCollider,
 }
 
-const PROJECTILE_SPEED: f32 = 1_000.0; // 1_000.0 seems like a good value
+const PROJECTILE_SPEED: f32 = 500.0; // 1_000.0 seems like a good value
+const PROJECTILE_MASS: f32 = 1.0;
 
 impl ProjectileBundle {
     pub fn from_cannon(origin: &Transform, cannon: &CannonProperties, angle: Vec2) -> Self {
@@ -28,11 +31,12 @@ impl ProjectileBundle {
                 ..Default::default()
             },
             rigid_body: RigidBodyBundle::default()
-                .with_mass(1.0)
+                .with_mass(PROJECTILE_MASS)
                 .with_initial_velocity(initial_velocity)
                 .with_drag_coefficient(DragCoefficient::CIRCLE),
             projectile: Projectile,
             life_time: Lifetime::default(),
+            circle_collider: CircleCollider::circle(1.0),
         }
     }
 }

@@ -1,5 +1,6 @@
 use crate::projectile::systems::{
-    cannon_cooldown, increment_lifetime, remove_bullets, shoot_bullets,
+    cannon_cooldown, increment_lifetime, remove_bullets_of_old_age, remove_bullets_on_collision,
+    shoot_bullets,
 };
 use crate::AppState;
 use bevy::prelude::*;
@@ -14,7 +15,8 @@ impl Plugin for ProjectilePlugin {
                 shoot_bullets,
                 cannon_cooldown,
                 increment_lifetime,
-                remove_bullets,
+                remove_bullets_of_old_age,
+                remove_bullets_on_collision,
             )
                 .run_if(in_state(AppState::InGame)),
         );

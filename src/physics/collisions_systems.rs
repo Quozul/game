@@ -1,27 +1,113 @@
-use crate::physics::collision_components::PolygonCollider;
-use bevy::math::Vec3Swizzles;
+use crate::physics::colliders::circle_collider::CircleCollider;
+use crate::physics::colliders::polygon_collider::PolygonCollider;
+use crate::physics::events::CollisionEvent;
+use crate::physics::movements_components::{Mass, Velocity};
 use bevy::prelude::*;
 
-pub fn resolve_collision(
-    mut gizmos: Gizmos,
-    mut q_bodies: Query<(&mut Transform, &PolygonCollider)>,
+pub fn resolve_collisions(
+    mut events: EventWriter<CollisionEvent>,
+    q_bodies: Query<(
+        &Transform,
+        Option<&PolygonCollider>,
+        Option<&CircleCollider>,
+        Entity,
+    )>,
 ) {
-    let mut iter = q_bodies.iter_combinations_mut();
-    while let Some([(mut transform, collider), (mut other_transform, other_collider)]) =
-        iter.fetch_next()
+    let mut iter = q_bodies.iter_combinations();
+    while let Some(
+        [(transform, collider, circle_collider, entity), (other_transform, other_collider, other_circle_collider, other_entity)],
+    ) = iter.fetch_next()
     {
-        let adjusted_collider = adjust_collider_vertices(&transform, collider);
-        let other_adjusted_collider = adjust_collider_vertices(&other_transform, other_collider);
+        let result = match (
+            collider,
+            circle_collider,
+            other_collider,
+            other_circle_collider,
+        ) {
+            // Polygon-polygon collision
+            (Some(poly_collider), None, Some(other_poly_collider), None) => {
+                let adjusted_collider = poly_collider.transform(transform);
+                let other_adjusted_collider = other_poly_collider.transform(other_transform);
+                adjusted_collider.intersect_polygon(&other_adjusted_collider)
+            }
 
-        adjusted_collider.draw_collider(&mut gizmos);
-        other_adjusted_collider.draw_collider(&mut gizmos);
+            // Polygon-circle collision
+            (None, Some(circle_collider), Some(other_poly_collider), None) => {
+                let other_adjusted_poly_collider = other_poly_collider.transform(other_transform);
+                let adjusted_circle_collider = circle_collider.transform(transform);
+                other_adjusted_poly_collider.intersect_circle(&adjusted_circle_collider)
+            }
+            (Some(poly_collider), None, None, Some(other_circle_collider)) => {
+                let adjusted_poly_collider = poly_collider.transform(transform);
+                let other_adjusted_circle_collider =
+                    other_circle_collider.transform(other_transform);
+                adjusted_poly_collider.intersect_circle(&other_adjusted_circle_collider)
+            }
 
-        if let Some((normal, depth)) = adjusted_collider.intersect_polygon(&other_adjusted_collider)
+            // Circle-circle collision
+            (None, Some(circle_collider), None, Some(other_circle_collider)) => {
+                let adjusted_collider = circle_collider.transform(transform);
+                let other_adjusted_collider = other_circle_collider.transform(other_transform);
+                adjusted_collider.intersect_circles(&other_adjusted_collider)
+            }
+
+            _ => continue,
+        };
+
+        if let Some((normal, depth)) = result {
+            events.send(CollisionEvent {
+                first: entity,
+                second: other_entity,
+                collision: normal * depth,
+            });
+        }
+    }
+}
+
+pub fn compute_collisions(
+    mut event: EventReader<CollisionEvent>,
+    mut q_bodies: Query<(&mut Transform, &mut Velocity, &Mass)>,
+) {
+    for ev in event.read() {
+        if let Ok(
+            [(mut transform, mut velocity, mass), (mut other_transform, mut other_velocity, other_mass)],
+        ) = q_bodies.get_many_mut([ev.first, ev.second])
         {
-            // TODO: Update Velocity instead of Transform
-            transform.translation -= (normal * depth * 0.5).extend(0.0);
-            other_transform.translation += (normal * depth * 0.5).extend(0.0);
-            // TODO: Fire collision event with the Entity ID
+            transform.translation -= (ev.collision * 0.5).extend(0.0);
+            other_transform.translation += (ev.collision * 0.5).extend(0.0);
+
+            let v1i = velocity.linear_velocity;
+            let v2i = other_velocity.linear_velocity;
+            let m1 = mass.0;
+            let m2 = other_mass.0;
+
+            let total_mass = m1 + m2;
+
+            let vf = (m1 * v1i + m2 * v2i) / total_mass;
+
+            let r1 = m1 / total_mass;
+            let r2 = m2 / total_mass;
+
+            velocity.linear_velocity = vf * r2;
+            other_velocity.linear_velocity = -vf * r1;
+        }
+    }
+}
+
+pub fn draw_colliders(
+    mut gizmos: Gizmos,
+    q_bodies: Query<(
+        &Transform,
+        Option<&PolygonCollider>,
+        Option<&CircleCollider>,
+    )>,
+) {
+    for (transform, polygon, circle) in q_bodies.iter() {
+        if let Some(poly) = polygon {
+            poly.transform(transform).draw_collider(&mut gizmos);
+        }
+        if let Some(circle) = circle {
+            circle.transform(transform).draw_collider(&mut gizmos);
         }
     }
 }
@@ -34,14 +120,4 @@ pub fn draw_world(mut gizmos: Gizmos) {
         Vec2::splat(650.),
         Color::WHITE,
     );
-}
-
-fn adjust_collider_vertices(transform: &Transform, collider: &PolygonCollider) -> PolygonCollider {
-    let adjusted_vertices = collider
-        .vertices
-        .iter()
-        .map(|vertex| transform.transform_point(vertex.extend(0.0)).xy())
-        .collect::<Vec<_>>();
-
-    PolygonCollider::new(adjusted_vertices)
 }
