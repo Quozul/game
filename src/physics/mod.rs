@@ -1,5 +1,8 @@
-pub mod components;
+pub mod collision_components;
+mod collisions_systems;
 mod constants;
+pub mod movements_components;
+mod movements_systems;
 pub mod plugin;
-mod systems;
+pub mod resources;
 pub mod utils;

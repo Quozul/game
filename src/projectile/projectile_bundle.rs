@@ -1,4 +1,4 @@
-use crate::physics::components::{DragCoefficient, RigidBodyBundle};
+use crate::physics::movements_components::{DragCoefficient, RigidBodyBundle};
 use crate::projectile::components::{CannonProperties, Lifetime, Projectile};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
@@ -27,7 +27,7 @@ impl ProjectileBundle {
                 transform: Transform::from_translation(origin.translation + offset),
                 ..Default::default()
             },
-            rigid_body: RigidBodyBundle::new()
+            rigid_body: RigidBodyBundle::default()
                 .with_mass(1.0)
                 .with_initial_velocity(initial_velocity)
                 .with_drag_coefficient(DragCoefficient::CIRCLE),

@@ -1,6 +1,6 @@
 use crate::camera::events::TriggerCameraShakeEvent;
 use crate::camera::main_camera::MainCamera;
-use crate::physics::components::{Impulse, Velocity};
+use crate::physics::movements_components::Impulse;
 use crate::projectile::components::{Cannon, Lifetime, Projectile};
 use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::calculate_direction_angle;

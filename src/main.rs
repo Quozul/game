@@ -10,6 +10,7 @@ mod utils;
 use crate::camera::post_processing::plugin::PostProcessPlugin;
 use crate::enemy::plugin::EnemyPlugin;
 use crate::physics::plugin::PhysicsPlugin;
+use crate::physics::resources::PhysicsResource;
 use crate::player::plugin::PlayerPlugin;
 use crate::projectile::plugin::ProjectilePlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
@@ -24,10 +25,16 @@ enum AppState {
 
 fn main() {
     App::new()
+        .insert_resource(PhysicsResource {
+            air_density: 0.05,
+            // The original value is 6.674*10E11 m3⋅kg−1⋅s−2
+            // We adjusted it to 10E0 so that the smallest object that will be attracted is 1 unit in mass
+            gravity: 6.674 * 10E0,
+        })
         .add_plugins((
             DefaultPlugins.set(bevy::log::LogPlugin {
                 level: bevy::log::Level::INFO,
-                filter: "wgpu=error,naga=warn,game=debug".to_string(),
+                filter: "wgpu=error,naga=warn,game=trace".to_string(),
                 ..default()
             }),
             FpsOverlayPlugin {

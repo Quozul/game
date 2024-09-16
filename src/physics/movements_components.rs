@@ -50,10 +50,6 @@ pub struct RigidBodyBundle {
 }
 
 impl RigidBodyBundle {
-    pub fn new() -> Self {
-        Self::default()
-    }
-
     pub fn with_drag_coefficient(mut self, drag_coefficient: DragCoefficient) -> Self {
         self.drag_coefficient = drag_coefficient;
         self

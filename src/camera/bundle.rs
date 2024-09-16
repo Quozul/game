@@ -29,7 +29,7 @@ impl PlayerCameraBundle {
                 projection: OrthographicProjection {
                     far: 1000.,
                     near: -1000.,
-                    scaling_mode: ScalingMode::FixedVertical(720.0),
+                    scaling_mode: ScalingMode::FixedVertical(1080.0),
                     scale: 1.0,
                     ..default()
                 },

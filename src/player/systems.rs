@@ -1,5 +1,6 @@
 use crate::camera::main_camera::MainCamera;
-use crate::physics::components::{DragCoefficient, Force, Mass, Velocity};
+use crate::physics::movements_components::{DragCoefficient, Force, Mass, Velocity};
+use crate::physics::resources::PhysicsResource;
 use crate::physics::utils::get_terminal_velocity;
 use crate::player::components::{Player, VelocityDisplay};
 use crate::utils::calculate_rotation_angle::calculate_rotation_angle;
@@ -8,6 +9,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 const THROTTLE: f32 = 500.0;
+const BOOST_MULTIPLIER: f32 = 5.0;
 
 pub fn move_player(
     mut rectangles: Query<&mut Force, With<Player>>,
@@ -36,7 +38,7 @@ pub fn move_player(
     }
 
     let throttle = if kb_input.pressed(KeyCode::ShiftLeft) {
-        THROTTLE * 5.0
+        THROTTLE * BOOST_MULTIPLIER
     } else {
         THROTTLE
     };
@@ -63,13 +65,19 @@ pub fn rotate_towards_mouse(
 }
 
 pub fn update_velocity_display(
+    physics_resource: Res<PhysicsResource>,
     q_velocity_displays: Query<(&Velocity, &Force, &DragCoefficient, &Mass, &VelocityDisplay)>,
     mut q_texts: Query<&mut Text>,
 ) {
     for (velocity, force, drag, mass, display) in q_velocity_displays.iter() {
         if let Ok(mut text) = q_texts.get_mut(display.0) {
             let current_speed = velocity.linear_velocity.length();
-            let maximum_speed = get_terminal_velocity(mass.0, force.linear_force.length(), drag.0);
+            let maximum_speed = get_terminal_velocity(
+                physics_resource.air_density,
+                mass.0,
+                force.linear_force.length(),
+                drag.0,
+            );
             let percentage = current_speed / maximum_speed * 100.0;
             text.sections[1].value = format!(
                 "{:.0}/{:.0} {:.0}%",

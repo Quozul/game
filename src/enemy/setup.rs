@@ -1,4 +1,6 @@
 use crate::enemy::components::Enemy;
+use crate::physics::collision_components::PolygonCollider;
+use crate::physics::movements_components::Mass;
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -13,9 +15,11 @@ pub fn spawn_enemy(
         MaterialMesh2dBundle {
             mesh: rect_mesh,
             material: materials.add(Color::linear_rgb(1.0, 0.5, 0.5)),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
+            transform: Transform::from_xyz(500.0, 0.0, 0.0),
             ..Default::default()
         },
+        PolygonCollider::square(50.0),
+        Mass(1.0),
         Enemy,
     ));
 }

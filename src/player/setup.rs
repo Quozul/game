@@ -1,5 +1,6 @@
 use crate::camera::bundle::PlayerCameraBundle;
-use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
+use crate::physics::collision_components::PolygonCollider;
+use crate::physics::movements_components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
 use crate::player::components::{Player, VelocityDisplay};
 use crate::projectile::cannon_bundle::{CannonBundle, CreateCannon};
 use bevy::prelude::*;
@@ -30,7 +31,7 @@ pub fn setup_player(
 
     // Spawn the player
     let small_bullet_texture = meshes.add(Ellipse::new(1.0, 1.0));
-    let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 100.0)));
+    let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 50.0)));
     let player_id = commands
         .spawn((
             MaterialMesh2dBundle {
@@ -39,9 +40,10 @@ pub fn setup_player(
                 transform: Transform::from_xyz(0.0, 0.0, 1.0),
                 ..Default::default()
             },
+            PolygonCollider::square(50.0),
             Player,
             VelocityDisplay(velocity_display),
-            RigidBodyBundle::new()
+            RigidBodyBundle::default()
                 .with_mass(10.0)
                 .with_drag_coefficient(DragCoefficient::CUBE),
             Force::default(),
