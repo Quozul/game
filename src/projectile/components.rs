@@ -4,7 +4,7 @@ use bevy::prelude::{ColorMaterial, Component, Mesh};
 use std::time::Duration;
 
 #[derive(Component)]
-pub struct Projectile;
+pub struct Damage(pub u32);
 
 pub struct CannonProperties {
     pub mesh_handle: Handle<Mesh>,

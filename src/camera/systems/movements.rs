@@ -1,6 +1,7 @@
 use crate::camera::components::CameraFollow;
 use crate::camera::main_camera::MainCamera;
 use crate::utils::get_mouse_world_position::get_mouse_world_position;
+use bevy::input::mouse::MouseWheel;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
@@ -22,14 +23,32 @@ pub fn camera_follow(
 
 pub fn camera_offset(
     q_windows: Query<&Window, With<PrimaryWindow>>,
-    mut q_camera: Query<(&Camera, &mut Transform, &GlobalTransform), With<MainCamera>>,
+    mut q_camera: Query<
+        (
+            &Camera,
+            &OrthographicProjection,
+            &mut Transform,
+            &GlobalTransform,
+        ),
+        With<MainCamera>,
+    >,
 ) {
-    let (camera, mut camera_transform, global_transform) = q_camera.single_mut();
+    let (camera, projection, mut camera_transform, global_transform) = q_camera.single_mut();
     let window = q_windows.single();
 
     if let Some(mouse_position) = get_mouse_world_position(camera, global_transform, window) {
         let offset = mouse_position - camera_transform.translation.xy();
-        let offset = offset.normalize_or_zero() * 1.0;
+        let offset = offset.normalize_or_zero() * projection.scale;
         camera_transform.translation += offset.extend(0.);
+    }
+}
+
+pub fn camera_zoom(
+    mut q_camera: Query<&mut OrthographicProjection, With<MainCamera>>,
+    mut evr_scroll: EventReader<MouseWheel>,
+) {
+    for ev in evr_scroll.read() {
+        let mut projection = q_camera.single_mut();
+        projection.scale = (projection.scale - ev.y / 10.0).clamp(0.1, 10.0);
     }
 }

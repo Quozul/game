@@ -9,7 +9,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 const THROTTLE: f32 = 500.0;
-const BOOST_MULTIPLIER: f32 = 5.0;
+const BOOST_MULTIPLIER: f32 = 50.0;
 
 pub fn move_player(
     mut rectangles: Query<&mut Force, With<Player>>,

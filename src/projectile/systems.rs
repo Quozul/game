@@ -1,14 +1,14 @@
 use crate::camera::events::TriggerCameraShakeEvent;
 use crate::camera::main_camera::MainCamera;
+use crate::enemy::components::{Enemy, Health};
 use crate::physics::events::CollisionEvent;
-use crate::physics::movements_components::{Impulse, Mass, Velocity};
-use crate::projectile::components::{Cannon, Lifetime, Projectile};
+use crate::physics::movements_components::Impulse;
+use crate::projectile::components::{Cannon, Damage, Lifetime};
 use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::calculate_direction_angle;
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
-use std::process::Command;
 use std::time::Duration;
 
 pub fn shoot_bullets(
@@ -65,12 +65,14 @@ pub fn cannon_cooldown(mut q_cannons: Query<&mut Cannon>, time: Res<Time>) {
     }
 }
 
+const MAX_PROJECTILE_LIFE: u64 = 1;
+
 pub fn remove_bullets_of_old_age(
     mut commands: Commands,
-    q_projectiles: Query<(&Lifetime, Entity), With<Projectile>>,
+    q_projectiles: Query<(&Lifetime, Entity), With<Damage>>,
 ) {
     for (velocity, entity) in q_projectiles.iter() {
-        if velocity.0.as_secs() > 10 {
+        if velocity.0.as_secs() > MAX_PROJECTILE_LIFE {
             commands.entity(entity).despawn();
         }
     }
@@ -79,15 +81,39 @@ pub fn remove_bullets_of_old_age(
 pub fn remove_bullets_on_collision(
     mut command: Commands,
     mut event: EventReader<CollisionEvent>,
-    q_projectiles: Query<Entity, With<Projectile>>,
+    q_projectiles: Query<&Damage>,
+    mut q_enemies: Query<&mut Health, With<Enemy>>,
 ) {
     for ev in event.read() {
-        if let Ok(entity) = q_projectiles.get(ev.first) {
-            command.entity(entity).despawn();
-        }
+        handle_collision(
+            &mut command,
+            &q_projectiles,
+            &mut q_enemies,
+            ev.first,
+            ev.second,
+        );
+        handle_collision(
+            &mut command,
+            &q_projectiles,
+            &mut q_enemies,
+            ev.second,
+            ev.first,
+        );
+    }
+}
 
-        if let Ok(entity) = q_projectiles.get(ev.second) {
-            command.entity(entity).despawn();
+fn handle_collision(
+    command: &mut Commands,
+    q_projectiles: &Query<&Damage>,
+    q_enemies: &mut Query<&mut Health, With<Enemy>>,
+    projectile_entity: Entity,
+    enemy_entity: Entity,
+) {
+    if let Ok(projectile) = q_projectiles.get(projectile_entity) {
+        command.entity(projectile_entity).despawn();
+
+        if let Ok(mut health) = q_enemies.get_mut(enemy_entity) {
+            health.0 = health.0.saturating_sub(projectile.0);
         }
     }
 }

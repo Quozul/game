@@ -1,6 +1,6 @@
 use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::movements_components::{DragCoefficient, RigidBodyBundle};
-use crate::projectile::components::{CannonProperties, Lifetime, Projectile};
+use crate::projectile::components::{CannonProperties, Damage, Lifetime};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -8,12 +8,12 @@ use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 pub struct ProjectileBundle {
     material: MaterialMesh2dBundle<ColorMaterial>,
     rigid_body: RigidBodyBundle,
-    projectile: Projectile,
+    damage: Damage,
     life_time: Lifetime,
-    pub circle_collider: CircleCollider,
+    circle_collider: CircleCollider,
 }
 
-const PROJECTILE_SPEED: f32 = 500.0; // 1_000.0 seems like a good value
+const PROJECTILE_SPEED: f32 = 1_000.0; // 1_000.0 seems like a good value
 const PROJECTILE_MASS: f32 = 1.0;
 
 impl ProjectileBundle {
@@ -34,7 +34,7 @@ impl ProjectileBundle {
                 .with_mass(PROJECTILE_MASS)
                 .with_initial_velocity(initial_velocity)
                 .with_drag_coefficient(DragCoefficient::CIRCLE),
-            projectile: Projectile,
+            damage: Damage(10),
             life_time: Lifetime::default(),
             circle_collider: CircleCollider::circle(1.0),
         }

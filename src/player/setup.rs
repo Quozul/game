@@ -1,6 +1,5 @@
 use crate::camera::bundle::PlayerCameraBundle;
 use crate::physics::colliders::circle_collider::CircleCollider;
-use crate::physics::colliders::polygon_collider::PolygonCollider;
 use crate::physics::movements_components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
 use crate::player::components::{Player, VelocityDisplay};
 use crate::projectile::cannon_bundle::{CannonBundle, CreateCannon};
@@ -37,16 +36,15 @@ pub fn setup_player(
         .spawn((
             MaterialMesh2dBundle {
                 mesh: rect_mesh,
-                material: materials.add(Color::WHITE),
+                material: materials.add(Color::linear_rgb(0.0, 0.0, 1.0)),
                 transform: Transform::from_xyz(0.0, 0.0, 1.0),
                 ..Default::default()
             },
-            // PolygonCollider::square(50.0),
             CircleCollider::circle(25.0),
             Player,
             VelocityDisplay(velocity_display),
             RigidBodyBundle::default()
-                .with_mass(10.0)
+                .with_mass(5.0)
                 .with_drag_coefficient(DragCoefficient::CUBE),
             Force::default(),
             Impulse::default(),
