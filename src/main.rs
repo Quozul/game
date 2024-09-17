@@ -1,7 +1,9 @@
 #![feature(let_chains)]
 
 mod camera;
+mod constants;
 mod enemy;
+mod map;
 mod physics;
 mod player;
 mod projectile;
@@ -9,6 +11,7 @@ mod utils;
 
 use crate::camera::post_processing::plugin::PostProcessPlugin;
 use crate::enemy::plugin::EnemyPlugin;
+use crate::map::plugin::MapPlugin;
 use crate::physics::plugin::PhysicsPlugin;
 use crate::physics::resources::PhysicsResource;
 use crate::player::plugin::PlayerPlugin;
@@ -48,6 +51,7 @@ fn main() {
             },
         ))
         .add_plugins((
+            MapPlugin,
             PlayerPlugin,
             EnemyPlugin,
             PhysicsPlugin,

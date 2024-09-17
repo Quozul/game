@@ -2,7 +2,7 @@ use bevy::math::Vec2;
 use bevy::prelude::*;
 
 /// Gives the Entity the ability to move
-#[derive(Component, Default)]
+#[derive(Component, Default, Debug)]
 pub struct Velocity {
     pub linear_velocity: Vec2,
 }
@@ -47,6 +47,7 @@ pub struct RigidBodyBundle {
     velocity: Velocity,
     mass: Mass,
     drag_coefficient: DragCoefficient,
+    rigid_body_type: RigidBodyType,
 }
 
 impl RigidBodyBundle {
@@ -63,5 +64,17 @@ impl RigidBodyBundle {
     pub fn with_mass(mut self, mass: f32) -> Self {
         self.mass = Mass(mass);
         self
+    }
+}
+
+#[derive(Component, PartialEq)]
+pub enum RigidBodyType {
+    Dynamic,
+    Static,
+}
+
+impl Default for RigidBodyType {
+    fn default() -> Self {
+        Self::Dynamic
     }
 }

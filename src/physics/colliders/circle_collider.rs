@@ -18,10 +18,6 @@ impl CircleCollider {
             center: Vec2::ZERO,
         }
     }
-
-    pub fn radius(&self) -> f32 {
-        self.radius
-    }
 }
 
 impl Center for CircleCollider {

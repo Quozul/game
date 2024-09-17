@@ -74,7 +74,6 @@ pub fn update_velocity_display(
             let current_speed = velocity.linear_velocity.length();
             let maximum_speed = get_terminal_velocity(
                 physics_resource.air_density,
-                mass.0,
                 force.linear_force.length(),
                 drag.0,
             );

@@ -1,5 +1,7 @@
 use crate::physics::constants::CROSS_SECTIONAL_AREA;
-use crate::physics::movements_components::{DragCoefficient, Force, Impulse, Mass, Velocity};
+use crate::physics::movements_components::{
+    DragCoefficient, Force, Impulse, Mass, RigidBodyType, Velocity,
+};
 use crate::physics::resources::PhysicsResource;
 use bevy::prelude::*;
 
@@ -51,6 +53,11 @@ pub fn update_gravity(
     {
         let delta = (other_transform.translation - transform.translation).xy();
         let distance_sq = delta.length_squared();
+        // FIXME: if the distance is zero, it causes everything to break
+        if distance_sq == 0.0 {
+            continue;
+        }
+
         let f = physics_resource.gravity / distance_sq;
         let force_unit_mass = delta * f * delta_time;
 
@@ -63,7 +70,10 @@ pub fn update_gravity(
     }
 }
 
-pub fn move_object(mut q_velocities: Query<(&mut Transform, &Velocity)>, time: Res<Time>) {
+pub fn move_object(
+    mut q_velocities: Query<(&mut Transform, &Velocity), With<RigidBodyType>>,
+    time: Res<Time>,
+) {
     let delta_time = time.delta_seconds();
 
     for (mut transform, velocity) in q_velocities.iter_mut() {

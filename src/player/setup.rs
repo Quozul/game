@@ -11,6 +11,7 @@ pub fn setup_player(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
+    // Spawn speed text
     let text_style = TextStyle {
         font_size: 16.0,
         ..default()
@@ -50,7 +51,7 @@ pub fn setup_player(
             Impulse::default(),
             CannonBundle::new(vec![CreateCannon {
                 mesh_handle: small_bullet_texture.clone(),
-                offset: Vec3::new(0.0, -50.0, 1.0),
+                offset: Vec3::new(0.0, -25.0, 1.0),
                 material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
                 recoil: 200.0,
                 reload: 200,
