@@ -1,5 +1,5 @@
 use crate::physics::colliders::circle_collider::CircleCollider;
-use crate::physics::movements_components::{DragCoefficient, RigidBodyBundle};
+use crate::physics::components::{DragCoefficient, RigidBodyBundle};
 use crate::projectile::components::{CannonProperties, Damage, Lifetime};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};

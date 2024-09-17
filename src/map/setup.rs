@@ -1,6 +1,6 @@
 use crate::constants::{MAP_SIZE, WALL_THICKNESS};
 use crate::physics::colliders::polygon_collider::PolygonCollider;
-use crate::physics::movements_components::RigidBodyType;
+use crate::physics::components::RigidBodyType;
 use bevy::prelude::*;
 
 pub fn setup_map(mut commands: Commands) {

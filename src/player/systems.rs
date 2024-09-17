@@ -1,7 +1,7 @@
 use crate::camera::main_camera::MainCamera;
-use crate::physics::movements_components::{DragCoefficient, Force, Mass, Velocity};
+use crate::physics::components::{DragCoefficient, Force, Velocity};
 use crate::physics::resources::PhysicsResource;
-use crate::physics::utils::get_terminal_velocity;
+use crate::physics::utils::get_terminal_velocity::get_terminal_velocity;
 use crate::player::components::{Player, VelocityDisplay};
 use crate::utils::calculate_rotation_angle::calculate_rotation_angle;
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
@@ -66,10 +66,10 @@ pub fn rotate_towards_mouse(
 
 pub fn update_velocity_display(
     physics_resource: Res<PhysicsResource>,
-    q_velocity_displays: Query<(&Velocity, &Force, &DragCoefficient, &Mass, &VelocityDisplay)>,
+    q_velocity_displays: Query<(&Velocity, &Force, &DragCoefficient, &VelocityDisplay)>,
     mut q_texts: Query<&mut Text>,
 ) {
-    for (velocity, force, drag, mass, display) in q_velocity_displays.iter() {
+    for (velocity, force, drag, display) in q_velocity_displays.iter() {
         if let Ok(mut text) = q_texts.get_mut(display.0) {
             let current_speed = velocity.linear_velocity.length();
             let maximum_speed = get_terminal_velocity(

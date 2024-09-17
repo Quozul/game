@@ -1,6 +1,6 @@
 use crate::enemy::components::{Enemy, Health};
 use crate::physics::colliders::polygon_collider::PolygonCollider;
-use crate::physics::movements_components::RigidBodyBundle;
+use crate::physics::components::RigidBodyBundle;
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use std::f32::consts::PI;

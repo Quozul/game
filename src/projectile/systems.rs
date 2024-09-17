@@ -1,8 +1,8 @@
 use crate::camera::events::TriggerCameraShakeEvent;
 use crate::camera::main_camera::MainCamera;
 use crate::enemy::components::{Enemy, Health};
+use crate::physics::components::Impulse;
 use crate::physics::events::CollisionEvent;
-use crate::physics::movements_components::Impulse;
 use crate::projectile::components::{Cannon, Damage, Lifetime};
 use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::calculate_direction_angle;

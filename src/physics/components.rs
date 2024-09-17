@@ -69,7 +69,9 @@ impl RigidBodyBundle {
 
 #[derive(Component, PartialEq)]
 pub enum RigidBodyType {
+    /// A Dynamic body can move and respond to collisions
     Dynamic,
+    /// A Static body doesn't move and doesn't respond to collisions but other bodies colliding with this one can
     Static,
 }
 

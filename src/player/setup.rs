@@ -1,6 +1,6 @@
 use crate::camera::bundle::PlayerCameraBundle;
 use crate::physics::colliders::polygon_collider::PolygonCollider;
-use crate::physics::movements_components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
+use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
 use crate::player::components::{Player, VelocityDisplay};
 use crate::projectile::cannon_bundle::{CannonBundle, CreateCannon};
 use bevy::prelude::*;

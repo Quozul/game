@@ -9,3 +9,7 @@ pub trait Collider {
 pub trait CollidesWith<T> {
     fn collides_with(&self, other: &T) -> Option<Collision>;
 }
+
+pub trait Center {
+    fn center(&self) -> Vec2;
+}

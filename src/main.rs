@@ -1,4 +1,5 @@
 #![feature(let_chains)]
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod camera;
 mod constants;

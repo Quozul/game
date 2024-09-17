@@ -1,6 +1,5 @@
-use crate::physics::colliders::center::Center;
 use crate::physics::colliders::circle_collider::CircleCollider;
-use crate::physics::colliders::collider::{Collider, CollidesWith};
+use crate::physics::colliders::traits::{Center, Collider, CollidesWith};
 use crate::physics::collisions::collision::Collision;
 use crate::physics::collisions::projection::{Project, Projection};
 use bevy::color::Color;

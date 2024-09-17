@@ -1,9 +1,9 @@
 pub mod colliders;
 mod collisions;
+pub mod components;
 mod constants;
+mod dynamics;
 pub mod events;
-pub mod movements_components;
-mod movements_systems;
 pub mod plugin;
 pub mod resources;
 pub mod utils;

@@ -1,10 +1,9 @@
+use crate::physics::components::{DragCoefficient, Force, Impulse, Mass, RigidBodyType, Velocity};
 use crate::physics::constants::CROSS_SECTIONAL_AREA;
-use crate::physics::movements_components::{
-    DragCoefficient, Force, Impulse, Mass, RigidBodyType, Velocity,
-};
 use crate::physics::resources::PhysicsResource;
 use bevy::prelude::*;
 
+/// Applies the force and drag on objects
 pub fn apply_acceleration_and_drag(
     physics_resource: Res<PhysicsResource>,
     mut q_velocities: Query<(&mut Velocity, &Force, &DragCoefficient, &Mass)>,
@@ -23,7 +22,15 @@ pub fn apply_acceleration_and_drag(
     }
 }
 
-/// Applies an impulse to the velocity then resets the impulse
+fn get_drag_force(fluid_density: f32, linear_velocity: Vec2, drag_coefficient: f32) -> Vec2 {
+    0.5 * fluid_density
+        * linear_velocity.normalize_or_zero()
+        * linear_velocity.length_squared()
+        * drag_coefficient
+        * CROSS_SECTIONAL_AREA
+}
+
+/// Applies an impulse to the velocity then resets the impulse to zero
 pub fn update_impulse(
     mut q_velocities: Query<(&mut Velocity, &mut Impulse), Changed<Impulse>>,
     time: Res<Time>,
@@ -38,7 +45,7 @@ pub fn update_impulse(
     }
 }
 
-/// Apply Newton's law of universal gravitation
+/// Applies Newton's law of universal gravitation
 pub fn update_gravity(
     physics_resource: Res<PhysicsResource>,
     mut q_velocities: Query<(&Transform, &Mass, Option<&mut Velocity>)>,
@@ -70,6 +77,7 @@ pub fn update_gravity(
     }
 }
 
+/// Updates the position of each objects given their velocity
 pub fn move_object(
     mut q_velocities: Query<(&mut Transform, &Velocity), With<RigidBodyType>>,
     time: Res<Time>,
@@ -79,12 +87,4 @@ pub fn move_object(
     for (mut transform, velocity) in q_velocities.iter_mut() {
         transform.translation += velocity.linear_velocity.extend(0.) * delta_time;
     }
-}
-
-fn get_drag_force(fluid_density: f32, linear_velocity: Vec2, drag_coefficient: f32) -> Vec2 {
-    0.5 * fluid_density
-        * linear_velocity.normalize_or_zero()
-        * linear_velocity.length_squared()
-        * drag_coefficient
-        * CROSS_SECTIONAL_AREA
 }
