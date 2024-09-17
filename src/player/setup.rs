@@ -1,5 +1,5 @@
 use crate::camera::bundle::PlayerCameraBundle;
-use crate::physics::colliders::circle_collider::CircleCollider;
+use crate::physics::colliders::polygon_collider::PolygonCollider;
 use crate::physics::movements_components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
 use crate::player::components::{Player, VelocityDisplay};
 use crate::projectile::cannon_bundle::{CannonBundle, CreateCannon};
@@ -31,7 +31,7 @@ pub fn setup_player(
 
     // Spawn the player
     let small_bullet_texture = meshes.add(Ellipse::new(1.0, 1.0));
-    let rect_mesh = Mesh2dHandle(meshes.add(Ellipse::new(25.0, 25.0)));
+    let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 50.0)));
     let player_id = commands
         .spawn((
             MaterialMesh2dBundle {
@@ -40,7 +40,7 @@ pub fn setup_player(
                 transform: Transform::from_xyz(0.0, 0.0, 1.0),
                 ..Default::default()
             },
-            CircleCollider::circle(25.0),
+            PolygonCollider::square(50.0),
             Player,
             VelocityDisplay(velocity_display),
             RigidBodyBundle::default()
@@ -48,24 +48,14 @@ pub fn setup_player(
                 .with_drag_coefficient(DragCoefficient::CUBE),
             Force::default(),
             Impulse::default(),
-            CannonBundle::new(vec![
-                CreateCannon {
-                    mesh_handle: small_bullet_texture.clone(),
-                    offset: Vec3::new(25.0, -25.0, 1.0),
-                    material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
-                    recoil: 200.0,
-                    reload: 200,
-                    spread: 2.0,
-                },
-                CreateCannon {
-                    mesh_handle: small_bullet_texture.clone(),
-                    offset: Vec3::new(-25.0, -25.0, 1.0),
-                    material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
-                    recoil: 200.0,
-                    reload: 200,
-                    spread: 2.0,
-                },
-            ]),
+            CannonBundle::new(vec![CreateCannon {
+                mesh_handle: small_bullet_texture.clone(),
+                offset: Vec3::new(0.0, -50.0, 1.0),
+                material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
+                recoil: 200.0,
+                reload: 200,
+                spread: 2.0,
+            }]),
         ))
         .id();
 

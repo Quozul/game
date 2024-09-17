@@ -1,5 +1,5 @@
-use crate::physics::collisions_systems::{
-    compute_collisions, draw_colliders, draw_world, resolve_collisions,
+use crate::physics::collisions::collisions_systems::{
+    draw_colliders, draw_world, resolve_collisions, solve_collisions,
 };
 use crate::physics::events::CollisionEvent;
 use crate::physics::movements_systems::{
@@ -23,7 +23,7 @@ impl Plugin for PhysicsPlugin {
                         move_object,
                     ),
                     resolve_collisions,
-                    compute_collisions,
+                    solve_collisions,
                 )
                     .chain(),
             );

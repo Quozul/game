@@ -12,7 +12,7 @@ pub fn despawn_dead(
     for (transform, health, circle, entity) in q_health.iter() {
         if health.0 == 0 {
             commands.entity(entity).despawn();
-            let new_radius = circle.radius / 2.0;
+            let new_radius = circle.radius() / 2.0;
             if new_radius > 10.0 {
                 commands.spawn(EnemyBundle::new(
                     &mut meshes,

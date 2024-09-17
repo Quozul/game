@@ -1,5 +1,5 @@
 pub mod colliders;
-mod collisions_systems;
+mod collisions;
 mod constants;
 pub mod events;
 pub mod movements_components;

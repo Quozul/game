@@ -1,11 +1,33 @@
+use crate::physics::colliders::center::Center;
 use crate::physics::colliders::circle_collider::CircleCollider;
+use crate::physics::colliders::collider::{Collider, CollidesWith};
+use crate::physics::collisions::collision::Collision;
+use crate::physics::collisions::projection::{Project, Projection};
 use bevy::color::Color;
-use bevy::math::Vec2;
-use bevy::prelude::*;
+use bevy::prelude::{Component, Gizmos, Transform, Vec2, Vec3Swizzles};
 
 #[derive(Component, Debug)]
 pub struct PolygonCollider {
     vertices: Vec<Vec2>,
+}
+
+impl CollidesWith<PolygonCollider> for PolygonCollider {
+    fn collides_with(&self, other: &PolygonCollider) -> Option<Collision> {
+        let collision = self
+            .intersect(other)
+            .and_then(|collision| other.intersect(self).map(|other| *collision.min(&other)));
+
+        collision
+    }
+}
+
+impl CollidesWith<CircleCollider> for PolygonCollider {
+    fn collides_with(&self, other: &CircleCollider) -> Option<Collision> {
+        self.intersect(other).and_then(|collision| {
+            self.intersect_circle(other)
+                .map(|other| *collision.min(&other))
+        })
+    }
 }
 
 impl PolygonCollider {
@@ -24,130 +46,118 @@ impl PolygonCollider {
         Self { vertices }
     }
 
-    pub fn intersect_polygon(&self, other: &Self) -> Option<(Vec2, f32)> {
-        self.intersect_vertices(other, Vec2::ZERO, f32::INFINITY)
-            .and_then(|(normal, depth)| other.intersect_vertices(self, normal, depth))
-            .map(|(normal, depth)| {
-                let depth = depth / normal.length();
-
-                let center_a = self.arithmetic_mean();
-                let center_b = other.arithmetic_mean();
-                (get_normalized_normal(normal, center_a, center_b), depth)
-            })
-    }
-
-    pub fn intersect_circle(&self, other: &CircleCollider) -> Option<(Vec2, f32)> {
-        let mut normal = Vec2::ZERO;
-        let mut depth = f32::INFINITY;
-
-        for axis in self.get_axes() {
-            match self.project_circle(other, axis) {
-                None => return None,
-                Some(axis_depth) => {
-                    if axis_depth < depth {
-                        depth = axis_depth;
-                        normal = axis;
-                    }
-                }
-            }
-        }
-
-        let closest_vertex = self.get_closest_vertex(other.center);
-
-        let axis = (closest_vertex - other.center).normalize();
-        match self.project_circle(other, axis) {
-            None => return None,
-            Some(axis_depth) => {
-                if axis_depth < depth {
-                    depth = axis_depth;
-                    normal = axis;
-                }
-            }
-        }
-
-        let polygon_center = self.arithmetic_mean();
-        Some((
-            get_normalized_normal(normal, other.center, polygon_center),
-            depth,
-        ))
-    }
-
-    fn project_circle(&self, other: &CircleCollider, axis: Vec2) -> Option<f32> {
-        let (min_a, max_a) = self.project_vertices(axis);
-        let (min_b, max_b) = other.project_circle(axis);
-
-        if min_a >= max_b || min_b >= max_a {
-            return None;
-        }
-
-        Some(max_b - min_a.min(max_a - min_b))
-    }
-
-    fn project_vertices(&self, axis: Vec2) -> (f32, f32) {
-        self.vertices
-            .iter()
-            .map(|vertex| vertex.dot(axis))
-            .fold((f32::INFINITY, -f32::INFINITY), |acc, projection| {
-                (acc.0.min(projection), acc.1.max(projection))
-            })
-    }
-
-    fn intersect_vertices(
-        &self,
-        other: &Self,
-        mut normal: Vec2,
-        mut depth: f32,
-    ) -> Option<(Vec2, f32)> {
-        for axis in self.get_axes() {
-            // Check for collision
-            let (min_a, max_a) = self.project_vertices(axis);
-            let (min_b, max_b) = other.project_vertices(axis);
-
-            if min_a >= max_b || min_b >= max_a {
-                return None;
-            }
-
-            // Collision resolving
-            let axis_depth = (max_b - min_a).min(max_a - min_b);
-
-            if axis_depth < depth {
-                depth = axis_depth;
-                normal = axis;
-            }
-        }
-
-        Some((normal, depth))
-    }
-
-    fn arithmetic_mean(&self) -> Vec2 {
-        let sum = self.vertices.iter().sum::<Vec2>();
-        sum / self.vertices.len() as f32
-    }
-
-    fn get_axes(&self) -> Vec<Vec2> {
+    pub fn edges(&self) -> Vec<Vec2> {
         self.vertices
             .iter()
             .zip(self.vertices[1..].iter().chain(&self.vertices[0..1]))
-            .map(|(va, vb)| (*vb - *va).perp())
+            .map(|(a, b)| *b - *a)
             .collect()
     }
 
-    fn get_closest_vertex(&self, point: Vec2) -> Vec2 {
-        self.vertices
+    pub fn normals(&self) -> Vec<Vec2> {
+        self.edges()
             .iter()
-            .min_by(|a, b| a.distance(point).total_cmp(&b.distance(point)))
-            .copied()
-            .expect("Polygon must have at least one vertex")
+            .map(|edge| edge.perp().normalize_or_zero())
+            .collect()
     }
 
-    pub fn draw_collider(&self, gizmos: &mut Gizmos) {
+    fn intersect<T>(&self, other: &T) -> Option<Collision>
+    where
+        T: Project + Center,
+    {
+        let mut collision_axis = Vec2::ZERO;
+        let mut collision_overlap = f32::MAX;
+
+        for axis in self.normals() {
+            let projection_a = self.project(axis);
+            let projection_b = other.project(axis);
+
+            if !projection_a.overlap(&projection_b) {
+                // then we can guarantee that the shapes do not overlap
+                return None;
+            }
+
+            // find the Minimum Translation Vector
+            let new_overlap = projection_a.get_overlap(&projection_b);
+            if new_overlap < collision_overlap {
+                collision_axis = axis;
+                collision_overlap = new_overlap;
+            }
+        }
+
+        let direction = self.center() - other.center();
+        if direction.dot(collision_axis) < 0.0 {
+            collision_axis = -collision_axis;
+        }
+
+        Some(Collision::new(collision_axis, collision_overlap))
+    }
+
+    fn intersect_circle(&self, other: &CircleCollider) -> Option<Collision> {
+        let closest_point = self.find_closest_point(other.center());
+        let mut axis = (closest_point - other.center()).normalize();
+
+        let projection_a = self.project(axis);
+        let projection_b = other.project(axis);
+
+        if !projection_a.overlap(&projection_b) {
+            return None;
+        }
+
+        let overlap = projection_a.get_overlap(&projection_b);
+
+        let direction = self.center() - other.center();
+        if direction.dot(axis) < 0.0 {
+            axis = -axis;
+        }
+
+        Some(Collision::new(axis, overlap))
+    }
+
+    fn find_closest_point(&self, circle_center: Vec2) -> Vec2 {
+        let mut closest_point = self.vertices[0];
+        for vertex in &self.vertices {
+            if (closest_point - circle_center).length_squared()
+                > (*vertex - circle_center).length_squared()
+            {
+                closest_point = *vertex;
+            }
+        }
+        closest_point
+    }
+}
+
+impl Center for PolygonCollider {
+    fn center(&self) -> Vec2 {
+        let sum = self.vertices.iter().sum::<Vec2>();
+        sum / self.vertices.len() as f32
+    }
+}
+
+impl Project for PolygonCollider {
+    fn project(&self, axis: Vec2) -> Projection {
+        assert!(
+            axis.is_normalized(),
+            "axis must be normalized, received {axis}"
+        );
+        let mut projection = Projection::default();
+        for vertex in &self.vertices {
+            let v = vertex.dot(axis);
+            projection.update(v);
+        }
+        projection
+    }
+}
+
+impl Collider for PolygonCollider {
+    fn draw_collider(&self, gizmos: &mut Gizmos) {
         self.vertices
             .iter()
             .zip(self.vertices[1..].iter().chain(&self.vertices[0..1]))
             .for_each(|(va, vb)| gizmos.line_2d(*va, *vb, Color::linear_rgb(0.0, 0.0, 1.0)));
     }
 
-    pub fn transform(&self, transform: &Transform) -> Self {
+    fn transform(&self, transform: &Transform) -> Self {
         let adjusted_vertices = self
             .vertices
             .iter()
@@ -155,14 +165,5 @@ impl PolygonCollider {
             .collect::<Vec<_>>();
 
         PolygonCollider::polygon(adjusted_vertices)
-    }
-}
-
-fn get_normalized_normal(normal: Vec2, center_a: Vec2, center_b: Vec2) -> Vec2 {
-    let direction = center_b - center_a;
-    if direction.dot(normal) < 0.0 {
-        -normal.normalize_or_zero()
-    } else {
-        normal.normalize_or_zero()
     }
 }

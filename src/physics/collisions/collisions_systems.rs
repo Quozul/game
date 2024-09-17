@@ -1,4 +1,5 @@
 use crate::physics::colliders::circle_collider::CircleCollider;
+use crate::physics::colliders::collider::{Collider, CollidesWith};
 use crate::physics::colliders::polygon_collider::PolygonCollider;
 use crate::physics::events::CollisionEvent;
 use crate::physics::movements_components::{Mass, Velocity};
@@ -26,45 +27,46 @@ pub fn resolve_collisions(
         ) {
             // Polygon-polygon collision
             (Some(poly_collider), None, Some(other_poly_collider), None) => {
+                poly_collider.collides_with(other_poly_collider);
                 let adjusted_collider = poly_collider.transform(transform);
                 let other_adjusted_collider = other_poly_collider.transform(other_transform);
-                adjusted_collider.intersect_polygon(&other_adjusted_collider)
+                adjusted_collider.collides_with(&other_adjusted_collider)
             }
 
             // Polygon-circle collision
             (None, Some(circle_collider), Some(other_poly_collider), None) => {
                 let other_adjusted_poly_collider = other_poly_collider.transform(other_transform);
                 let adjusted_circle_collider = circle_collider.transform(transform);
-                other_adjusted_poly_collider.intersect_circle(&adjusted_circle_collider)
+                other_adjusted_poly_collider.collides_with(&adjusted_circle_collider)
             }
             (Some(poly_collider), None, None, Some(other_circle_collider)) => {
                 let adjusted_poly_collider = poly_collider.transform(transform);
                 let other_adjusted_circle_collider =
                     other_circle_collider.transform(other_transform);
-                adjusted_poly_collider.intersect_circle(&other_adjusted_circle_collider)
+                adjusted_poly_collider.collides_with(&other_adjusted_circle_collider)
             }
 
             // Circle-circle collision
             (None, Some(circle_collider), None, Some(other_circle_collider)) => {
                 let adjusted_collider = circle_collider.transform(transform);
                 let other_adjusted_collider = other_circle_collider.transform(other_transform);
-                adjusted_collider.intersect_circles(&other_adjusted_collider)
+                adjusted_collider.collides_with(&other_adjusted_collider)
             }
 
             _ => continue,
         };
 
-        if let Some((normal, depth)) = result {
+        if let Some(collision) = result {
             events.send(CollisionEvent {
                 first: entity,
                 second: other_entity,
-                collision: normal * depth,
+                collision,
             });
         }
     }
 }
 
-pub fn compute_collisions(
+pub fn solve_collisions(
     mut event: EventReader<CollisionEvent>,
     mut q_bodies: Query<(&mut Transform, &mut Velocity, &Mass)>,
 ) {
@@ -73,8 +75,9 @@ pub fn compute_collisions(
             [(mut transform, mut velocity, mass), (mut other_transform, mut other_velocity, other_mass)],
         ) = q_bodies.get_many_mut([ev.first, ev.second])
         {
-            transform.translation -= (ev.collision * 0.5).extend(0.0);
-            other_transform.translation += (ev.collision * 0.5).extend(0.0);
+            let translation_vector = ev.collision.translation_vector() * 0.5;
+            transform.translation -= translation_vector.extend(0.0);
+            other_transform.translation += translation_vector.extend(0.0);
 
             let v1i = velocity.linear_velocity;
             let v2i = other_velocity.linear_velocity;
@@ -85,11 +88,8 @@ pub fn compute_collisions(
 
             let vf = (m1 * v1i + m2 * v2i) / total_mass;
 
-            let r1 = m1 / total_mass;
-            let r2 = m2 / total_mass;
-
-            velocity.linear_velocity = vf * r2;
-            other_velocity.linear_velocity = -vf * r1;
+            velocity.linear_velocity = vf;
+            other_velocity.linear_velocity = -vf;
         }
     }
 }
