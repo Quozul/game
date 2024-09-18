@@ -15,6 +15,7 @@ impl Collision {
         Collision { normal, overlap }
     }
 
+    /// Returns the collision with the smallest overlap
     pub fn min<'a>(&'a self, other: &'a Self) -> &'a Self {
         if self.overlap < other.overlap {
             self
@@ -23,6 +24,8 @@ impl Collision {
         }
     }
 
+    /// Returns the normal vector multiplied by the overlap
+    /// This is the total amount the objects involved in the collision should move
     pub fn translation_vector(&self) -> Vec2 {
         self.normal * self.overlap
     }

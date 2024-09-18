@@ -1,3 +1,4 @@
+use crate::physics::colliders::polygon_collider::PolygonCollider;
 use crate::physics::colliders::traits::{Center, Collider, CollidesWith};
 use crate::physics::collisions::collision::Collision;
 use crate::physics::collisions::projection::{Project, Projection};
@@ -56,6 +57,15 @@ impl CollidesWith<CircleCollider> for CircleCollider {
         let depth = radii - distance;
 
         Some(Collision::new(normal, depth))
+    }
+}
+
+impl CollidesWith<PolygonCollider> for CircleCollider {
+    fn collides_with(&self, other_collider: &PolygonCollider) -> Option<Collision> {
+        other_collider.collides_with(self).map(|mut collision| {
+            collision.normal = -collision.normal;
+            collision
+        })
     }
 }
 

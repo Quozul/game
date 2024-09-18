@@ -33,12 +33,12 @@ fn main() {
             air_density: 0.05,
             // The original value is 6.674*10E11 m3⋅kg−1⋅s−2
             // We adjusted it to 10E0 so that the smallest object that will be attracted is 1 unit in mass
-            gravity: 6.674 * 10E0,
+            newton_gravity: 6.674 * 10E-1,
         })
         .add_plugins((
             DefaultPlugins.set(bevy::log::LogPlugin {
                 level: bevy::log::Level::INFO,
-                filter: "wgpu=error,naga=warn,game=trace".to_string(),
+                filter: "wgpu=off,naga=warn,game=trace".to_string(),
                 ..default()
             }),
             FpsOverlayPlugin {

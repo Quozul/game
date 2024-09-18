@@ -11,13 +11,13 @@ pub fn apply_acceleration_and_drag(
 ) {
     let delta_time = time.delta_seconds();
 
-    for (mut velocity, applied_force, drag_coefficient, mass) in q_velocities.iter_mut() {
+    for (mut velocity, force, drag_coefficient, mass) in q_velocities.iter_mut() {
         let air_resistance = get_drag_force(
             physics_resource.air_density,
             velocity.linear_velocity,
             drag_coefficient.0,
         );
-        let acceleration = applied_force.linear_force;
+        let acceleration = force.linear_force * mass.0;
         velocity.linear_velocity += (acceleration - air_resistance) / mass.0 * delta_time;
     }
 }
@@ -65,7 +65,7 @@ pub fn update_gravity(
             continue;
         }
 
-        let f = physics_resource.gravity / distance_sq;
+        let f = physics_resource.newton_gravity / distance_sq;
         let force_unit_mass = delta * f * delta_time;
 
         if let Some(velocity) = velocity.as_mut() {
@@ -86,5 +86,6 @@ pub fn move_object(
 
     for (mut transform, velocity) in q_velocities.iter_mut() {
         transform.translation += velocity.linear_velocity.extend(0.) * delta_time;
+        transform.rotate_z(velocity.angular_velocity * delta_time);
     }
 }

@@ -2,9 +2,26 @@ use bevy::math::Vec2;
 use bevy::prelude::*;
 
 /// Gives the Entity the ability to move
-#[derive(Component, Default, Debug)]
+#[derive(Component, Default)]
 pub struct Velocity {
     pub linear_velocity: Vec2,
+    pub angular_velocity: f32,
+}
+
+impl Velocity {
+    pub fn linear(linear_velocity: Vec2) -> Self {
+        Self {
+            linear_velocity,
+            ..default()
+        }
+    }
+
+    pub fn angular(angular_velocity: f32) -> Self {
+        Self {
+            angular_velocity,
+            ..default()
+        }
+    }
 }
 
 /// Move the Entity with an external force
@@ -56,8 +73,8 @@ impl RigidBodyBundle {
         self
     }
 
-    pub fn with_initial_velocity(mut self, initial_velocity: Vec2) -> Self {
-        self.velocity.linear_velocity = initial_velocity;
+    pub fn with_initial_velocity(mut self, initial_velocity: Velocity) -> Self {
+        self.velocity = initial_velocity;
         self
     }
 

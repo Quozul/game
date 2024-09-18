@@ -8,9 +8,10 @@ pub fn get_mouse_world_position_from_queries(
     q_camera: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) -> Option<Vec2> {
     let (camera, camera_transform) = q_camera.single();
-    let window = q_windows.single();
-
-    get_mouse_world_position(camera, camera_transform, window)
+    q_windows
+        .get_single()
+        .ok()
+        .and_then(|window| get_mouse_world_position(camera, camera_transform, window))
 }
 
 pub fn get_mouse_world_position(

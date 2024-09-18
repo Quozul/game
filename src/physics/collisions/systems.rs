@@ -4,6 +4,7 @@ use crate::physics::colliders::traits::{Collider, CollidesWith};
 use crate::physics::events::CollisionEvent;
 use bevy::prelude::*;
 
+/// Dispatches events when a collision is detected between two objects
 pub fn resolve_collisions(
     mut events: EventWriter<CollisionEvent>,
     q_bodies: Query<(
@@ -36,7 +37,7 @@ pub fn resolve_collisions(
             (None, Some(circle_collider), Some(other_poly_collider), None) => {
                 let other_adjusted_poly_collider = other_poly_collider.transform(other_transform);
                 let adjusted_circle_collider = circle_collider.transform(transform);
-                other_adjusted_poly_collider.collides_with(&adjusted_circle_collider)
+                adjusted_circle_collider.collides_with(&other_adjusted_poly_collider)
             }
             (Some(poly_collider), None, None, Some(other_circle_collider)) => {
                 let adjusted_poly_collider = poly_collider.transform(transform);
@@ -65,6 +66,7 @@ pub fn resolve_collisions(
     }
 }
 
+/// Debug system to draw the colliders boxes
 pub fn draw_colliders(
     mut gizmos: Gizmos,
     q_bodies: Query<(
@@ -81,14 +83,4 @@ pub fn draw_colliders(
             circle.transform(transform).draw_collider(&mut gizmos);
         }
     }
-}
-
-pub fn draw_world(mut gizmos: Gizmos) {
-    gizmos.grid_2d(
-        Vec2::ZERO,
-        0.,
-        UVec2::new(10, 10),
-        Vec2::splat(650.),
-        Color::WHITE,
-    );
 }

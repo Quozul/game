@@ -1,6 +1,6 @@
 use crate::enemy::components::{Enemy, Health};
 use crate::physics::colliders::polygon_collider::PolygonCollider;
-use crate::physics::components::RigidBodyBundle;
+use crate::physics::components::{RigidBodyBundle, Velocity};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 use std::f32::consts::PI;
@@ -23,7 +23,7 @@ impl EnemyBundle {
         circumradius: f32,
         sides: usize,
         translation: Vec3,
-        linear_velocity: Vec2,
+        initial_velocity: Vec2,
     ) -> Self {
         let mesh = Mesh2dHandle(meshes.add(RegularPolygon::new(circumradius, sides)));
         let mass = PI * circumradius.powf(2.0) * EnemyBundle::DENSITY;
@@ -39,7 +39,7 @@ impl EnemyBundle {
             collider: PolygonCollider::regular_polygon(circumradius, sides),
             rigid_body: RigidBodyBundle::default()
                 .with_mass(mass)
-                .with_initial_velocity(linear_velocity),
+                .with_initial_velocity(Velocity::linear(initial_velocity)),
             health: Health(circumradius as u32),
             enemy: Enemy,
         }

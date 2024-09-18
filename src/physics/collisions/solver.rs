@@ -13,7 +13,17 @@ pub fn solve_collisions_transforms(
             [(mut transform, rigid_body_type), (mut other_transform, other_rigid_body_type)],
         ) = q_bodies.get_many_mut([ev.first, ev.second])
         {
-            let translation_vector = (ev.collision.translation_vector() * 0.5).extend(0.0);
+            // move by half the size of the translation vector if both are dynamic,
+            // else move the only dynamic one by the full translation vector
+            let ratio = if *rigid_body_type == RigidBodyType::Dynamic
+                && *other_rigid_body_type == RigidBodyType::Dynamic
+            {
+                0.5
+            } else {
+                1.0
+            };
+
+            let translation_vector = (ev.collision.translation_vector() * ratio).extend(0.0);
             if *rigid_body_type == RigidBodyType::Dynamic {
                 transform.translation -= translation_vector;
             }

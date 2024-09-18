@@ -21,14 +21,7 @@ pub fn spawn_enemy(
             radius,
             sides,
             Vec3::new(x, y, 0.0),
-            random_vec(-500.0, 500.0),
+            Vec2::ZERO,
         ));
     }
-}
-
-fn random_vec(min: f32, max: f32) -> Vec2 {
-    let mut rng = rand::thread_rng();
-    let x = rng.gen_range(min..max);
-    let y = rng.gen_range(min..max);
-    Vec2::new(x, y)
 }

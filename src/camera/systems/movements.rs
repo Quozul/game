@@ -34,9 +34,12 @@ pub fn camera_offset(
     >,
 ) {
     let (camera, projection, mut camera_transform, global_transform) = q_camera.single_mut();
-    let window = q_windows.single();
+    let mouse_position = q_windows
+        .get_single()
+        .ok()
+        .and_then(|window| get_mouse_world_position(camera, global_transform, window));
 
-    if let Some(mouse_position) = get_mouse_world_position(camera, global_transform, window) {
+    if let Some(mouse_position) = mouse_position {
         let offset = mouse_position - camera_transform.translation.xy();
         let offset = offset.normalize_or_zero() * projection.scale;
         camera_transform.translation += offset.extend(0.);

@@ -12,27 +12,23 @@ pub struct PolygonCollider {
 
 impl CollidesWith<PolygonCollider> for PolygonCollider {
     fn collides_with(&self, other_collider: &PolygonCollider) -> Option<Collision> {
-        self.intersect(other_collider).and_then(|collision| {
-            other_collider.intersect(self).map(|other| {
-                let mut final_collision = *collision.min(&other);
-                let normal = get_fixed_normal(final_collision.normal, other_collider, self);
-                final_collision.normal = normal;
+        self.intersect_polygon(other_collider)
+            .map(|mut final_collision| {
+                final_collision.normal =
+                    get_fixed_normal(final_collision.normal, other_collider, self);
                 final_collision
             })
-        })
     }
 }
 
 impl CollidesWith<CircleCollider> for PolygonCollider {
     fn collides_with(&self, other_collider: &CircleCollider) -> Option<Collision> {
-        self.intersect(other_collider).and_then(|collision| {
-            self.intersect_circle(other_collider).map(|other| {
-                let mut final_collision = *collision.min(&other);
-                let normal = get_fixed_normal(final_collision.normal, other_collider, self);
-                final_collision.normal = normal;
+        self.intersect_circle(other_collider)
+            .map(|mut final_collision| {
+                final_collision.normal =
+                    get_fixed_normal(final_collision.normal, other_collider, self);
                 final_collision
             })
-        })
     }
 }
 
@@ -79,6 +75,19 @@ impl PolygonCollider {
         Self { vertices }
     }
 
+    /// This method returns the radius of the polygon shape, assuming it is a regular polygon
+    pub fn get_radius(&self) -> f32 {
+        let center = self.center();
+        let vertex = &self.vertices[0];
+        let dx = center.x - vertex.x;
+        let dy = center.y - vertex.y;
+        (dx * dx + dy * dy).sqrt()
+    }
+
+    pub fn vertices_count(&self) -> usize {
+        self.vertices.len()
+    }
+
     fn edges(&self) -> Vec<Vec2> {
         self.vertices
             .iter()
@@ -94,26 +103,33 @@ impl PolygonCollider {
             .collect()
     }
 
-    pub fn get_radius(&self) -> f32 {
-        let center = self.center();
-        let vertex = &self.vertices[0];
-        let dx = center.x - vertex.x;
-        let dy = center.y - vertex.y;
-        (dx * dx + dy * dy).sqrt()
+    fn intersect_polygon(&self, other: &PolygonCollider) -> Option<Collision> {
+        self.intersect_axis(other, self.normals())
+            .and_then(|collision| {
+                other
+                    .intersect_axis(self, other.normals())
+                    .map(|other| *collision.min(&other))
+            })
     }
 
-    pub fn vertices_count(&self) -> usize {
-        self.vertices.len()
+    fn intersect_circle(&self, other: &CircleCollider) -> Option<Collision> {
+        let closest_point = self.find_closest_point(other.center());
+        let axis = (closest_point - other.center()).normalize();
+
+        let mut axes = self.normals();
+        axes.push(axis);
+
+        self.intersect_axis(other, axes)
     }
 
-    fn intersect<T>(&self, other: &T) -> Option<Collision>
+    fn intersect_axis<T>(&self, other: &T, axes: Vec<Vec2>) -> Option<Collision>
     where
         T: Project + Center,
     {
         let mut axis = Vec2::ZERO;
         let mut overlap = f32::MAX;
 
-        for normal in self.normals() {
+        for normal in axes {
             let projection_a = self.project(normal);
             let projection_b = other.project(normal);
 
@@ -133,23 +149,6 @@ impl PolygonCollider {
         Some(Collision::new(axis, overlap))
     }
 
-    fn intersect_circle(&self, other: &CircleCollider) -> Option<Collision> {
-        let closest_point = self.find_closest_point(other.center());
-        let axis = (closest_point - other.center()).normalize();
-
-        let projection_a = self.project(axis);
-        let projection_b = other.project(axis);
-
-        if !projection_a.overlap(&projection_b) {
-            return None;
-        }
-
-        Some(Collision::new(
-            axis,
-            projection_a.get_overlap(&projection_b),
-        ))
-    }
-
     fn find_closest_point(&self, circle_center: Vec2) -> Vec2 {
         let mut closest_point = self.vertices[0];
         for vertex in &self.vertices {
@@ -164,6 +163,7 @@ impl PolygonCollider {
 }
 
 impl Center for PolygonCollider {
+    /// Mean average of all vertices to get the polygon center
     fn center(&self) -> Vec2 {
         let sum = self.vertices.iter().sum::<Vec2>();
         sum / self.vertices.len() as f32
