@@ -3,7 +3,7 @@ use crate::inventory::components::Inventory;
 use crate::physics::colliders::polygon_collider::PolygonCollider;
 use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
 use crate::player::components::{Cooldown, Player, VelocityDisplay};
-use crate::projectile::cannon_bundle::Cannon;
+use crate::weapon::cannon::Cannon;
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -32,7 +32,6 @@ pub fn setup_player(
         .id();
 
     // Spawn the player
-    let small_bullet_texture = meshes.add(Ellipse::new(1.0, 1.0));
     let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 50.0)));
     let player_id = commands
         .spawn((
@@ -50,14 +49,7 @@ pub fn setup_player(
                 .with_drag_coefficient(DragCoefficient::CUBE),
             Force::default(),
             Impulse::default(),
-            Inventory::<Cannon>::with_contents(vec![Cannon {
-                mesh_handle: small_bullet_texture.clone(),
-                offset: Vec3::new(0.0, -25.0, 1.0),
-                material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
-                recoil: 200.0,
-                reload: 200,
-                spread: 2.0,
-            }]),
+            Inventory::<Cannon>::with_contents(vec![]),
             Cooldown::default(),
         ))
         .id();

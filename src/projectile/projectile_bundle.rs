@@ -1,7 +1,7 @@
 use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::components::{DragCoefficient, RigidBodyBundle, Velocity};
-use crate::projectile::cannon_bundle::Cannon;
-use crate::projectile::components::{Damage, Lifetime};
+use crate::projectile::components::{Damage, Lifetime, Projectile};
+use crate::weapon::cannon::Cannon;
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -12,6 +12,7 @@ pub struct ProjectileBundle {
     damage: Damage,
     life_time: Lifetime,
     circle_collider: CircleCollider,
+    projectile: Projectile,
 }
 
 const PROJECTILE_SPEED: f32 = 1_000.0; // 1_000.0 seems like a good value
@@ -36,6 +37,7 @@ impl ProjectileBundle {
                 .with_initial_velocity(Velocity::linear(initial_velocity))
                 .with_drag_coefficient(DragCoefficient::CIRCLE),
             damage: Damage(10),
+            projectile: Projectile,
             life_time: Lifetime::default(),
             circle_collider: CircleCollider::circle(1.0),
         }

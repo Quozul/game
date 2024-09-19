@@ -26,8 +26,4 @@ impl<T> Inventory<T> {
     pub fn add_item(&mut self, item: T) {
         self.contents.push(item);
     }
-
-    pub fn remove_item(&mut self, index: usize) -> T {
-        self.contents.remove(index)
-    }
 }

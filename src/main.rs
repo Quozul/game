@@ -10,6 +10,7 @@ mod physics;
 mod player;
 mod projectile;
 mod utils;
+mod weapon;
 
 use crate::camera::post_processing::plugin::PostProcessPlugin;
 use crate::enemy::plugin::EnemyPlugin;
@@ -18,10 +19,10 @@ use crate::map::plugin::MapPlugin;
 use crate::physics::plugin::PhysicsPlugin;
 use crate::physics::resources::PhysicsResource;
 use crate::player::plugin::PlayerPlugin;
-use crate::projectile::cannon_bundle::Cannon;
 use crate::projectile::plugin::ProjectilePlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
 use bevy::prelude::*;
+use weapon::cannon::Cannon;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 enum AppState {

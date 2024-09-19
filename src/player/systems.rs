@@ -5,10 +5,10 @@ use crate::physics::components::{DragCoefficient, Force, Impulse, Mass, Velocity
 use crate::physics::resources::PhysicsResource;
 use crate::physics::utils::get_terminal_velocity::get_terminal_velocity;
 use crate::player::components::{Cooldown, Player, VelocityDisplay};
-use crate::projectile::cannon_bundle::Cannon;
 use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::{calculate_direction_angle, calculate_rotation_angle};
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
+use crate::weapon::cannon::Cannon;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use std::time::Duration;

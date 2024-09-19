@@ -2,6 +2,7 @@ use bevy::asset::Handle;
 use bevy::math::Vec3;
 use bevy::prelude::{ColorMaterial, Mesh};
 
+#[derive(Clone)]
 pub struct Cannon {
     pub mesh_handle: Handle<Mesh>,
     pub offset: Vec3,

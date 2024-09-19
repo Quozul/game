@@ -1,4 +1,4 @@
-use crate::physics::components::{Mass, RigidBodyType, Velocity};
+use crate::physics::components::{Mass, RigidBodyType, Sensor, Velocity};
 use crate::physics::events::CollisionEvent;
 use bevy::math::Vec2;
 use bevy::prelude::*;
@@ -6,29 +6,29 @@ use bevy::prelude::*;
 /// Adjusts the positions of colliding bodies so that they don't overlap anymore.
 pub fn solve_collisions_transforms(
     mut event: EventReader<CollisionEvent>,
-    mut q_bodies: Query<(&mut Transform, &RigidBodyType)>,
+    mut q_bodies: Query<(&mut Transform, &RigidBodyType), Without<Sensor>>,
 ) {
     for ev in event.read() {
-        if let Ok(
-            [(mut transform, rigid_body_type), (mut other_transform, other_rigid_body_type)],
-        ) = q_bodies.get_many_mut([ev.first, ev.second])
+        if let Ok([(mut transform_a, rigid_body_type_a), (mut transform_b, rigid_body_type_b)]) =
+            q_bodies.get_many_mut([ev.first, ev.second])
         {
+            let is_a_dynamic = *rigid_body_type_a == RigidBodyType::Dynamic;
+            let is_b_dynamic = *rigid_body_type_b == RigidBodyType::Dynamic;
+
             // move by half the size of the translation vector if both are dynamic,
             // else move the only dynamic one by the full translation vector
-            let ratio = if *rigid_body_type == RigidBodyType::Dynamic
-                && *other_rigid_body_type == RigidBodyType::Dynamic
-            {
+            let ratio = if is_a_dynamic && is_b_dynamic {
                 0.5
             } else {
                 1.0
             };
 
             let translation_vector = (ev.collision.translation_vector() * ratio).extend(0.0);
-            if *rigid_body_type == RigidBodyType::Dynamic {
-                transform.translation -= translation_vector;
+            if is_a_dynamic {
+                transform_a.translation -= translation_vector;
             }
-            if *other_rigid_body_type == RigidBodyType::Dynamic {
-                other_transform.translation += translation_vector;
+            if is_b_dynamic {
+                transform_b.translation += translation_vector;
             }
         }
     }
@@ -36,7 +36,7 @@ pub fn solve_collisions_transforms(
 
 pub fn solve_collisions_velocities(
     mut event: EventReader<CollisionEvent>,
-    mut q_bodies: Query<(&Transform, Option<&mut Velocity>, Option<&Mass>)>,
+    mut q_bodies: Query<(&Transform, Option<&mut Velocity>, Option<&Mass>), Without<Sensor>>,
 ) {
     for ev in event.read() {
         if let Ok([(transform_a, velocity_a, mass_a), (transform_b, velocity_b, mass_b)]) =

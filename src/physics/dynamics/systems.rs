@@ -1,4 +1,4 @@
-use crate::physics::components::{DragCoefficient, Force, Impulse, Mass, RigidBodyType, Velocity};
+use crate::physics::components::{DragCoefficient, Force, Impulse, Mass, Sensor, Velocity};
 use crate::physics::constants::CROSS_SECTIONAL_AREA;
 use crate::physics::resources::PhysicsResource;
 use bevy::prelude::*;
@@ -48,7 +48,7 @@ pub fn update_impulse(
 /// Applies Newton's law of universal gravitation
 pub fn update_gravity(
     physics_resource: Res<PhysicsResource>,
-    mut q_velocities: Query<(&Transform, &Mass, Option<&mut Velocity>)>,
+    mut q_velocities: Query<(&Transform, &Mass, Option<&mut Velocity>), Without<Sensor>>,
     time: Res<Time>,
 ) {
     let delta_time = time.delta_seconds();
@@ -78,10 +78,7 @@ pub fn update_gravity(
 }
 
 /// Updates the position of each objects given their velocity
-pub fn move_object(
-    mut q_velocities: Query<(&mut Transform, &Velocity), With<RigidBodyType>>,
-    time: Res<Time>,
-) {
+pub fn move_object(mut q_velocities: Query<(&mut Transform, &Velocity)>, time: Res<Time>) {
     let delta_time = time.delta_seconds();
 
     for (mut transform, velocity) in q_velocities.iter_mut() {

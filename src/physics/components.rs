@@ -90,3 +90,6 @@ impl Default for RigidBodyType {
         Self::Dynamic
     }
 }
+
+#[derive(Component)]
+pub struct Sensor;
