@@ -15,13 +15,6 @@ impl Velocity {
             ..default()
         }
     }
-
-    pub fn angular(angular_velocity: f32) -> Self {
-        Self {
-            angular_velocity,
-            ..default()
-        }
-    }
 }
 
 /// Move the Entity with an external force

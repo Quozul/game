@@ -1,6 +1,7 @@
 use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::components::{DragCoefficient, RigidBodyBundle, Velocity};
-use crate::projectile::components::{CannonProperties, Damage, Lifetime};
+use crate::projectile::cannon_bundle::Cannon;
+use crate::projectile::components::{Damage, Lifetime};
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -17,7 +18,7 @@ const PROJECTILE_SPEED: f32 = 1_000.0; // 1_000.0 seems like a good value
 const PROJECTILE_MASS: f32 = 1.0;
 
 impl ProjectileBundle {
-    pub fn from_cannon(origin: &Transform, cannon: &CannonProperties, angle: Vec2) -> Self {
+    pub fn from_cannon(origin: &Transform, cannon: &Cannon, angle: Vec2) -> Self {
         let bullet_mesh = Mesh2dHandle(cannon.mesh_handle.clone());
         let initial_velocity = angle * PROJECTILE_SPEED;
 

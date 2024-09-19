@@ -4,6 +4,7 @@
 mod camera;
 mod constants;
 mod enemy;
+mod inventory;
 mod map;
 mod physics;
 mod player;
@@ -12,10 +13,12 @@ mod utils;
 
 use crate::camera::post_processing::plugin::PostProcessPlugin;
 use crate::enemy::plugin::EnemyPlugin;
+use crate::inventory::plugin::InventoryPlugin;
 use crate::map::plugin::MapPlugin;
 use crate::physics::plugin::PhysicsPlugin;
 use crate::physics::resources::PhysicsResource;
 use crate::player::plugin::PlayerPlugin;
+use crate::projectile::cannon_bundle::Cannon;
 use crate::projectile::plugin::ProjectilePlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
 use bevy::prelude::*;
@@ -59,6 +62,7 @@ fn main() {
             ProjectilePlugin,
             PostProcessPlugin,
             camera::plugin::CameraPlugin,
+            InventoryPlugin::<Cannon>::new(),
         ))
         .init_state::<AppState>()
         .add_systems(Update, switch_scene.run_if(in_state(AppState::Menu)))

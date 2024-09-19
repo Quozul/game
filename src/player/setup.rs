@@ -1,8 +1,9 @@
 use crate::camera::bundle::PlayerCameraBundle;
+use crate::inventory::components::Inventory;
 use crate::physics::colliders::polygon_collider::PolygonCollider;
 use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
-use crate::player::components::{Player, VelocityDisplay};
-use crate::projectile::cannon_bundle::{CannonBundle, CreateCannon};
+use crate::player::components::{Cooldown, Player, VelocityDisplay};
+use crate::projectile::cannon_bundle::Cannon;
 use bevy::prelude::*;
 use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
@@ -49,7 +50,7 @@ pub fn setup_player(
                 .with_drag_coefficient(DragCoefficient::CUBE),
             Force::default(),
             Impulse::default(),
-            CannonBundle::new(vec![CreateCannon {
+            Inventory::<Cannon>::with_contents(vec![Cannon {
                 mesh_handle: small_bullet_texture.clone(),
                 offset: Vec3::new(0.0, -25.0, 1.0),
                 material_handle: materials.add(Color::linear_rgb(10.0, 10.0, 10.0)),
@@ -57,6 +58,7 @@ pub fn setup_player(
                 reload: 200,
                 spread: 2.0,
             }]),
+            Cooldown::default(),
         ))
         .id();
 

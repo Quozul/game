@@ -1,21 +1,16 @@
 use crate::constants::DESPAWN_PROJECTILES;
 use crate::enemy::components::{Enemy, Health};
 use crate::physics::events::CollisionEvent;
-use crate::projectile::components::{Cannon, Damage, Lifetime};
+use crate::player::components::Cooldown;
+use crate::projectile::components::{Damage, Lifetime};
 use bevy::prelude::*;
 use std::time::Duration;
 
-pub fn cannon_cooldown(mut q_cannons: Query<&mut Cannon>, time: Res<Time>) {
+pub fn cannon_cooldown(mut q_cooldowns: Query<&mut Cooldown>, time: Res<Time>) {
     let delta = time.delta();
 
-    for mut cannon in q_cannons.iter_mut() {
-        for property in &mut cannon.properties {
-            if let Some(remaining) = property.cooldown.checked_sub(delta) {
-                property.cooldown = remaining;
-            } else {
-                property.cooldown = Duration::ZERO;
-            }
-        }
+    for mut cooldown in q_cooldowns.iter_mut() {
+        cooldown.0 = cooldown.0.checked_sub(delta).unwrap_or(Duration::ZERO);
     }
 }
 

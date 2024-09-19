@@ -1,10 +1,11 @@
 use crate::camera::events::TriggerCameraShakeEvent;
 use crate::camera::main_camera::MainCamera;
+use crate::inventory::components::Inventory;
 use crate::physics::components::{DragCoefficient, Force, Impulse, Mass, Velocity};
 use crate::physics::resources::PhysicsResource;
 use crate::physics::utils::get_terminal_velocity::get_terminal_velocity;
-use crate::player::components::{Player, VelocityDisplay};
-use crate::projectile::components::Cannon;
+use crate::player::components::{Cooldown, Player, VelocityDisplay};
+use crate::projectile::cannon_bundle::Cannon;
 use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::{calculate_direction_angle, calculate_rotation_angle};
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
@@ -53,7 +54,7 @@ pub fn move_player(
 pub fn shoot_bullets(
     mut commands: Commands,
     mouse_input: Res<ButtonInput<MouseButton>>,
-    mut q_cannons: Query<(&mut Cannon, &Transform, &mut Impulse)>,
+    mut q_cannons: Query<(&Inventory<Cannon>, &Transform, &mut Impulse, &mut Cooldown)>,
     q_windows: Query<&Window, With<PrimaryWindow>>,
     q_cameras: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut trigger_camera_shake_events: EventWriter<TriggerCameraShakeEvent>,
@@ -63,12 +64,11 @@ pub fn shoot_bullets(
     {
         // Only iter through cannons that are ready to fire
         // TODO: Trigger event for spawning projectile
-        for (mut cannon, origin, mut impulse) in q_cannons.iter_mut() {
+        for (inventory, origin, mut impulse, mut cooldown) in q_cannons.iter_mut() {
             let player_translation = origin.translation.xy();
             let angle = calculate_direction_angle(player_translation, world_position);
-
-            for property in &mut cannon.properties {
-                if property.cooldown != Duration::ZERO {
+            if let Some(property) = inventory.get_selected_item() {
+                if cooldown.0 != Duration::ZERO {
                     continue;
                 }
 
@@ -84,7 +84,7 @@ pub fn shoot_bullets(
                 impulse.linear_impulse += -angle * property.recoil;
 
                 // Reset the cooldown once the cannon has fired
-                property.cooldown = Duration::from_millis(property.reload);
+                cooldown.0 = Duration::from_millis(property.reload);
             }
         }
     }
