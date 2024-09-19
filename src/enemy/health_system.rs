@@ -1,31 +1,27 @@
-use crate::enemy::bundle::EnemyBundle;
-use crate::enemy::components::Health;
-use crate::physics::colliders::polygon_collider::PolygonCollider;
-use crate::physics::components::Velocity;
+use crate::animation::components::AnimationConfig;
+use crate::enemy::components::{Health, UiArrow};
+use crate::physics::colliders::circle_collider::CircleCollider;
 use bevy::prelude::*;
 
-pub fn despawn_dead(
+pub fn start_dead_animation(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-    q_health: Query<(&Transform, &Health, &Velocity, &PolygonCollider, Entity)>,
+    mut q_health: Query<(&Health, &UiArrow, &mut AnimationConfig, Entity), Changed<Health>>,
 ) {
-    for (transform, health, velocity, asteroid_collider, entity) in q_health.iter() {
+    for (health, arrow, mut animation, entity) in q_health.iter_mut() {
         if health.0 == 0 {
-            commands.entity(entity).despawn();
-            let new_radius = asteroid_collider.get_radius() / 2.0;
-            let new_polygon_count = asteroid_collider.vertices_count() - 1;
-
-            if new_polygon_count >= 3 && new_radius >= 10.0 {
-                commands.spawn(EnemyBundle::new(
-                    &mut meshes,
-                    &mut materials,
-                    new_radius,
-                    new_polygon_count,
-                    transform.translation,
-                    velocity.linear_velocity,
-                ));
+            commands.entity(entity).remove::<CircleCollider>();
+            if let Some(mut ent) = commands.get_entity(arrow.0) {
+                ent.despawn();
+                animation.frame_timer = AnimationConfig::timer_from_fps(animation.fps);
             }
+        }
+    }
+}
+
+pub fn despawn_dead(mut commands: Commands, q_health: Query<(&Health, &AnimationConfig, Entity)>) {
+    for (health, animation, entity) in q_health.iter() {
+        if health.0 == 0 && animation.frame_timer.just_finished() {
+            commands.entity(entity).despawn();
         }
     }
 }

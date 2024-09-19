@@ -1,13 +1,14 @@
 use bevy::asset::Handle;
 use bevy::math::Vec3;
-use bevy::prelude::{ColorMaterial, Mesh};
+use bevy::prelude::{Image, TextureAtlasLayout};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Cannon {
-    pub mesh_handle: Handle<Mesh>,
+    pub texture: Handle<Image>,
     pub offset: Vec3,
-    pub material_handle: Handle<ColorMaterial>,
     pub recoil: f32,
     pub reload: u64,
     pub spread: f32,
+    pub damage: u32,
+    pub texture_atlas_layout: Handle<TextureAtlasLayout>,
 }

@@ -5,13 +5,8 @@ use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundl
 use crate::player::components::{Cooldown, Player, VelocityDisplay};
 use crate::weapon::cannon::Cannon;
 use bevy::prelude::*;
-use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
 
-pub fn setup_player(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
-) {
+pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Spawn speed text
     let text_style = TextStyle {
         font_size: 16.0,
@@ -31,29 +26,33 @@ pub fn setup_player(
         }),))
         .id();
 
+    // load the sprite sheet using the `AssetServer`
+    let texture = asset_server.load("textures/Main Ship - Base - Full health.png");
+
     // Spawn the player
-    let rect_mesh = Mesh2dHandle(meshes.add(Rectangle::new(50.0, 50.0)));
     let player_id = commands
         .spawn((
-            MaterialMesh2dBundle {
-                mesh: rect_mesh,
-                material: materials.add(Color::linear_rgb(0.0, 0.0, 1.0)),
+            // Sprite and animations
+            SpriteBundle {
                 transform: Transform::from_xyz(0.0, 0.0, 1.0),
-                ..Default::default()
+                texture: texture.clone(),
+                ..default()
             },
-            PolygonCollider::square(50.0),
-            Player,
+            // Physics
+            PolygonCollider::square(28.0),
             VelocityDisplay(velocity_display),
             RigidBodyBundle::default()
                 .with_mass(5.0)
                 .with_drag_coefficient(DragCoefficient::CUBE),
             Force::default(),
             Impulse::default(),
+            // Player
+            Player,
             Inventory::<Cannon>::with_contents(vec![]),
             Cooldown::default(),
         ))
         .id();
 
-    // Spawn the camera
+    // Spawn the player's camera
     commands.spawn(PlayerCameraBundle::new(player_id));
 }

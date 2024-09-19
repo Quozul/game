@@ -30,7 +30,7 @@ impl PlayerCameraBundle {
                     far: 1000.,
                     near: -1000.,
                     scaling_mode: ScalingMode::FixedVertical(1080.0),
-                    scale: 1.0,
+                    scale: 0.5,
                     ..default()
                 },
                 tonemapping: Tonemapping::TonyMcMapface,

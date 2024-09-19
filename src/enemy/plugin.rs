@@ -1,6 +1,7 @@
-use crate::enemy::health_system::despawn_dead;
+use crate::enemy::health_system::{despawn_dead, start_dead_animation};
 use crate::enemy::movement::move_enemy;
 use crate::enemy::setup::spawn_enemy;
+use crate::enemy::ui_systems::move_arrow;
 use crate::AppState;
 use bevy::prelude::*;
 
@@ -11,7 +12,8 @@ impl Plugin for EnemyPlugin {
         app.add_systems(OnEnter(AppState::InGame), spawn_enemy)
             .add_systems(
                 Update,
-                (move_enemy, despawn_dead).run_if(in_state(AppState::InGame)),
+                (move_enemy, start_dead_animation, despawn_dead, move_arrow)
+                    .run_if(in_state(AppState::InGame)),
             );
     }
 }

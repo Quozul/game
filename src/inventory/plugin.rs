@@ -17,7 +17,7 @@ impl<T> InventoryPlugin<T> {
 
 impl<T> Plugin for InventoryPlugin<T>
 where
-    T: Send + Sync + Clone + 'static,
+    T: Send + Sync + Clone + 'static + std::fmt::Debug,
 {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)

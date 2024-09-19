@@ -1,6 +1,7 @@
 #![feature(let_chains)]
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod animation;
 mod camera;
 mod constants;
 mod enemy;
@@ -40,11 +41,13 @@ fn main() {
             newton_gravity: 6.674 * 10E-1,
         })
         .add_plugins((
-            DefaultPlugins.set(bevy::log::LogPlugin {
-                level: bevy::log::Level::INFO,
-                filter: "wgpu=off,naga=warn,game=trace".to_string(),
-                ..default()
-            }),
+            DefaultPlugins
+                .set(bevy::log::LogPlugin {
+                    level: bevy::log::Level::INFO,
+                    filter: "wgpu=off,naga=warn,game=trace".to_string(),
+                    ..default()
+                })
+                .set(ImagePlugin::default_nearest()),
             FpsOverlayPlugin {
                 config: FpsOverlayConfig {
                     text_config: TextStyle {
@@ -63,6 +66,7 @@ fn main() {
             ProjectilePlugin,
             PostProcessPlugin,
             camera::plugin::CameraPlugin,
+            animation::plugin::AnimationPlugin,
             InventoryPlugin::<Cannon>::new(),
         ))
         .init_state::<AppState>()

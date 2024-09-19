@@ -14,7 +14,7 @@ use bevy::window::PrimaryWindow;
 use std::time::Duration;
 
 const THROTTLE: f32 = 500.0;
-const BOOST_MULTIPLIER: f32 = 50.0;
+const BOOST_MULTIPLIER: f32 = 2.0;
 
 pub fn move_player(
     mut rectangles: Query<&mut Force, With<Player>>,

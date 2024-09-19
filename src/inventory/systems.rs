@@ -24,20 +24,23 @@ pub fn select_item<T: Send + Sync + 'static>(
     }
 }
 
-pub fn collect_item<T: Send + Sync + Clone + 'static>(
+pub fn collect_item<T: Send + Sync + Clone + 'static + std::fmt::Debug>(
     mut commands: Commands,
     mut event: EventReader<CollisionEvent>,
     mut q_inventories: Query<&mut Inventory<T>>,
     q_items: Query<&Item<T>>,
+    kb_input: Res<ButtonInput<KeyCode>>,
 ) {
     for ev in event.read() {
         if let Some(item) = ev.get_from_query(&q_items) {
             if let Some(mut inventory) = ev.get_mut_from_query(&mut q_inventories) {
-                inventory.add_item(item.0.clone());
+                if kb_input.just_pressed(KeyCode::KeyE) {
+                    inventory.add_item(item.0.clone());
 
-                // Despawn the item if successfully collected
-                if let Some(entity) = ev.contains(&q_items) {
-                    commands.entity(entity).despawn()
+                    // Despawn the item if successfully collected
+                    if let Some(entity) = ev.contains(&q_items) {
+                        commands.entity(entity).despawn()
+                    }
                 }
             }
         }

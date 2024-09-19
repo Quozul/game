@@ -1,46 +1,48 @@
+use crate::animation::components::AnimationConfig;
 use crate::enemy::components::{Enemy, Health};
-use crate::physics::colliders::polygon_collider::PolygonCollider;
+use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::components::{RigidBodyBundle, Velocity};
 use bevy::prelude::*;
-use bevy::sprite::{MaterialMesh2dBundle, Mesh2dHandle};
-use std::f32::consts::PI;
 
 #[derive(Bundle)]
 pub struct EnemyBundle {
-    material: MaterialMesh2dBundle<ColorMaterial>,
-    collider: PolygonCollider,
+    collider: CircleCollider,
     rigid_body: RigidBodyBundle,
     health: Health,
     enemy: Enemy,
+    sprite: SpriteBundle,
+    texture: TextureAtlas,
+    animation: AnimationConfig,
 }
 
 impl EnemyBundle {
-    const DENSITY: f32 = 0.05;
-
     pub fn new(
-        meshes: &mut ResMut<Assets<Mesh>>,
-        materials: &mut ResMut<Assets<ColorMaterial>>,
-        circumradius: f32,
-        sides: usize,
         translation: Vec3,
         initial_velocity: Vec2,
+        texture_handle: Handle<Image>,
+        texture_atlas_layout: Handle<TextureAtlasLayout>,
+        animation_config: AnimationConfig,
+        health: u32,
     ) -> Self {
-        let mesh = Mesh2dHandle(meshes.add(RegularPolygon::new(circumradius, sides)));
-        let mass = PI * circumradius.powf(2.0) * EnemyBundle::DENSITY;
-        let color = mass / 100.0;
-
         Self {
-            material: MaterialMesh2dBundle {
-                mesh,
-                material: materials.add(Color::linear_rgb(color, color, color)),
+            // Texture and animation
+            sprite: SpriteBundle {
                 transform: Transform::from_translation(translation),
-                ..Default::default()
+                texture: texture_handle.clone(),
+                ..default()
             },
-            collider: PolygonCollider::regular_polygon(circumradius, sides),
+            texture: TextureAtlas {
+                layout: texture_atlas_layout.clone(),
+                index: animation_config.first_sprite_index,
+            },
+            animation: animation_config,
+            // Physics
+            collider: CircleCollider::circle(24.0),
             rigid_body: RigidBodyBundle::default()
-                .with_mass(mass)
+                .with_mass(24.0)
                 .with_initial_velocity(Velocity::linear(initial_velocity)),
-            health: Health(circumradius as u32),
+            // Enemy
+            health: Health(health),
             enemy: Enemy,
         }
     }
