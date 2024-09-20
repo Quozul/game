@@ -47,22 +47,6 @@ impl PolygonCollider {
         Self::polygon(vertices)
     }
 
-    pub fn regular_polygon(circumradius: f32, sides: usize) -> Self {
-        assert!(sides >= 3, "regular polygon must have at least three sides");
-        let start_angle = std::f32::consts::FRAC_PI_2;
-        let step = std::f32::consts::TAU / sides as f32;
-
-        let vertices = (0..sides)
-            .map(move |i| {
-                let theta = start_angle + i as f32 * step;
-                let (sin, cos) = theta.sin_cos();
-                Vec2::new(cos, sin) * circumradius
-            })
-            .collect();
-
-        Self::polygon(vertices)
-    }
-
     pub fn polygon(vertices: Vec<Vec2>) -> Self {
         assert!(
             !vertices.is_empty(),
@@ -73,19 +57,6 @@ impl PolygonCollider {
             "polygon must contain valid vertices"
         );
         Self { vertices }
-    }
-
-    /// This method returns the radius of the polygon shape, assuming it is a regular polygon
-    pub fn get_radius(&self) -> f32 {
-        let center = self.center();
-        let vertex = &self.vertices[0];
-        let dx = center.x - vertex.x;
-        let dy = center.y - vertex.y;
-        (dx * dx + dy * dy).sqrt()
-    }
-
-    pub fn vertices_count(&self) -> usize {
-        self.vertices.len()
     }
 
     fn edges(&self) -> Vec<Vec2> {

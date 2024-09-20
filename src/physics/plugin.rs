@@ -8,26 +8,30 @@ use crate::physics::dynamics::systems::{
 use crate::physics::events::CollisionEvent;
 use bevy::prelude::*;
 
-pub struct PhysicsPlugin;
+pub struct PhysicsPlugin {
+    pub draw_debug_colliders: bool,
+}
 
 impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<CollisionEvent>()
-            .add_systems(Update, draw_colliders)
-            .add_systems(
-                PostUpdate,
+        if self.draw_debug_colliders {
+            app.add_systems(Update, draw_colliders);
+        }
+
+        app.add_event::<CollisionEvent>().add_systems(
+            PostUpdate,
+            (
                 (
-                    (
-                        update_impulse,
-                        update_gravity,
-                        apply_acceleration_and_drag,
-                        move_object,
-                    ),
-                    resolve_collisions,
-                    solve_collisions_velocities,
-                    solve_collisions_transforms,
-                )
-                    .chain(),
-            );
+                    update_impulse,
+                    update_gravity,
+                    apply_acceleration_and_drag,
+                    move_object,
+                ),
+                resolve_collisions,
+                solve_collisions_velocities,
+                solve_collisions_transforms,
+            )
+                .chain(),
+        );
     }
 }

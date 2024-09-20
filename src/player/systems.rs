@@ -5,10 +5,9 @@ use crate::physics::components::{DragCoefficient, Force, Impulse, Mass, Velocity
 use crate::physics::resources::PhysicsResource;
 use crate::physics::utils::get_terminal_velocity::get_terminal_velocity;
 use crate::player::components::{Cooldown, Player, VelocityDisplay};
-use crate::projectile::projectile_bundle::ProjectileBundle;
 use crate::utils::calculate_rotation_angle::{calculate_direction_angle, calculate_rotation_angle};
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
-use crate::weapon::cannon::Cannon;
+use crate::weapon::weapon::Weapon;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use std::time::Duration;
@@ -54,7 +53,7 @@ pub fn move_player(
 pub fn shoot_bullets(
     mut commands: Commands,
     mouse_input: Res<ButtonInput<MouseButton>>,
-    mut q_cannons: Query<(&Inventory<Cannon>, &Transform, &mut Impulse, &mut Cooldown)>,
+    mut q_cannons: Query<(&Inventory<Weapon>, &Transform, &mut Impulse, &mut Cooldown)>,
     q_windows: Query<&Window, With<PrimaryWindow>>,
     q_cameras: Query<(&Camera, &GlobalTransform), With<MainCamera>>,
     mut trigger_camera_shake_events: EventWriter<TriggerCameraShakeEvent>,
@@ -64,27 +63,29 @@ pub fn shoot_bullets(
     {
         // Only iter through cannons that are ready to fire
         // TODO: Trigger event for spawning projectile
-        for (inventory, origin, mut impulse, mut cooldown) in q_cannons.iter_mut() {
-            let player_translation = origin.translation.xy();
-            let angle = calculate_direction_angle(player_translation, world_position);
-            if let Some(property) = inventory.get_selected_item() {
+        for (inventory, player_transform, mut impulse, mut cooldown) in q_cannons.iter_mut() {
+            let angle =
+                calculate_direction_angle(player_transform.translation.xy(), world_position);
+            if let Some(cannon) = inventory.get_selected_item() {
                 if cooldown.0 != Duration::ZERO {
                     continue;
                 }
 
-                commands.spawn(ProjectileBundle::from_cannon(origin, property, angle));
+                let offset = player_transform.rotation.mul_vec3(cannon.offset);
+                let origin = Transform::from_translation(player_transform.translation + offset);
+                commands.spawn(cannon.projectile.create_projectile(origin, angle));
 
                 // Shaking the camera acts as a way to spread the projectiles
                 trigger_camera_shake_events.send(TriggerCameraShakeEvent {
-                    duration: Duration::from_millis(property.reload),
-                    intensity: property.spread,
+                    duration: Duration::from_millis(cannon.reload),
+                    intensity: cannon.spread,
                 });
 
                 // Simulate recoil, we need to add in case the previous impulse has not been processed yet
-                impulse.linear_impulse += -angle * property.recoil;
+                impulse.linear_impulse += -angle * cannon.recoil;
 
                 // Reset the cooldown once the cannon has fired
-                cooldown.0 = Duration::from_millis(property.reload);
+                cooldown.0 = Duration::from_millis(cannon.reload);
             }
         }
     }

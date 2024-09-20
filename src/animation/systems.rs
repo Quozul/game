@@ -8,8 +8,10 @@ pub fn execute_animations(
     mut query: Query<(&mut AnimationConfig, &mut TextureAtlas)>,
 ) {
     for (mut config, mut atlas) in &mut query {
-        // we track how long the current sprite has been displayed for
-        config.frame_timer.tick(time.delta());
+        if config.is_animating() {
+            // we track how long the current sprite has been displayed for
+            config.frame_timer.tick(time.delta());
+        }
 
         // If it has been displayed for the user-defined amount of time (fps)...
         if config.frame_timer.just_finished() {
@@ -20,7 +22,7 @@ pub fn execute_animations(
                 // ...and it is NOT the last frame, then we move to the next frame...
                 atlas.index += 1;
                 // ...and reset the frame timer to start counting all over again
-                config.frame_timer.reset();
+                config.reset();
             }
         }
     }

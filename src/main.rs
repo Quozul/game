@@ -21,9 +21,10 @@ use crate::physics::plugin::PhysicsPlugin;
 use crate::physics::resources::PhysicsResource;
 use crate::player::plugin::PlayerPlugin;
 use crate::projectile::plugin::ProjectilePlugin;
+use crate::weapon::plugin::WeaponPlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
 use bevy::prelude::*;
-use weapon::cannon::Cannon;
+use weapon::weapon::Weapon;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 enum AppState {
@@ -62,12 +63,15 @@ fn main() {
             MapPlugin,
             PlayerPlugin,
             EnemyPlugin,
-            PhysicsPlugin,
+            PhysicsPlugin {
+                draw_debug_colliders: false,
+            },
             ProjectilePlugin,
             PostProcessPlugin,
             camera::plugin::CameraPlugin,
             animation::plugin::AnimationPlugin,
-            InventoryPlugin::<Cannon>::new(),
+            InventoryPlugin::<Weapon>::new(),
+            WeaponPlugin,
         ))
         .init_state::<AppState>()
         .add_systems(Update, switch_scene.run_if(in_state(AppState::Menu)))

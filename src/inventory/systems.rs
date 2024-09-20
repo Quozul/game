@@ -24,7 +24,7 @@ pub fn select_item<T: Send + Sync + 'static>(
     }
 }
 
-pub fn collect_item<T: Send + Sync + Clone + 'static + std::fmt::Debug>(
+pub fn pickup_item<T: Send + Sync + Clone + 'static>(
     mut commands: Commands,
     mut event: EventReader<CollisionEvent>,
     mut q_inventories: Query<&mut Inventory<T>>,

@@ -12,7 +12,7 @@ pub fn start_dead_animation(
             commands.entity(entity).remove::<CircleCollider>();
             if let Some(mut ent) = commands.get_entity(arrow.0) {
                 ent.despawn();
-                animation.frame_timer = AnimationConfig::timer_from_fps(animation.fps);
+                animation.start();
             }
         }
     }
