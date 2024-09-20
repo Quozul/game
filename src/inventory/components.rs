@@ -41,7 +41,7 @@ impl<T> Inventory<T> {
             let removed = self.contents.remove(self.selected_slot);
             // Adjust the slot
             if self.selected_slot >= self.contents.len() {
-                self.selected_slot = self.contents.len();
+                self.selected_slot = self.contents.len().checked_sub(1).unwrap_or_default();
             }
             Some(removed)
         }

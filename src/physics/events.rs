@@ -20,7 +20,7 @@ impl CollisionEvent {
             .ok()
     }
 
-    pub fn contains<D: QueryData, F: QueryFilter>(&self, query: &Query<D, F>) -> Option<Entity> {
+    pub fn get_entity<D: QueryData, F: QueryFilter>(&self, query: &Query<D, F>) -> Option<Entity> {
         if query.contains(self.first) {
             Some(self.first)
         } else if query.contains(self.second) {

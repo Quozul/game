@@ -1,4 +1,5 @@
 use crate::animation::components::AnimationConfig;
+use crate::interact::components::Interactive;
 use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::components::Sensor;
 use bevy::prelude::*;
@@ -14,6 +15,7 @@ pub struct ItemBundle<T: Send + Sync + 'static> {
     animation_config: AnimationConfig,
     atlas: TextureAtlas,
     bundle: SpriteBundle,
+    interactive: Interactive,
 }
 
 impl<T: Send + Sync> ItemBundle<T> {
@@ -35,6 +37,7 @@ impl<T: Send + Sync> ItemBundle<T> {
             sensor: Sensor,
             // Item
             item: Item(item),
+            interactive: Interactive,
         }
     }
 }

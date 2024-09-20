@@ -30,7 +30,7 @@ pub fn deal_projectile_damage_on_collision(
                 health.0 = health.0.saturating_sub(*damage);
 
                 // Remove projectile on collision after hitting an enemy
-                if let Some(entity) = ev.contains(&q_damages) {
+                if let Some(entity) = ev.get_entity(&q_damages) {
                     commands.entity(entity).despawn()
                 }
             }
