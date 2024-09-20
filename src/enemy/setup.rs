@@ -33,7 +33,6 @@ pub fn spawn_enemy(
         commands.spawn((
             EnemyBundle::new(
                 Vec3::new(x, y, 0.0),
-                Vec2::ZERO,
                 texture_handle.clone(),
                 texture_atlas_layout.clone(),
                 animation_config.clone(),

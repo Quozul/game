@@ -30,7 +30,7 @@ pub fn setup_map(mut commands: Commands) {
 pub fn setup_tutorial(mut commands: Commands) {
     commands.spawn(
         TextBundle::from_section(
-            "move: WASD\nshoot: left mouse button\nzoom: mouse wheel",
+            "move: WASD\nshoot: left mouse button\npickup: E\ndrop: R\nzoom: mouse wheel",
             TextStyle {
                 font_size: 16.0,
                 ..default()

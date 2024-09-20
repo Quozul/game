@@ -1,4 +1,4 @@
 pub mod components;
-pub(crate) mod plugin;
+pub mod plugin;
 mod systems;
 pub mod weapon;

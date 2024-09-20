@@ -3,6 +3,7 @@
 
 mod animation;
 mod camera;
+mod configuration;
 mod constants;
 mod enemy;
 mod inventory;
@@ -14,6 +15,8 @@ mod utils;
 mod weapon;
 
 use crate::camera::post_processing::plugin::PostProcessPlugin;
+use crate::configuration::configuration::Configuration;
+use crate::configuration::plugin::ConfigurationPlugin;
 use crate::enemy::plugin::EnemyPlugin;
 use crate::inventory::plugin::InventoryPlugin;
 use crate::map::plugin::MapPlugin;
@@ -59,6 +62,7 @@ fn main() {
                 },
             },
         ))
+        .add_plugins(ConfigurationPlugin::<Configuration>::new())
         .add_plugins((
             MapPlugin,
             PlayerPlugin,

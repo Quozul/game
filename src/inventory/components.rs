@@ -4,13 +4,15 @@ use bevy::prelude::*;
 pub struct Inventory<T> {
     contents: Vec<T>,
     selected_slot: usize,
+    capacity: usize,
 }
 
 impl<T> Inventory<T> {
-    pub fn with_contents(contents: Vec<T>) -> Self {
+    pub fn with_contents(contents: Vec<T>, capacity: usize) -> Self {
         Self {
             contents,
             selected_slot: 0,
+            capacity,
         }
     }
 
@@ -23,7 +25,25 @@ impl<T> Inventory<T> {
         self.selected_slot = new_index
     }
 
-    pub fn add_item(&mut self, item: T) {
-        self.contents.push(item);
+    pub fn add_item(&mut self, item: T) -> bool {
+        if self.contents.len() < self.capacity {
+            self.contents.push(item);
+            true
+        } else {
+            false
+        }
+    }
+
+    pub fn remove_selected_item(&mut self) -> Option<T> {
+        if self.selected_slot >= self.contents.len() {
+            None
+        } else {
+            let removed = self.contents.remove(self.selected_slot);
+            // Adjust the slot
+            if self.selected_slot >= self.contents.len() {
+                self.selected_slot = self.contents.len();
+            }
+            Some(removed)
+        }
     }
 }

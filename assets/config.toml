@@ -1,0 +1,79 @@
+[[weapons]]
+pickup_icon.texture_path = "textures/pickup_icons/Auto Cannon.png"
+pickup_icon.tile_size = 32
+pickup_icon.columns = 15
+
+projectile.texture_path = "textures/projectiles/Auto Cannon.png"
+projectile.tile_size = 32
+projectile.columns = 4
+
+weapon.texture_path = "textures/weapons/Auto Cannon.png"
+weapon.tile_size = 48
+weapon.columns = 7
+
+offset = [0.0, 25.0, 1.0]
+recoil = 200.0
+reload = 0.5
+spread = 2.0
+damage = 5
+radius = 5.0
+
+[[weapons]]
+pickup_icon.texture_path = "textures/pickup_icons/Rocket.png"
+pickup_icon.tile_size = 32
+pickup_icon.columns = 15
+
+projectile.texture_path = "textures/projectiles/Rocket.png"
+projectile.tile_size = 32
+projectile.columns = 3
+
+weapon.texture_path = "textures/weapons/Rocket.png"
+weapon.tile_size = 48
+weapon.columns = 17
+
+offset = [0.0, 25.0, 1.0]
+recoil = 200.0
+reload = 0.166667
+spread = 1.0
+damage = 3
+radius = 2.0
+
+[[weapons]]
+pickup_icon.texture_path = "textures/pickup_icons/Zapper.png"
+pickup_icon.tile_size = 32
+pickup_icon.columns = 15
+
+projectile.texture_path = "textures/projectiles/Zapper.png"
+projectile.tile_size = 32
+projectile.columns = 8
+
+weapon.texture_path = "textures/weapons/Zapper.png"
+weapon.tile_size = 48
+weapon.columns = 14
+
+offset = [0.0, 25.0, 1.0]
+recoil = 100.0
+reload = 0.05
+spread = 1.0
+damage = 1
+radius = 2.0
+
+[[weapons]]
+pickup_icon.texture_path = "textures/pickup_icons/Big Space Gun.png"
+pickup_icon.tile_size = 32
+pickup_icon.columns = 15
+
+projectile.texture_path = "textures/projectiles/Big Space Gun.png"
+projectile.tile_size = 32
+projectile.columns = 10
+
+weapon.texture_path = "textures/weapons/Big Space Gun.png"
+weapon.tile_size = 48
+weapon.columns = 12
+
+offset = [0.0, 25.0, 1.0]
+recoil = 1_000.0
+reload = 1
+spread = 1.0
+damage = 15
+radius = 2.0

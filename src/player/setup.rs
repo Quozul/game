@@ -50,7 +50,7 @@ pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             Impulse::default(),
             // Player
             Player,
-            Inventory::<Weapon>::with_contents(vec![]),
+            Inventory::<Weapon>::with_contents(vec![], 1),
             Cooldown::default(),
         ))
         .with_children(|parent| {

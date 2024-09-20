@@ -1,7 +1,7 @@
 use crate::animation::components::AnimationConfig;
 use crate::enemy::components::{Enemy, Health};
 use crate::physics::colliders::circle_collider::CircleCollider;
-use crate::physics::components::{RigidBodyBundle, Velocity};
+use crate::physics::components::RigidBodyBundle;
 use bevy::prelude::*;
 
 #[derive(Bundle)]
@@ -18,16 +18,16 @@ pub struct EnemyBundle {
 impl EnemyBundle {
     pub fn new(
         translation: Vec3,
-        initial_velocity: Vec2,
         texture_handle: Handle<Image>,
         texture_atlas_layout: Handle<TextureAtlasLayout>,
         animation_config: AnimationConfig,
         health: u32,
     ) -> Self {
+        let scale = health as f32 / 10.0;
         Self {
             // Texture and animation
             sprite: SpriteBundle {
-                transform: Transform::from_translation(translation),
+                transform: Transform::from_translation(translation).with_scale(Vec3::splat(scale)),
                 texture: texture_handle.clone(),
                 ..default()
             },
@@ -37,10 +37,8 @@ impl EnemyBundle {
             },
             animation: animation_config,
             // Physics
-            collider: CircleCollider::circle(24.0),
-            rigid_body: RigidBodyBundle::default()
-                .with_mass(24.0)
-                .with_initial_velocity(Velocity::linear(initial_velocity)),
+            collider: CircleCollider::circle(scale * 20.0),
+            rigid_body: RigidBodyBundle::default().with_mass(health as f32 * 2.0),
             // Enemy
             health: Health(health),
             enemy: Enemy,

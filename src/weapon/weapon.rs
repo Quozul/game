@@ -1,4 +1,5 @@
 use crate::animation::components::AnimationConfig;
+use crate::configuration::configuration::WeaponConfig;
 use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::components::{DragCoefficient, RigidBodyBundle, Velocity};
 use crate::projectile::components::{Damage, Lifetime, Projectile};
@@ -7,12 +8,14 @@ use bevy::asset::Handle;
 use bevy::math::{Quat, Vec2, Vec3};
 use bevy::prelude::{default, Image, SpriteBundle, TextureAtlas, TextureAtlasLayout, Transform};
 use std::f32::consts::FRAC_PI_2;
+use std::time::Duration;
 
 #[derive(Clone)]
 pub struct Weapon {
+    pub config: WeaponConfig,
     pub offset: Vec3,
     pub recoil: f32,
-    pub reload: u64,
+    pub reload: Duration,
     pub spread: f32,
     pub projectile: Bullet,
     pub texture_handle: Handle<Image>,
@@ -25,6 +28,7 @@ pub struct Bullet {
     pub damage: u32,
     pub texture_handle: Handle<Image>,
     pub texture_atlas_layout: Handle<TextureAtlasLayout>,
+    pub animation_config: AnimationConfig,
     pub speed: f32,
     pub mass: f32,
     pub radius: f32,
@@ -36,6 +40,7 @@ impl Default for Bullet {
             damage: 1,
             texture_handle: Default::default(),
             texture_atlas_layout: Default::default(),
+            animation_config: AnimationConfig::default(),
             speed: 1_000.0,
             mass: 1.0,
             radius: 1.0,
@@ -46,7 +51,6 @@ impl Default for Bullet {
 impl Bullet {
     pub fn create_projectile(&self, origin: Transform, angle: Vec2) -> ProjectileBundle {
         let initial_velocity = angle * self.speed;
-        let animation_config = AnimationConfig::repeating(0, 3, 10, true);
 
         ProjectileBundle {
             // Texture
@@ -58,9 +62,9 @@ impl Bullet {
             },
             texture: TextureAtlas {
                 layout: self.texture_atlas_layout.clone(),
-                index: animation_config.first_sprite_index,
+                index: self.animation_config.first_sprite_index,
             },
-            animation: animation_config,
+            animation: self.animation_config.clone(),
             // Physics
             circle_collider: CircleCollider::circle(self.radius),
             rigid_body: RigidBodyBundle::default()

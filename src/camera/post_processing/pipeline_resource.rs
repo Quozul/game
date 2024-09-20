@@ -11,9 +11,9 @@ use bevy::render::renderer::RenderDevice;
 
 #[derive(Resource)]
 pub struct PostProcessPipeline {
-    pub(crate) layout: BindGroupLayout,
-    pub(crate) sampler: Sampler,
-    pub(crate) pipeline_id: CachedRenderPipelineId,
+    pub layout: BindGroupLayout,
+    pub sampler: Sampler,
+    pub pipeline_id: CachedRenderPipelineId,
 }
 
 impl FromWorld for PostProcessPipeline {

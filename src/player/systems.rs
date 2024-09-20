@@ -77,7 +77,7 @@ pub fn shoot_bullets(
 
                 // Shaking the camera acts as a way to spread the projectiles
                 trigger_camera_shake_events.send(TriggerCameraShakeEvent {
-                    duration: Duration::from_millis(cannon.reload),
+                    duration: cannon.reload,
                     intensity: cannon.spread,
                 });
 
@@ -85,7 +85,7 @@ pub fn shoot_bullets(
                 impulse.linear_impulse += -angle * cannon.recoil;
 
                 // Reset the cooldown once the cannon has fired
-                cooldown.0 = Duration::from_millis(cannon.reload);
+                cooldown.0 = cannon.reload;
             }
         }
     }

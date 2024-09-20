@@ -35,10 +35,10 @@ pub fn pickup_item<T: Send + Sync + Clone + 'static>(
         if let Some(item) = ev.get_from_query(&q_items) {
             if let Some(mut inventory) = ev.get_mut_from_query(&mut q_inventories) {
                 if kb_input.just_pressed(KeyCode::KeyE) {
-                    inventory.add_item(item.0.clone());
+                    let added = inventory.add_item(item.0.clone());
 
                     // Despawn the item if successfully collected
-                    if let Some(entity) = ev.contains(&q_items) {
+                    if added && let Some(entity) = ev.contains(&q_items) {
                         commands.entity(entity).despawn()
                     }
                 }

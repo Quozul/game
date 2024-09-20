@@ -20,7 +20,6 @@ where
     T: Send + Sync + Clone + 'static,
 {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
-            .add_systems(Update, (select_item::<T>, pickup_item::<T>));
+        app.add_systems(Update, (setup, select_item::<T>, pickup_item::<T>));
     }
 }
