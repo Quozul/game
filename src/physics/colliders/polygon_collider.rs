@@ -1,7 +1,7 @@
 use crate::physics::colliders::circle_collider::CircleCollider;
+use crate::physics::colliders::projection::{Project, Projection};
 use crate::physics::colliders::traits::{Center, Collider, CollidesWith};
 use crate::physics::collisions::collision::Collision;
-use crate::physics::collisions::projection::{Project, Projection};
 use bevy::color::Color;
 use bevy::prelude::{Component, Gizmos, Transform, Vec2, Vec3Swizzles};
 

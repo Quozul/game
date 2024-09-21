@@ -1,7 +1,7 @@
 use crate::physics::colliders::polygon_collider::PolygonCollider;
+use crate::physics::colliders::projection::{Project, Projection};
 use crate::physics::colliders::traits::{Center, Collider, CollidesWith};
 use crate::physics::collisions::collision::Collision;
-use crate::physics::collisions::projection::{Project, Projection};
 use bevy::math::Vec2;
 use bevy::prelude::{Color, Component, Gizmos, Transform, Vec3Swizzles};
 
