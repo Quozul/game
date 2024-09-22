@@ -28,6 +28,7 @@ impl<T> Inventory<T> {
     pub fn add_item(&mut self, item: T) -> bool {
         if self.contents.len() < self.capacity {
             self.contents.push(item);
+            self.selected_slot = self.contents.len() - 1;
             true
         } else {
             false

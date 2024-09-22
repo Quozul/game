@@ -5,7 +5,7 @@ use crate::physics::colliders::polygon_collider::PolygonCollider;
 use crate::physics::components::{DragCoefficient, Force, Impulse, RigidBodyBundle};
 use crate::player::components::{Cooldown, Player, VelocityDisplay};
 use crate::weapon::components::EquippedWeapon;
-use crate::weapon::weapon::Weapon;
+use crate::weapon::weapon_data::Weapon;
 use bevy::prelude::*;
 
 pub fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {

@@ -1,4 +1,4 @@
 pub mod components;
 pub mod plugin;
 mod systems;
-pub mod weapon;
+pub mod weapon_data;

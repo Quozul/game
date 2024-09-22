@@ -1,5 +1,5 @@
 use crate::animation::components::AnimationConfig;
-use crate::configuration::configuration::WeaponConfig;
+use crate::configuration::configuration_data::WeaponConfig;
 use crate::physics::colliders::circle_collider::CircleCollider;
 use crate::physics::components::{DragCoefficient, RigidBodyBundle, Velocity};
 use crate::projectile::components::{Damage, Lifetime, Projectile};

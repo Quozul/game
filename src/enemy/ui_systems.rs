@@ -4,10 +4,12 @@ use crate::utils::calculate_rotation_angle::calculate_angle;
 use bevy::prelude::*;
 use std::f32::consts::FRAC_PI_2;
 
+type ArrowFilter = (Without<Enemy>, Without<Player>);
+
 pub fn move_arrow(
     q_enemies: Query<(&Transform, &UiArrow), With<Enemy>>,
     q_player: Query<&Transform, With<Player>>,
-    mut q_arrows: Query<(&mut Transform, &mut Visibility), (Without<Enemy>, Without<Player>)>,
+    mut q_arrows: Query<(&mut Transform, &mut Visibility), ArrowFilter>,
 ) {
     let player_transform = q_player.single();
     let player_translation = player_transform.translation.xy();

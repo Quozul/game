@@ -34,9 +34,11 @@ pub fn solve_collisions_transforms(
     }
 }
 
+type WithoutSensor = Without<Sensor>;
+
 pub fn solve_collisions_velocities(
     mut event: EventReader<CollisionEvent>,
-    mut q_bodies: Query<(&Transform, Option<&mut Velocity>, Option<&Mass>), Without<Sensor>>,
+    mut q_bodies: Query<(&Transform, Option<&mut Velocity>, Option<&Mass>), WithoutSensor>,
 ) {
     for ev in event.read() {
         if let Ok([(transform_a, velocity_a, mass_a), (transform_b, velocity_b, mass_b)]) =

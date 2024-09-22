@@ -7,7 +7,7 @@ use crate::physics::utils::get_terminal_velocity::get_terminal_velocity;
 use crate::player::components::{Cooldown, Player, VelocityDisplay};
 use crate::utils::calculate_rotation_angle::{calculate_direction_angle, calculate_rotation_angle};
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
-use crate::weapon::weapon::Weapon;
+use crate::weapon::weapon_data::Weapon;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use std::time::Duration;

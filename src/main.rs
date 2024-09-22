@@ -16,7 +16,7 @@ mod utils;
 mod weapon;
 
 use crate::camera::post_processing::plugin::PostProcessPlugin;
-use crate::configuration::configuration::Configuration;
+use crate::configuration::configuration_data::Configuration;
 use crate::configuration::plugin::ConfigurationPlugin;
 use crate::enemy::plugin::EnemyPlugin;
 use crate::interact::plugin::InteractPlugin;
@@ -29,7 +29,7 @@ use crate::projectile::plugin::ProjectilePlugin;
 use crate::weapon::plugin::WeaponPlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
 use bevy::prelude::*;
-use weapon::weapon::Weapon;
+use weapon::weapon_data::Weapon;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 enum AppState {

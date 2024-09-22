@@ -1,6 +1,6 @@
 use crate::animation::components::AnimationConfig;
 use crate::inventory::item::ItemBundle;
-use crate::weapon::weapon::{Bullet, Weapon};
+use crate::weapon::weapon_data::{Bullet, Weapon};
 use bevy::asset::{AssetServer, Assets, Handle};
 use bevy::math::{UVec2, Vec3};
 use bevy::prelude::*;
