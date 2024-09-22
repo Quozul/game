@@ -1,0 +1,47 @@
+[package]
+name = "game_space"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rand = "0.9.0-alpha.2"
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+thiserror = "1.0"
+tool_physics = { path = "../tool_physics" }
+
+[features]
+dynamic_linking = ["bevy/dynamic_linking"]
+
+[dependencies.bevy]
+version = "0.14.2"
+default-features = false
+features = [
+    "animation",
+    "bevy_asset",
+    "bevy_audio",
+    "bevy_color",
+    "bevy_core_pipeline",
+    "bevy_dev_tools",
+    "bevy_gilrs",
+    "bevy_gizmos",
+    "bevy_gltf",
+    "bevy_pbr",
+    "bevy_render",
+    "bevy_scene",
+    "bevy_sprite",
+    "bevy_state",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_winit",
+    "default_font",
+    "hdr",
+    "multi_threaded",
+    "png",
+    "smaa_luts",
+    "sysinfo_plugin",
+    "tonemapping_luts",
+    "vorbis",
+    "wayland",
+    "file_watcher"
+]

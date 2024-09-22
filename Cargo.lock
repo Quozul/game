@@ -1868,7 +1868,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "game"
+name = "game_space"
 version = "0.1.0"
 dependencies = [
  "bevy",
@@ -1876,6 +1876,7 @@ dependencies = [
  "serde",
  "thiserror",
  "toml",
+ "tool_physics",
 ]
 
 [[package]]
@@ -3735,6 +3736,14 @@ dependencies = [
  "serde_spanned",
  "toml_datetime",
  "winnow",
+]
+
+[[package]]
+name = "tool_physics"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_math",
 ]
 
 [[package]]
