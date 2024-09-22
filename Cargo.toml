@@ -1,3 +1,3 @@
 [workspace]
 resolver = "2"
-members = ["tool_physics", "game_space"]
+members = ["tool_physics", "game_space", "game_grid_builder", "tools"]

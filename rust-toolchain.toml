@@ -1,4 +1,4 @@
 [toolchain]
-channel = "nightly-2024-09-14"
+channel = "nightly-2024-09-21"
 profile = "default"
 components = ["rustc-codegen-cranelift-preview"]
