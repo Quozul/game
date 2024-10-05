@@ -5,11 +5,12 @@ use crate::player::components::{Cooldown, Player, VelocityDisplay};
 use crate::utils::calculate_rotation_angle::{calculate_direction_angle, calculate_rotation_angle};
 use crate::utils::get_mouse_world_position::get_mouse_world_position_from_queries;
 use crate::weapon::weapon_data::Weapon;
+use crate::AIR_DENSITY;
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 use std::time::Duration;
 use tool_physics::get_terminal_velocity::get_terminal_velocity;
-use tool_physics::{DragCoefficient, Force, Impulse, Mass, PhysicsResource, Velocity};
+use tool_physics::{DragCoefficient, Force, Impulse, Mass, Velocity};
 
 const THROTTLE: f32 = 500.0;
 const BOOST_MULTIPLIER: f32 = 2.0;
@@ -109,19 +110,14 @@ pub fn rotate_towards_mouse(
 }
 
 pub fn update_velocity_display(
-    physics_resource: Res<PhysicsResource>,
     q_velocity_displays: Query<(&Velocity, &Force, &Mass, &DragCoefficient, &VelocityDisplay)>,
     mut q_texts: Query<&mut Text>,
 ) {
     for (velocity, force, mass, drag, display) in q_velocity_displays.iter() {
         if let Ok(mut text) = q_texts.get_mut(display.0) {
             let current_speed = velocity.linear_velocity.length();
-            let maximum_speed = get_terminal_velocity(
-                physics_resource.air_density,
-                mass.0,
-                force.linear_force.length(),
-                drag.0,
-            );
+            let maximum_speed =
+                get_terminal_velocity(AIR_DENSITY, mass.0, force.linear_force.length(), drag.0);
             let percentage = current_speed / maximum_speed * 100.0;
             text.sections[1].value = format!(
                 "{:.0}/{:.0} {:.0}%",

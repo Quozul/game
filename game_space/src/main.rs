@@ -26,7 +26,7 @@ use crate::projectile::plugin::ProjectilePlugin;
 use crate::weapon::plugin::WeaponPlugin;
 use bevy::dev_tools::fps_overlay::{FpsOverlayConfig, FpsOverlayPlugin};
 use bevy::prelude::*;
-use tool_physics::{PhysicsPlugin, PhysicsResource};
+use tool_physics::PhysicsPlugin;
 use weapon::weapon_data::Weapon;
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -36,14 +36,10 @@ enum AppState {
     InGame,
 }
 
+pub const AIR_DENSITY: f32 = 0.05;
+
 fn main() {
     App::new()
-        .insert_resource(PhysicsResource {
-            air_density: 0.05,
-            // The original value is 6.674*10E11 m3⋅kg−1⋅s−2
-            // We adjusted it to 10E0 so that the smallest object that will be attracted is 1 unit in mass
-            newton_gravity: 6.674 * 10E-1,
-        })
         .add_plugins((
             DefaultPlugins
                 .set(bevy::log::LogPlugin {
@@ -67,6 +63,10 @@ fn main() {
             InteractPlugin,
             PhysicsPlugin {
                 draw_debug_colliders: false,
+                air_density: AIR_DENSITY,
+                // The original value is 6.674*10E11 m3⋅kg−1⋅s−2
+                // We adjusted it to 10E0 so that the smallest object that will be attracted is 1 unit in mass
+                newton_gravity: 6.674 * 10E-1,
             },
             PostProcessPlugin,
         ))

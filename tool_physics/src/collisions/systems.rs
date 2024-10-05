@@ -17,6 +17,11 @@ type Filter = Or<(With<PolygonCollider>, With<CircleCollider>)>;
 pub fn resolve_collisions(mut events: EventWriter<CollisionEvent>, q_bodies: Query<Data, Filter>) {
     let mut iter = q_bodies.iter_combinations();
     while let Some([object_a, object_b]) = iter.fetch_next() {
+        let distance = object_a.0.translation.distance(object_b.0.translation);
+        if distance > 16.0 {
+            continue;
+        }
+
         let result = Shape::new(object_a)
             .zip(Shape::new(object_b))
             .and_then(|(first, second)| first.collides_with(&second));

@@ -20,5 +20,4 @@ pub use components::Sensor;
 pub use components::Velocity;
 pub use events::CollisionEvent;
 pub use plugin::PhysicsPlugin;
-pub use resources::PhysicsResource;
 pub use utils::get_terminal_velocity;
