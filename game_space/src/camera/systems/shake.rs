@@ -9,12 +9,12 @@ pub fn camera_shake(
     time: Res<Time>,
 ) {
     let delta = time.delta();
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     for (mut camera_transform, mut shake) in q_camera.iter_mut() {
         if shake.intensity > 0. {
             let range = -shake.intensity..shake.intensity;
-            let random_offset = Vec2::new(rng.gen_range(range.clone()), rng.gen_range(range));
+            let random_offset = Vec2::new(rng.random_range(range.clone()), rng.random_range(range));
             camera_transform.translation += random_offset.extend(0.);
 
             if let Some(remaining) = shake.remaining.checked_sub(delta) {

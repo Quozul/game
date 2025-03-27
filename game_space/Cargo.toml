@@ -1,7 +1,7 @@
 [package]
 name = "game_space"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 default-run = "game_space"
 resolver = "2"
 
@@ -9,10 +9,10 @@ resolver = "2"
 dynamic_linking = ["bevy/dynamic_linking"]
 
 [dependencies]
-rand = "0.9.0-alpha.2"
+rand = "0.9"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
-thiserror = "1.0"
+thiserror = "2.0"
 tool_physics = { path = "../tool_physics" }
 
 [dependencies.bevy]

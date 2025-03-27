@@ -10,7 +10,7 @@ pub fn spawn_enemy(
     asset_server: Res<AssetServer>,
     mut texture_atlas_layouts: ResMut<Assets<TextureAtlasLayout>>,
 ) {
-    let mut rng = rand::thread_rng();
+    let mut rng = rand::rng();
 
     let texture_handle = asset_server.load("textures/Asteroid 01 - Explode.png");
     let layout = TextureAtlasLayout::from_grid(UVec2::splat(96), 7, 1, None, None);
@@ -20,8 +20,8 @@ pub fn spawn_enemy(
     let arrow_texture_handle: Handle<Image> = asset_server.load("textures/arrow.png");
 
     for _ in 0..ASTEROID_COUNT {
-        let x = rng.gen_range(-HALF_MAP..HALF_MAP);
-        let y = rng.gen_range(-HALF_MAP..HALF_MAP);
+        let x = rng.random_range(-HALF_MAP..HALF_MAP);
+        let y = rng.random_range(-HALF_MAP..HALF_MAP);
         let arrow = commands
             .spawn(SpriteBundle {
                 transform: Transform::from_scale(Vec3::splat(0.5)),
@@ -36,7 +36,7 @@ pub fn spawn_enemy(
                 texture_handle.clone(),
                 texture_atlas_layout.clone(),
                 animation_config.clone(),
-                rng.gen_range(10..50),
+                rng.random_range(10..50),
             ),
             UiArrow(arrow),
         ));

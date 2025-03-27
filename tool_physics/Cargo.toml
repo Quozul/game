@@ -1,11 +1,10 @@
 [package]
 name = "tool_physics"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 resolver = "2"
 
 [dependencies]
-bevy_math = "0.14.2"
 
 [dependencies.bevy]
 version = "0.14.2"

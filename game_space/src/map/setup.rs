@@ -2,8 +2,8 @@ use crate::configuration::configuration_data::Configuration;
 use crate::configuration::toml_loader::ConfigState;
 use crate::constants::{MAP_SIZE, WALL_THICKNESS};
 use bevy::prelude::*;
-use tool_physics::polygon_collider::PolygonCollider;
 use tool_physics::RigidBodyType;
+use tool_physics::polygon_collider::PolygonCollider;
 
 pub fn setup_map(mut commands: Commands) {
     // Spawn walls
@@ -32,7 +32,7 @@ pub fn setup_map(mut commands: Commands) {
 pub fn setup_tutorial(mut commands: Commands) {
     commands.spawn(
         TextBundle::from_section(
-            "move: WASD\nshoot: left mouse button\npickup: E\ndrop: R\nzoom: mouse wheel",
+            "move: WASD\nboost: left shift\nshoot: left mouse button\npickup: E\ndrop: R\nzoom: mouse wheel\nchange weapon: 1-3 - you can pick up to 3 weapons",
             TextStyle {
                 font_size: 16.0,
                 ..default()
